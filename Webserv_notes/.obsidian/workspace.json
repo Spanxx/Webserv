@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "86e826098340edbc",
+        "id": "4dba81b46bc315e8",
         "type": "tabs",
         "children": [
           {
-            "id": "e8dbaca0cd3f34df",
+            "id": "9c25fbdbad7e0da2",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Webserv_notes/Obsidian Basics.md",
-                "bFile": "Webserv_notes/Obsidian Basics.md",
-                "aRef": ""
+                "file": "01 - Chris/General Overview.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: Obsidian Basics"
+              "icon": "lucide-file",
+              "title": "General Overview"
             }
           }
         ]
@@ -163,7 +163,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 346.5
+    "width": 346.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -178,8 +179,9 @@
       "table-editor-obsidian:Advanced Tables Toolbar": false
     }
   },
-  "active": "e8dbaca0cd3f34df",
+  "active": "9c25fbdbad7e0da2",
   "lastOpenFiles": [
+    "04 - Files/OSI-Model.png",
     "Obsidian Basics.md",
     "05 - Templates/std_notes.md",
     "01 - Chris/General Overview.md",
