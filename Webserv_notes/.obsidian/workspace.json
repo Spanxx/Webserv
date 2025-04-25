@@ -11,14 +11,14 @@
             "id": "9c5e1dba41a0ce02",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Obsidian Basics.md",
-                "mode": "source",
-                "source": false
+                "aFile": "Webserv_notes/.obsidian/workspace.json",
+                "bFile": "Webserv_notes/.obsidian/workspace.json",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Obsidian Basics"
+              "icon": "diff",
+              "title": "Diff: workspace.json"
             }
           },
           {
@@ -193,9 +193,9 @@
   "active": "9c5e1dba41a0ce02",
   "lastOpenFiles": [
     "04 - Files/Excalidraw/Hello World!.md",
+    "01 - Chris/General Overview.md",
     "Obsidian Basics.md",
     "04 - Files/Excalidraw",
-    "01 - Chris/General Overview.md",
     "05 - Templates/std_notes.md",
     "05 - Templates/Untitled.md",
     "05 - Templates",
