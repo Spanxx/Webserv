@@ -39,7 +39,7 @@ You can also add a title with `title:"This is a title"`
 ```
 
 
-Writing 2 sqaure brackets around text is creating a link to a file or a other note.
+Writing 2 sqaure brackets around text is creating a link to a file or another note.
 When the note doesn't exist, it creates it.
 Good for linking notes if they have matching content.
 
@@ -65,6 +65,7 @@ Add pipe `|` behinde the filename inside the square brackets for the width, obsi
 
 - Toogle spellcheck = ctrl + shift + /
 - Insert codeblock = ctrl + alt + c
+- Using Template = alt + t
 
 # Admonition
 Create a codeblock and ad `ad-<type>` in first line.
@@ -94,4 +95,3 @@ There is a little Graph sign on the left side or on the top right.
 
 It opens the git graph overview and you can upload your notes to our Git repo.
 Stage all and click "Commit and sync" and then "Push".
-
