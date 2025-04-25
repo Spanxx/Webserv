@@ -3,30 +3,18 @@ Tags:
 
 ---
 
-Source: https://www.youtube.com/watch?v=gntyAFoZp-E&list=PLHpOzseM8O8GY1p0LV0FkJ-_vwzpcQiPv
-
-# Basic concepts in Video:
-- Winsocket
+# Basic concepts:
 - OSI Model
 - Client-server architecture
 - IP-Adresses
 - Ports
 - 7 Steps of a server
 - 5 Steps of a Client
-- Load DLL
-- Create Socket
-- Bind Socket
-- Listen
-- Accept
-- Connect
+- [[TCP_IP Sockets]]
 - Setting up the server
 - Setting up the client
 - Connecting client and server
-# Winsock
-Sockets were initially inveted for Unix
-Winsock is a low level API
 
-- [ ] What is the Linux Version?
 # OSI Model
 Open System Interconnections
 
@@ -35,12 +23,19 @@ Open System Interconnections
 Layer 7: Application (Input Updates/ State Updates)
 Layer 6: Presentation (Serialization Buffering)
 Layer 5: Session (Sockets)
-Layer 4: Transport (TCP/UDP)
+Layer 4: Transport (TCP/UDP/SPX)
 Layer 3: Network (IP)
 Layer 2: Data Link (Ethernet (MAC))
 Layer 1: Physical (Wired (Cables), Wireless ...)
 
+TCP = Transmisson Control Protocol
+UDP = User Datagram Protocol
+SPX = Sequenced Packet Exchange
+
 ![[OSI-Model.png| 800]]
+
+To implement HTTP, we only care about **4th Layer: Transport Layer**.
+The Transport layer is primarily responsible for ensuring that data is transferred from one point to another reliably and without errors. For example, the Transport layer makes sure data are sent and received in the correct sequence.
 
 # Architecture
 - Connection is always between 2 devices
@@ -68,6 +63,11 @@ Layer 1: Physical (Wired (Cables), Wireless ...)
 
 # Sockets
 - Def: A pipe between 2 computers on a network through which data flows (Mulholland 2004)
+
+```ad-info
+A socket is the mechanism that most popular operating systems provide to give programs access to the network. It allows messages to be sent and received between applications (unrelated processes) on different networked machines.==
+```
+
 - Both sides of the connection use a socket
 - Sockets are two-way, data can be sent and received on a socket
 - 2 Common types for a socket
@@ -107,3 +107,11 @@ All these functions are the windows version. Unix Version will be looked up and 
 3. Connect to the server - connect()
 4. Send and receive data - recv(), send(), recvfrom(), sendto()
 5. Disconnect - closesocket()
+
+
+
+
+
+# Sources
+- https://www.youtube.com/watch?v=gntyAFoZp-E&list=PLHpOzseM8O8GY1p0LV0FkJ-_vwzpcQiPv
+- https://medium.com/from-the-scratch/http-server-what-do-you-need-to-know-to-build-a-simple-http-server-from-scratch-d1ef8945e4fa
