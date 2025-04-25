@@ -90,3 +90,8 @@ This is an example
 
 # Git in Obsidian
 
+There is a little Graph sign on the left side or on the top right.
+
+It opens the git graph overview and you can upload your notes to our Git repo.
+Stage all and click "Commit and sync" and then "Push".
+

@@ -4,33 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "b3da2d42fdfa0fca",
+        "id": "86e826098340edbc",
         "type": "tabs",
         "children": [
           {
-            "id": "9c5e1dba41a0ce02",
+            "id": "e8dbaca0cd3f34df",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "Webserv_notes/.obsidian/workspace.json",
-                "bFile": "Webserv_notes/.obsidian/workspace.json",
+                "aFile": "Webserv_notes/Obsidian Basics.md",
+                "bFile": "Webserv_notes/Obsidian Basics.md",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: workspace.json"
-            }
-          },
-          {
-            "id": "47c90de46c262ab6",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "04 - Files/Excalidraw/Hello World!.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Hello World!"
+              "title": "Diff: Obsidian Basics"
             }
           }
         ]
@@ -190,13 +178,13 @@
       "table-editor-obsidian:Advanced Tables Toolbar": false
     }
   },
-  "active": "9c5e1dba41a0ce02",
+  "active": "e8dbaca0cd3f34df",
   "lastOpenFiles": [
-    "04 - Files/Excalidraw/Hello World!.md",
-    "01 - Chris/General Overview.md",
     "Obsidian Basics.md",
-    "04 - Files/Excalidraw",
     "05 - Templates/std_notes.md",
+    "01 - Chris/General Overview.md",
+    "04 - Files/Excalidraw/Hello World!.md",
+    "04 - Files/Excalidraw",
     "05 - Templates/Untitled.md",
     "05 - Templates",
     "04 - Files",
