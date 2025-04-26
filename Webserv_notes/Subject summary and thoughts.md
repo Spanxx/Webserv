@@ -16,7 +16,13 @@ Any external library and Boost libraries are forbidden
 	- [RFC 9110](https://www.rfc-editor.org/info/rfc9110) Semantics, Content and Authentication
 	- [RFC 9111](https://www.rfc-editor.org/info/rfc9111) Caching
 	- [RFC 9112](https://www.rfc-editor.org/info/rfc9112) Message Syntax and Routing
-- [ ] test telnet and NGINX
+	
+	- [RFC 7230](https://www.rfc-editor.org/info/rfc7230) & [RFC 7231](https://www.rfc-editor.org/info/rfc7231) are older version, but easier to understand.
+	- ✅ We should use **RFC 9110** and **9112** as our main reference.  
+		- (And occasionally check old 7230 examples for easier explanations.)
+
+- [ ]  telnet and NGINX
+	--> [[Testing Telnet & NGINX]]
 - [ ] what is a CGI?
 
 # Requirements

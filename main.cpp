@@ -1,8 +1,11 @@
-#include <sys/socket.h>
 
-...
-if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+#include "incl/server.hpp" 
+
+int main()
 {
-	std::cerr << "Error: can not create socket!\n";
+	// browser: 127.0.0.1:555
+	Server newServer(5555);
+	newServer.start();
+	
 	return (0);
 }

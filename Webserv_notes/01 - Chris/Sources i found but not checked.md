@@ -10,3 +10,13 @@ https://ncona.com/2019/04/building-a-simple-server-with-cpp/
 
 ## What is telnet
 https://www.techtarget.com/searchnetworking/definition/Telnet
+
+
+
+
+
+
+
+
+
+

@@ -109,9 +109,6 @@ All these functions are the windows version. Unix Version will be looked up and 
 5. Disconnect - closesocket()
 
 
-
-
-
 # Sources
 - https://www.youtube.com/watch?v=gntyAFoZp-E&list=PLHpOzseM8O8GY1p0LV0FkJ-_vwzpcQiPv
 - https://medium.com/from-the-scratch/http-server-what-do-you-need-to-know-to-build-a-simple-http-server-from-scratch-d1ef8945e4fa
