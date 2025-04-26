@@ -32,9 +32,9 @@ AF_NS (Xerox Network Systems protocols)
 Adress families determine what variant of the `sockaddr` (Step 2) struct to use and what elements it contains for that specific communication type.
 #### type (type of service)
 - is selected according to the properties requiered by the application
-- `SOCK_STREAM (virtaul circuit service)`
-- `SOCK_DGRAM (datagram service)`
-- `SOCK_RAW (direct IP service)`
+- `SOCK_STREAM (virtual circuit service)` = TCP (reliable, connection-oriented)
+- `SOCK_DGRAM (datagram service)` = UDP (unreliable, connectionless)
+- `SOCK_RAW (direct IP service)` = bypass without TCP/IP
 - check with address family to see which services are available
 
 #### protocol
@@ -122,17 +122,70 @@ if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 ```
 
 
+# 3. Server wait for incoming connection
 
+1. `listen` system call tells a socket that it should be capable of accepting incomming connections
 
+```cpp
+$include <sys/socket.h>
+int listen (int socket, int backlog);
+```
 
+**Parameter**
+socket = socket that listens for incoming conections
+backlog = defines the max. numbers of pending connections that can be queued up before connections are refused.
 
+2. `accept` syscall grabs the first connection on the queue and creates a new socket for it
+	❗ The orginal socket for listening is used only for accepting connections, not for data exchange ❗
 
+```cpp
+#include <sys/socket.h> 
+int accept(int socket, struct sockaddr *restrict address, socklen_t *restrict address_len);
+```
 
+**Parameter**
+socket = socket that was set for listening
+address = structure that get filled with the address of the client
+	--> this allows us to examine the address and port number of the connecting socket
+address_len = lenght of address structure
 
+```cpp title:"example"
+if (listen(server_fd, 3) < 0)   
+{   
+    perror(“In listen”);   
+    exit(EXIT_FAILURE);   
+}
+if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)  
+{  
+    perror("In accept");              
+    exit(EXIT_FAILURE);          
+}
+```
 
+# 4. Send and receive messages
 
+The same syscalls `read` and `write` that work on files also work on sockets.
 
+```cpp
+char buffer[1024] = {0};
+int valread = read(new_socket , buffer, 1024);   
 
+printf(“%s\n”,buffer );  
+if(valread < 0)     
+    printf("No bytes are there to read");  
+    
+char *hello = "Hello from the server";//IMPORTANT! WE WILL GET TO IT  
+write(new_socket , hello , strlen(hello));
+```
+
+# 5. Close the socket
+
+The `close`syscall from files can be used here also. 
+`close(new_socket;`
+
+# State Diagram of Server - Client model
+
+![[State diagram server client model.png]]
 
 ## Sources:
 - https://medium.com/from-the-scratch/http-server-what-do-you-need-to-know-to-build-a-simple-http-server-from-scratch-d1ef8945e4fa

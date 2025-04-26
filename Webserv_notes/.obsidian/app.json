@@ -1,4 +1,6 @@
 {
   "spellcheck": false,
-  "readableLineLength": false
+  "readableLineLength": false,
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "04 - Files"
 }

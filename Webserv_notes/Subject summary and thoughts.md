@@ -6,12 +6,16 @@ Tags: #subject #todo
 ```ad-important
 Any external library and Boost libraries are forbidden
 ```
-
-
 # 🧠 Thoughts 
 
 **Before starting this project**
 - [ ] read the RFC
+- Version from 1999 (obsolet)
+	- [RFC 2616](https://www.rfc-editor.org/info/rfc2616),  [RFC 2617](https://www.rfc-editor.org/info/rfc2617)
+- Current version
+	- [RFC 9110](https://www.rfc-editor.org/info/rfc9110) Semantics, Content and Authentication
+	- [RFC 9111](https://www.rfc-editor.org/info/rfc9111) Caching
+	- [RFC 9112](https://www.rfc-editor.org/info/rfc9112) Message Syntax and Routing
 - [ ] test telnet and NGINX
 - [ ] what is a CGI?
 
@@ -43,6 +47,7 @@ Any external library and Boost libraries are forbidden
 #### `./webserv [configuration file`]
 
 # Configuration file
+
 in file, you should be able to:
 - [ ] choose port and host
 - [ ] set up server name
@@ -68,12 +73,10 @@ in file, you should be able to:
 	- [ ] server should support at least one CGI (php-CGI, Python....)
 
 We have to provide config files and default files for testing.
-
 # Bonus part
 
 - [ ] support cookies and session management (provide simple examples)
 - [ ] handle multiple CGI
-
 # External functions overview
 
 | Function       | Header File                                      | Short Description                                                 |
