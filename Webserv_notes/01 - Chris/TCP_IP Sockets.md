@@ -2,14 +2,7 @@
 Tags: #socket #tcp #ip
 
 ---
-
 # Programming with TCP/IP sockets
-
-- Create Socket
-- Bind Socket
-- Listen
-- Accept
-- Connect
 
 1. Create the socket
 2. Identify the socket
@@ -22,8 +15,8 @@ Tags: #socket #tcp #ip
 
 `int server_fd = socket(domain, type, protocol);`
 
+**Good to know:**
 All parameters, as well as the return value are integers
-
 #### domain, or adress family
 communication domain in which the socket should be created. 
 Some of address families are:
@@ -98,7 +91,7 @@ struct sockaddr_in
 - address family what we used to set up the socket (AF_INET)
 **sin_port**
 - port number (transport address)
-- we can assign it or the O/S
+- we can assign it or leave the O/S assigning it
 	- client (usually let the O/S pick any available port number by specifying port 0)
 	- server (generally pick a specific port number --> clients need to know for connecting)
 **sin_addr**
@@ -106,7 +99,7 @@ struct sockaddr_in
 - to let the O/S use whatever it wants use --> 0.0.0.0 it is defined by the symbolic constant `INADDR_ANY`
 
 **address_len** = address structure may differ based on the type of transport
-`sizeof(struct sockaddr_in)`
+We can simply use`sizeof(struct sockaddr_in)`
 
 ```cpp title:"example to bind a socket"
 #include <sys/socket.h>
