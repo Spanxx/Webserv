@@ -1,5 +1,5 @@
 
-#include "../incl/server.hpp"
+#include "../incl/Server.hpp"
 
 Server::Server(int port) : _port(port)
 {
@@ -50,6 +50,7 @@ void	Server::start()
 	struct sockaddr_in	clientAddr;
 	socklen_t			clientLen = sizeof(clientAddr);
 	int					clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
+
 	if (clientSocket < 0)
 	{
 		std::cerr << "Error accepting connection!\n";
