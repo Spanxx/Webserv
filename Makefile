@@ -7,28 +7,37 @@ CC = c++
 #Flags
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
+#Object files folder
+OBJDIR = ./obj
+
 #Cleanup
 RM = rm -rf
 
 #Source files and objects
-SRCS = main.cpp src/Server.cpp
+SRCS = main.cpp \
+		src/Server.cpp src/Config.cpp
 
-OBJS = $(patsubst %.cpp, %.o, $(SRCS))
+OBJ = $(patsubst %.cpp, $(OBJDIR)/%.o, $(SRCS))
 
 #Targets
 all: $(NAME)
 
 #Link object files into target executable
-$(NAME): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@
+$(NAME): $(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) -o $@
+
+#Create object folder
+$(OBJDIR):
+	mkdir $(OBJDIR)
+	mkdir $(OBJDIR)/src
 
 #Object file generation
-%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 #Clean up
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJ)
 
 fclean: clean
 	$(RM) $(NAME)
