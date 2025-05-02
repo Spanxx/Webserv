@@ -17,6 +17,9 @@ Server::Server(Config *conf)
 	serverAddr.sin_addr.s_addr = INADDR_ANY;	//bind to any local adress
 	serverAddr.sin_port = htons(conf->getPort());			//port in network byte order
 
+	int yes = 1;
+	setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+
 	if (bind(_serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
 	{
 		std::cerr << "Error binding server socket!\n";
@@ -37,7 +40,7 @@ Server::~Server()
 
 void	Server::serverLoop()
 {
-	int time = 5000;
+	int time = 50000;
 
 	while (true)
 	{
@@ -47,6 +50,9 @@ void	Server::serverLoop()
 		{
 			std::cerr << "poll error\n";
 			continue;
+		} if (ret == 0) {
+			std::cout << "Poll timeout " << ret << std::endl;
+
 		}
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
@@ -61,7 +67,7 @@ void	Server::serverLoop()
 					// check if we need to clean or close something 
 					continue;
 				}
-				fcntl(clientSocket, F_SETFL, O_NONBLOCK); // chech if at some point we need to call fcntl with  FD_CLOEXEC.
+				fcntl(clientSocket, F_SETFL, O_NONBLOCK); // check if at some point we need to call fcntl with  FD_CLOEXEC.
 				struct pollfd clientFd;
 				clientFd.fd = clientSocket;        
 				clientFd.events = POLLIN;	// wait for input
@@ -69,21 +75,9 @@ void	Server::serverLoop()
 				std::cout << "New connection accepted: fd = " << clientFd.fd << std::endl;
 
 			}
+			
 		}
-
 	}
-// struct sockaddr_in	clientAddr;
-	// socklen_t			clientLen = sizeof(clientAddr);
-	// int					clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
-
-	// if (clientSocket < 0)
-	// {
-	// 	std::cerr << "Error accepting connection!\n";
-	// 	exit(1);
-	// }
-
-	// std::cout << "Client connected!\n";
-
 }
 
 void	Server::startListen()

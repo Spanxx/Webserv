@@ -106,7 +106,7 @@ int main(int ac, char **av)
 	// browser: 127.0.0.1:555
 	Server newServer(config);
 	newServer.startListen();
-
+	newServer.serverLoop();
 
 	delete config;
 	return (0);

@@ -26,6 +26,11 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o $@
 
+#Create object folder
+$(OBJDIR):
+	mkdir $(OBJDIR)
+	mkdir $(OBJDIR)/src
+
 #Object file generation
 $(OBJDIR)/%.o: %.cpp | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
