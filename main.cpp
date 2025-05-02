@@ -6,7 +6,6 @@ void	extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string>
 {
 	std::string	line;
 
-	
 	while (std::getline(conFile, line))
 	{
 		if (line == target)
@@ -24,12 +23,12 @@ void	extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string>
 				{
 					std::string	key = line.substr(0, equalPos);
 					std::string value = line.substr(equalPos + 1);
-					
+
 					//check for key duplicates
 					if (targetMap.find(key) != targetMap.end())
 					{
-						std::cout << "Warning: Duplicate key found " << key << '\n'
-								<< "new Value overwrites existing Value!\n";
+						std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+								<< "new Value don't overwrites existing Value!\n";
 					}
 					else
 						targetMap[key] = value;
@@ -56,6 +55,8 @@ int	checkConfigFile(std::ifstream &conFile)
 		}
 		// maybe add more checks?
 	}
+	conFile.clear();                // Clear any error flags
+	conFile.seekg(0, std::ios::beg); // Go back to the beginning
 	return (0);
 }
 
@@ -102,10 +103,9 @@ int main(int ac, char **av)
 	if (!config)
 		return (0);
 
-	
 	// browser: 127.0.0.1:555
-	// Server newServer(5555);
-	// newServer.start();
+	Server newServer(config);
+	newServer.startListen();
 
 
 	delete config;

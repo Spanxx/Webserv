@@ -11,21 +11,27 @@
 #include <sys/socket.h>
 #include <netinet/in.h>		//needed for handling IP addresses and protocols
 #include <unistd.h>   		// For close()
+#include <poll.h>
+#include <vector>
+#include <fcntl.h>
 
 #include "Config.hpp"
+
+class Config;
 
 class Server
 {
 public:
 
-	Server(int port);
+	Server(Config *conf);
 	~Server();
 
-	void	start();
+	void	startListen();
+	void	serverLoop();
 
 private:
-	int			_port;
 	int			_serverSocket;
+	std::vector<struct pollfd> _socketArray;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

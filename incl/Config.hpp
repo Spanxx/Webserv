@@ -19,7 +19,9 @@ public:
 		ConfigException(std::string error);
 	};
 
-private:
+	int getPort();
+
+protected:
 	int			_port;
 	std::string	_host;
 	std::string	_root;

@@ -8,13 +8,13 @@ Config::Config(std::map<std::string, std::string> serverConfig)
 		for (std::map<std::string, std::string>::iterator it = serverConfig.begin(); it != serverConfig.end(); ++it)
 		{	
 			if (it->first == "host)")
-				this->_host = it->second;
+			this->_host = it->second;
 			else if (it->first == "root")
-				this->_root = it->second;
+			this->_root = it->second;
 			else if (it->first == "port")
 				this->_port = std::atoi(it->second.c_str());
-			else if (it->first == "host")
-				this->_host = std::atoi(it->second.c_str());
+			else if (it->first == "index")
+				this->_index = it->second;
 			else
 				ConfigException("Invalid key found in config file!");
 		}
@@ -60,3 +60,8 @@ Config& Config::operator=(Config &other)
 }
 
 Config::ConfigException::ConfigException(std::string error) : std::runtime_error(error) {}
+
+int Config::getPort()
+{
+	return (this->_port);
+}
