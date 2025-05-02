@@ -249,3 +249,52 @@
         
     - `timeout`: time to wait for events (`NULL` = block indefinitely)  
         **Returns:** On success, returns the number of events returned in `eventlist`; `-1` on error with `errno` set.
+
+
+
+
+#### `FD_ZERO(fd_set *set)`
+
+> **Clears** all file descriptors from the set (sets all bits to 0).
+
+c
+
+CopyEdit
+
+`FD_ZERO(&read_fds);  // initialize the fd_set before use`
+
+---
+
+#### 🔹 `FD_SET(int fd, fd_set *set)`
+
+> **Adds** `fd` to the set (sets bit at index `fd` to 1).
+
+c
+
+CopyEdit
+
+`FD_SET(server_socket, &read_fds);  // watch server_socket for reading`
+
+---
+
+#### 🔹 `FD_CLR(int fd, fd_set *set)`
+
+> **Removes** `fd` from the set (sets bit at index `fd` to 0).
+
+c
+
+CopyEdit
+
+`FD_CLR(client_fd, &read_fds);  // stop watching this client`
+
+---
+
+#### 🔹 `FD_ISSET(int fd, fd_set *set)`
+
+> **Checks** if `fd` is in the set (returns true if bit at index `fd` is 1).
+
+c
+
+CopyEdit
+
+`if (FD_ISSET(client_fd, &read_fds)) {     // client_fd is ready to be read from }`

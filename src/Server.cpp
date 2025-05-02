@@ -41,7 +41,6 @@ Server::~Server()
 void	Server::serverLoop()
 {
 	int time = 50000;
-
 	while (true)
 	{
 		int ret = poll(_socketArray.data(), _socketArray.size(), time);
@@ -52,7 +51,6 @@ void	Server::serverLoop()
 			continue;
 		} if (ret == 0) {
 			std::cout << "Poll timeout " << ret << std::endl;
-
 		}
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
@@ -64,19 +62,39 @@ void	Server::serverLoop()
 				if (clientSocket < 0)
 				{
 					std::cerr << "client socket error\n";
-					// check if we need to clean or close something 
+					// check if we need to clean or close something
 					continue;
 				}
 				fcntl(clientSocket, F_SETFL, O_NONBLOCK); // check if at some point we need to call fcntl with  FD_CLOEXEC.
 				struct pollfd clientFd;
-				clientFd.fd = clientSocket;        
+				clientFd.fd = clientSocket;       
 				clientFd.events = POLLIN;	// wait for input
 				this->_socketArray.push_back(clientFd);
 				std::cout << "New connection accepted: fd = " << clientFd.fd << std::endl;
-
+			}
+			else if (_socketArray[i].revents & POLLIN)
+			{
+				char	buffer[1024] = {0};
+				int 	n = read(_socketArray[i].fd, buffer, sizeof(buffer));
+				if (n < 0)
+				{
+					std::cerr << "Error reading from socket!\n";
+					exit(1);
+				}
+				std::cout << "Received request:" << buffer << std::endl;
+				//HTTP response
+				const char *response =
+					"HTTP/1.1 200 OK\r\n"
+					"Content-Type: text/html\r\n"
+					"Content-Length: 48\r\n"
+					"\r\n"
+					"<html><body><h1>Hello from C++ Server!</h1></body></html>";
+				//send HTTP response
+				send(_socketArray[i].fd, response, strlen(response), 0);
 			}
 			
 		}
+		
 	}
 }
 
