@@ -79,7 +79,16 @@ void	Server::serverLoop()
 				if (n < 0)
 				{
 					std::cerr << "Error reading from socket!\n";
-					exit(1);
+					//exit(1);
+					continue;
+				}
+				else if (n == 0) // when EOF is reached, so connection is closed by client
+				{
+					std::cout << "client disconnected: fd = " << _socketArray[i].fd << std::endl;
+					close(_socketArray[i].fd);
+					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
+					--i;
+					continue;
 				}
 				std::cout << "Received request:" << buffer << std::endl;
 				//HTTP response
@@ -91,6 +100,16 @@ void	Server::serverLoop()
 					"<html><body><h1>Hello from C++ Server!</h1></body></html>";
 				//send HTTP response
 				send(_socketArray[i].fd, response, strlen(response), 0);
+
+				/*  // this below needs to be expanded and checked later when we have parsing, to make different handlers for keep-alive or not and timeout etc. 
+				bool keepAlive = true;
+				if (!keepAlive) 
+				{
+					std::cout << "no kep-alive connection, closing connection: fd " << _socketArray[i].fd << std::endl;
+					close(_socketArray[i].fd);
+					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
+					--i;
+				}*/ 
 			}
 			
 		}

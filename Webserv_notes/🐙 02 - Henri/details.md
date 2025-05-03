@@ -528,3 +528,73 @@ In some cases, you might create **custom routes** or commands for your server. F
 - **POST** requests are for submitting data, like form submissions or file uploads, and will typically trigger some processing on the server.
     
 - For each request type, the server needs to determine how to handle it (which file to serve, what data to store, etc.), based on the logic written in the server code and the configuration file.
+
+
+
+CHUNKING
+### How Chunked Transfer Encoding Works
+
+In **chunked transfer encoding**, the data is sent in chunks, each chunk prefixed by its size (in hexadecimal) followed by a CRLF (`\r\n`). The data in each chunk is **not null-terminated**, but the server can still know where each chunk ends by the size field and the CRLF delimiters.
+
+Each chunk is transmitted as follows:
+
+php-template
+
+KopierenBearbeiten
+
+`<chunk size in hex>\r\n <chunk data>\r\n`
+
+The **final chunk** is denoted by a chunk size of `0`:
+
+KopierenBearbeiten
+
+`0\r\n \r\n`
+
+This tells the server that there is no more data to read, and the connection can be closed or kept open based on the `Connection` header.
+
+### Steps for Handling Chunked Transfer Encoding
+
+1. **Reading the chunk size**:
+    
+    - The chunk size is transmitted as a hexadecimal value, followed by a CRLF (`\r\n`).
+        
+    - For example, if the chunk size is `5`, the server reads `5\r\n`, which tells the server to expect 5 bytes of data in the next chunk.
+        
+2. **Reading the chunk data**:
+    
+    - After reading the chunk size, the server then reads exactly that many bytes of data.
+        
+    - If the chunk size was `5`, the server reads the next 5 bytes of data.
+        
+3. **Reading the next chunk**:
+    
+    - After reading the chunk data, the server expects another `\r\n` delimiter, followed by the next chunk size, and so on.
+        
+    - This continues until the final chunk, which is a chunk size of `0`.
+        
+4. **Final chunk**:
+    
+    - When the server reads `0\r\n\r\n`, it knows that the transmission is complete.
+        
+
+### Example of HTTP Response with Chunked Transfer Encoding
+
+Here's an example of an HTTP response with **chunked transfer encoding**:
+
+pgsql
+
+KopierenBearbeiten
+
+`HTTP/1.1 200 OK\r\n Content-Type: text/plain\r\n Transfer-Encoding: chunked\r\n \r\n 5\r\n Hello\r\n 6\r\n  World\r\n 0\r\n \r\n`
+
+### What Happens in Your Server?
+
+When handling chunked encoding, the server needs to:
+
+1. **Detect the chunk size** (which is hexadecimal).
+    
+2. **Read the corresponding chunk of data** based on the size.
+    
+3. **Repeat** this process for each chunk until it encounters the final `0\r\n\r\n` chunk, which signals the end of the transfer.
+    
+
