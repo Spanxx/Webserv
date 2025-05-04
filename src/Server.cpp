@@ -50,7 +50,7 @@ void	Server::serverLoop()
 			std::cerr << "poll error\n";
 			continue;
 		}
-		if (ret == 0 && i != 0) {
+		if (ret == 0) {
 			std::cout << "Poll timeout " << ret << std::endl;
 		}
 		for (size_t i = 0; i < _socketArray.size(); ++i)
