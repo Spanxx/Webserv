@@ -40,7 +40,7 @@ Server::~Server()
 
 void	Server::serverLoop()
 {
-	int time = 50000;
+	int time = 5000;
 	while (true)
 	{
 		int ret = poll(_socketArray.data(), _socketArray.size(), time);
@@ -49,11 +49,18 @@ void	Server::serverLoop()
 		{
 			std::cerr << "poll error\n";
 			continue;
-		} if (ret == 0) {
+		}
+		if (ret == 0 && i != 0) {
 			std::cout << "Poll timeout " << ret << std::endl;
 		}
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
+			// if (ret == 0 && i != 0) {							// Timeout handling for Client Socket?
+			// 	std::cout << "Poll timeout " << ret << std::endl;
+			// 	std::cout << "Client fd " <<  _socketArray[i].fd << " is closed\n";
+			// 	close(_socketArray[i].fd);
+			// }
+
 			if (_socketArray[i].fd == _serverSocket && (_socketArray[i].revents & POLLIN)) //return a non-zero value if the POLLIN bit is set
 			{
 				struct sockaddr_in	clientAddr;
@@ -172,6 +179,7 @@ void Server::sendResponse(int client_fd) {
     std::string body = html.str();
 
     std::ostringstream response_stream;
+
     response_stream << "HTTP/1.1 200 OK\r\n"
                     << "Content-Type: text/html\r\n"
                     << "Content-Length: " << body.length() << "\r\n"
