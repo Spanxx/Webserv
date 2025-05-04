@@ -8,7 +8,7 @@ CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
 #Object files folder
-OBJDIR = ./obj
+OBJDIR = obj
 
 #Cleanup
 RM = rm -rf
@@ -26,13 +26,9 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o $@
 
-#Create object folder
-$(OBJDIR):
-	mkdir $(OBJDIR)
-	mkdir $(OBJDIR)/src
-
 #Object file generation
-$(OBJDIR)/%.o: %.cpp | $(OBJDIR)
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 #Clean up

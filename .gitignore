@@ -30,12 +30,11 @@
 *.exe
 *.out
 *.app
+webserv
 
-# VsCode
+# vsCode
 .vscode/*.json
 
 # Obsidian
 Webserv_notes/.obsidian/workspace.json
 Webserv_notes/.obsidian/workspace-mobile.json
-
-.vscode/settings.json
