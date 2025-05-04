@@ -40,7 +40,7 @@ Server::~Server()
 
 void	Server::serverLoop()
 {
-	int time = 50000;
+	int time = 5000;
 	while (true)
 	{
 		int ret = poll(_socketArray.data(), _socketArray.size(), time);
@@ -49,11 +49,18 @@ void	Server::serverLoop()
 		{
 			std::cerr << "poll error\n";
 			continue;
-		} if (ret == 0) {
+		}
+		if (ret == 0 && i != 0) {
 			std::cout << "Poll timeout " << ret << std::endl;
 		}
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
+			// if (ret == 0 && i != 0) {							// Timeout handling for Client Socket?
+			// 	std::cout << "Poll timeout " << ret << std::endl;
+			// 	std::cout << "Client fd " <<  _socketArray[i].fd << " is closed\n";
+			// 	close(_socketArray[i].fd);
+			// }
+
 			if (_socketArray[i].fd == _serverSocket && (_socketArray[i].revents & POLLIN)) //return a non-zero value if the POLLIN bit is set
 			{
 				struct sockaddr_in	clientAddr;
@@ -67,7 +74,7 @@ void	Server::serverLoop()
 				}
 				fcntl(clientSocket, F_SETFL, O_NONBLOCK); // check if at some point we need to call fcntl with  FD_CLOEXEC.
 				struct pollfd clientFd;
-				clientFd.fd = clientSocket;       
+				clientFd.fd = clientSocket;
 				clientFd.events = POLLIN;	// wait for input
 				this->_socketArray.push_back(clientFd);
 				std::cout << "New connection accepted: fd = " << clientFd.fd << std::endl;
@@ -92,28 +99,21 @@ void	Server::serverLoop()
 				}
 				std::cout << "Received request:" << buffer << std::endl;
 				//HTTP response
-				const char *response =
-					"HTTP/1.1 200 OK\r\n"
-					"Content-Type: text/html\r\n"
-					"Content-Length: 48\r\n"
-					"\r\n"
-					"<html><body><h1>Hello from C++ Server!</h1></body></html>";
-				//send HTTP response
-				send(_socketArray[i].fd, response, strlen(response), 0);
+				sendResponse(_socketArray[i].fd);
 
-				/*  // this below needs to be expanded and checked later when we have parsing, to make different handlers for keep-alive or not and timeout etc. 
+				/*  // this below needs to be expanded and checked later when we have parsing, to make different handlers for keep-alive or not and timeout etc.
 				bool keepAlive = true;
-				if (!keepAlive) 
+				if (!keepAlive)
 				{
 					std::cout << "no kep-alive connection, closing connection: fd " << _socketArray[i].fd << std::endl;
 					close(_socketArray[i].fd);
 					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
 					--i;
-				}*/ 
+				}*/
 			}
-			
+
 		}
-		
+
 	}
 }
 
@@ -157,7 +157,7 @@ void	Server::startListen()
 	// std::cout << "Received request:" << buffer << std::endl;
 
 	// //HTTP response
-	// const char *response = 
+	// const char *response =
 	// 	"HTTP/1.1 200 OK\r\n"
 	// 	"Content-Type: text/html\r\n"
 	// 	"Content-Length: 48\r\n"
@@ -168,4 +168,25 @@ void	Server::startListen()
 	// send(clientSocket, response, strlen(response), 0);
 
 	// close(clientSocket);
+}
+
+void Server::sendResponse(int client_fd) {
+    std::ostringstream html;
+    html << "<html><body><h1>Hello from C++ Server!</h1>"
+         << "<p>Your socket fd is: " << client_fd << "</p>"
+         << "</body></html>";
+
+    std::string body = html.str();
+
+    std::ostringstream response_stream;
+
+    response_stream << "HTTP/1.1 200 OK\r\n"
+                    << "Content-Type: text/html\r\n"
+                    << "Content-Length: " << body.length() << "\r\n"
+                    << "\r\n"
+                    << body;
+
+    std::string response = response_stream.str();
+
+    write(client_fd, response.c_str(), response.length());
 }

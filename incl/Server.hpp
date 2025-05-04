@@ -14,6 +14,7 @@
 #include <poll.h>
 #include <vector>
 #include <fcntl.h>
+#include <sstream>
 
 #include "Config.hpp"
 
@@ -28,6 +29,7 @@ public:
 
 	void	startListen();
 	void	serverLoop();
+	void	sendResponse(int client_fd);
 
 private:
 	int			_serverSocket;
@@ -35,7 +37,7 @@ private:
 
 	Server(Server &other);
 	Server& operator=(Server &other);
-	
+
 };
 
 
