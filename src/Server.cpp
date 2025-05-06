@@ -1,7 +1,7 @@
 
 #include "../incl/Server.hpp"
 
-Server::Server(Config *conf)
+Server::Server()
 {
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverSocket < 0)
@@ -189,4 +189,43 @@ void Server::sendResponse(int client_fd) {
     std::string response = response_stream.str();
 
     write(client_fd, response.c_str(), response.length());
+}
+
+void Server::closeServer() {
+	for (size_t i = 0; i < _socketArray.size(); ++i) {
+		std::cout << "closing socket fd" << _socketArray[i].fd << std::endl;
+		close(_socketArray[i].fd);
+	}
+	delete conf;
+}
+
+Config*	Server::createConfig(char *av)
+{
+	std::ifstream conFile(av);
+	if (!conFile)
+	{
+		std::cout << "Reading config File failed!\n";
+		return (NULL);
+	}
+	if(conFile.peek() == std::ifstream::traits_type::eof())
+	{
+		std::cout << "The Config file is empty!\n";
+		return (NULL);
+	}
+	
+	if (Config::checkConfigFile(conFile) == 1)
+		return (NULL);
+
+	std::map<std::string, std::string> serverConfig;
+	Config::extractConfigMap(conFile, serverConfig, "server{");
+	// std::map<std::string, std::string> dirConfig;
+	// extractConfigMap(conFile, serverConfig, "dir{");
+	// std::map<std::string, std::string> fileConfig;
+	// extractConfigMap(conFile, serverConfig, "files{");
+
+	
+	Config *config = new Config(serverConfig);
+	// one class for each map or all together?
+
+	return (config);
 }

@@ -24,12 +24,15 @@ class Server
 {
 public:
 
-	Server(Config *conf);
+	Server();
 	~Server();
 
 	void	startListen();
 	void	serverLoop();
 	void	sendResponse(int client_fd);
+	void	closeServer();
+	Config	*conf;
+	static Config*	createConfig(char *av);
 
 private:
 	int			_serverSocket;

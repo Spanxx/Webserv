@@ -20,6 +20,8 @@ public:
 	};
 
 	int getPort();
+	static void	extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target);
+	static int	checkConfigFile(std::ifstream &conFile);
 
 protected:
 	int			_port;

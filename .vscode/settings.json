@@ -50,6 +50,7 @@
 		"typeinfo": "cpp",
 		"ranges": "cpp",
 		"span": "cpp",
-		"cinttypes": "cpp"
+		"cinttypes": "cpp",
+		"sstream": "cpp"
 	}
 }
