@@ -15,8 +15,11 @@
 #include <vector>
 #include <fcntl.h>
 #include <sstream>
+#include <csignal>
 
 #include "Config.hpp"
+
+extern volatile sig_atomic_t stopSignal;
 
 class Config;
 
@@ -24,7 +27,7 @@ class Server
 {
 public:
 
-	Server();
+	Server(char *av);
 	~Server();
 
 	void	startListen();
@@ -40,7 +43,6 @@ private:
 
 	Server(Server &other);
 	Server& operator=(Server &other);
-
 };
 
 

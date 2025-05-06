@@ -1,7 +1,7 @@
 
 #include "../incl/Server.hpp"
 
-Server::Server()
+Server::Server(char *av)
 {
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverSocket < 0)
@@ -9,7 +9,9 @@ Server::Server()
 		std::cerr << "Error creating server socket!\n";
 		exit(1);
 	}
-
+	conf = Server::createConfig(av);
+	if (!conf)
+		exit(1); // call close?
 	//prepare server adress structure
 	struct sockaddr_in serverAddr;
 	memset(&serverAddr, 0, sizeof(serverAddr));
@@ -36,12 +38,13 @@ Server::~Server()
 {
 	close(_serverSocket);
 	std::cout << "Server socket closed\n";
+	delete conf;
 }
 
 void	Server::serverLoop()
 {
 	int time = 5000;
-	while (true)
+	while (!stopSignal)
 	{
 		int ret = poll(_socketArray.data(), _socketArray.size(), time);
 		// check ret == 0 for timeout and if we need to close manually or poll does by itself
@@ -115,6 +118,7 @@ void	Server::serverLoop()
 		}
 
 	}
+	closeServer();
 }
 
 void	Server::startListen()
@@ -191,14 +195,6 @@ void Server::sendResponse(int client_fd) {
     write(client_fd, response.c_str(), response.length());
 }
 
-void Server::closeServer() {
-	for (size_t i = 0; i < _socketArray.size(); ++i) {
-		std::cout << "closing socket fd" << _socketArray[i].fd << std::endl;
-		close(_socketArray[i].fd);
-	}
-	delete conf;
-}
-
 Config*	Server::createConfig(char *av)
 {
 	std::ifstream conFile(av);
@@ -228,4 +224,13 @@ Config*	Server::createConfig(char *av)
 	// one class for each map or all together?
 
 	return (config);
+}
+
+void Server::closeServer() {
+	for (size_t i = 0; i < _socketArray.size(); ++i) {
+		std::cout << "closing socket fd" << _socketArray[i].fd << std::endl;
+		close(_socketArray[i].fd);
+	}
+	// if (conf)
+	// 	delete conf;
 }
