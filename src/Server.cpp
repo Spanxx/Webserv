@@ -54,7 +54,7 @@ void	Server::serverLoop()
 			continue;
 		}
 		if (ret == 0) {
-			std::cout << "Poll timeout " << ret << std::endl;
+			std::cout << "Poll timeout " << ret << std::endl; // TODO should we continue?
 		}
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
@@ -79,6 +79,7 @@ void	Server::serverLoop()
 				struct pollfd clientFd;
 				clientFd.fd = clientSocket;
 				clientFd.events = POLLIN;	// wait for input
+				clientFd.revents = 0; // initializing this but poll() will handle it
 				this->_socketArray.push_back(clientFd);
 				std::cout << "New connection accepted: fd = " << clientFd.fd << std::endl;
 			}
