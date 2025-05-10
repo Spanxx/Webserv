@@ -1,6 +1,7 @@
 
 #include "../incl/Server.hpp"
 #include "../incl/Request.hpp"
+#include "../incl/Response.hpp"
 
 Server::Server(char *av)
 {
@@ -104,9 +105,10 @@ void	Server::serverLoop()
 				std::cout << "Received request:" << buffer << std::endl;
 				Request *request = new Request;
 				request->setCode(request->parse_request(buffer)); // set error codes, depending on which the response will be sent
-				request->process_request(_socketArray[i].fd); // launch send responde from here later?
 				
+				Response *response = new Response(request);
 				//HTTP response	
+				response->process_request(_socketArray[i].fd); // launch send responde from here later?
 				sendResponse(_socketArray[i].fd); // later maybe remove below, because will be called from inside process request function?
 
 				/*  // this below needs to be expanded and checked later when we have parsing, to make different handlers for keep-alive or not and timeout etc.

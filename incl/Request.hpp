@@ -18,9 +18,14 @@ class Request
 
 		int parse_request(const std::string &request_raw);
 		int parse_headers(std::istringstream &rstream);
-		void process_request(int client_fd);
+
 		
 		void setCode(int code);
+		int getCode();
+		std::string getMethod();
+		std::string getPath();
+		std::string getVersion();
+		std::string getBody();
 		static std::string trim(const std::string &str);
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
