@@ -99,9 +99,9 @@ void	Server::serverLoop()
 					continue;
 				}
 				std::cout << "Received request:" << buffer << std::endl;
-				Request request;
-				request.setCode(request.parse_request(buffer)); // set error codes, depending on which the response will be sent
-				request.process_request(_socketArray[i].fd); // launch send responde from here later?
+				Request *request = new Request;
+				request->setCode(request->parse_request(buffer)); // set error codes, depending on which the response will be sent
+				request->process_request(_socketArray[i].fd); // launch send responde from here later?
 				
 				//HTTP response	
 				sendResponse(_socketArray[i].fd); // later maybe remove below, because will be called from inside process request function?
@@ -115,6 +115,7 @@ void	Server::serverLoop()
 					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
 					--i;
 				}*/
+			delete request;
 			}
 
 		}

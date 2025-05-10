@@ -49,8 +49,8 @@ int Request::parse_request(const std::string &request_raw)
 	std::cout << "Request raw: " << request_raw << std::endl;
 	if (std::getline(rstream, line))
 	{
-		std::istringstream lstream(line);
-		std::string extra; //splits with space as delimiter
+		std::istringstream lstream(line); //splits with space as delimiter
+		std::string extra;
 		if (!(lstream >> _method >> _path >> _version) || lstream >> extra) // less than or more than 3 parts
 			return 400;
 	}
