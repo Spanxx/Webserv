@@ -2,7 +2,7 @@
 #include "../incl/Server.hpp"
 #include "../incl/Request.hpp"
 
-Server::Server(Config *conf)
+Server::Server(char *av)
 {
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverSocket < 0)
@@ -10,7 +10,9 @@ Server::Server(Config *conf)
 		std::cerr << "Error creating server socket!\n";
 		exit(1);
 	}
-
+	conf = createConfig(av);
+	if (!conf)
+		exit(1); // call close?
 	//prepare server adress structure
 	struct sockaddr_in serverAddr;
 	memset(&serverAddr, 0, sizeof(serverAddr));
@@ -26,7 +28,7 @@ Server::Server(Config *conf)
 		std::cerr << "Error binding server socket!\n";
 		exit(1);
 	}
-
+	delete conf;
 	std::cout << "Server socket created and bound\n";
 }
 
@@ -42,7 +44,7 @@ Server::~Server()
 void	Server::serverLoop()
 {
 	int time = 5000;
-	while (true)
+	while (!stopSignal)
 	{
 		int ret = poll(_socketArray.data(), _socketArray.size(), time);
 		// check ret == 0 for timeout and if we need to close manually or poll does by itself
@@ -52,7 +54,7 @@ void	Server::serverLoop()
 			continue;
 		}
 		if (ret == 0) {
-			std::cout << "Poll timeout " << ret << std::endl;
+			std::cout << "Poll timeout " << ret << std::endl; // TODO should we continue?
 		}
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
@@ -77,6 +79,7 @@ void	Server::serverLoop()
 				struct pollfd clientFd;
 				clientFd.fd = clientSocket;
 				clientFd.events = POLLIN;	// wait for input
+				clientFd.revents = 0; // initializing this but poll() will handle it
 				this->_socketArray.push_back(clientFd);
 				std::cout << "New connection accepted: fd = " << clientFd.fd << std::endl;
 			}
@@ -121,6 +124,7 @@ void	Server::serverLoop()
 		}
 
 	}
+	closeServer();
 }
 
 void	Server::startListen()
@@ -138,42 +142,6 @@ void	Server::startListen()
 	serverFd.fd = _serverSocket;
 	serverFd.events = POLLIN;	// wait for input
 	this->_socketArray.push_back(serverFd);
-	// //accept an incoming connection
-	// struct sockaddr_in	clientAddr;
-	// socklen_t			clientLen = sizeof(clientAddr);
-	// int					clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
-
-	// if (clientSocket < 0)
-	// {
-	// 	std::cerr << "Error accepting connection!\n";
-	// 	exit(1);
-	// }
-
-	// std::cout << "Client connected!\n";
-
-	// //Read data from the client
-	// char	buffer[1024] = {0};
-	// int 	n = read(clientSocket, buffer, sizeof(buffer));
-	// if (n < 0)
-	// {
-	// 	std::cerr << "Error reading from socket!\n";
-	// 	exit(1);
-	// }
-
-	// std::cout << "Received request:" << buffer << std::endl;
-
-	// //HTTP response
-	// const char *response =
-	// 	"HTTP/1.1 200 OK\r\n"
-	// 	"Content-Type: text/html\r\n"
-	// 	"Content-Length: 48\r\n"
-	// 	"\r\n"
-	// 	"<html><body><h1>Hello from C++ Server!</h1></body></html>";
-
-	// //send HTTP response
-	// send(clientSocket, response, strlen(response), 0);
-
-	// close(clientSocket);
 }
 
 void Server::sendResponse(int client_fd) {
@@ -195,4 +163,42 @@ void Server::sendResponse(int client_fd) {
     std::string response = response_stream.str();
 
     write(client_fd, response.c_str(), response.length());
+}
+
+Config*	Server::createConfig(char *av)
+{
+	std::ifstream conFile(av);
+	if (!conFile)
+	{
+		std::cout << "Reading config File failed!\n";
+		return (NULL);
+	}
+	if(conFile.peek() == std::ifstream::traits_type::eof())
+	{
+		std::cout << "The Config file is empty!\n";
+		return (NULL);
+	}
+	
+	if (Config::checkConfigFile(conFile) == 1)
+		return (NULL);
+
+	std::map<std::string, std::string> serverConfig;
+	Config::extractConfigMap(conFile, serverConfig, "server{");
+	// std::map<std::string, std::string> dirConfig;
+	// extractConfigMap(conFile, serverConfig, "dir{");
+	// std::map<std::string, std::string> fileConfig;
+	// extractConfigMap(conFile, serverConfig, "files{");
+
+	
+	Config *config = new Config(serverConfig);
+	// one class for each map or all together?
+
+	return (config);
+}
+
+void Server::closeServer() {
+	for (size_t i = 0; i < _socketArray.size(); ++i) {
+		std::cout << "closing socket fd" << _socketArray[i].fd << std::endl;
+		close(_socketArray[i].fd);
+	}
 }
