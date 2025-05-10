@@ -1,0 +1,185 @@
+{
+  "main": {
+    "id": "46075a50e0d9f672",
+    "type": "split",
+    "children": [
+      {
+        "id": "06cb5ec0791cf42f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "daa65c4a7f3d1b75",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Webserv_notes/🐙 02 - Henri/request parsing.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "request parsing"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "63d6844c9d670b67",
+    "type": "split",
+    "children": [
+      {
+        "id": "fa3c7bda5c638d9e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8bba4ffbfc5c67dd",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "182f9f001636fb02",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "d18a190595ddb4db",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "15e912424bf79f5d",
+    "type": "split",
+    "children": [
+      {
+        "id": "b90ea1adc02936f7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "226273912124c626",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Webserv_notes/🐙 02 - Henri/request parsing.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for request parsing"
+            }
+          },
+          {
+            "id": "c69ca3d6392004fc",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Webserv_notes/🐙 02 - Henri/request parsing.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from request parsing"
+            }
+          },
+          {
+            "id": "499f3f16f8a5a58e",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "02420cb0a394dfc1",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Webserv_notes/🐙 02 - Henri/request parsing.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of request parsing"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "daa65c4a7f3d1b75",
+  "lastOpenFiles": [
+    "webserv",
+    "obj/src/Response.o",
+    "obj/src/Response-39a90af8.o.tmp",
+    "obj/src/Request.o",
+    "obj/src/Request-31316f87.o.tmp",
+    "obj/src/Config.o",
+    "obj/src/Config-a25282be.o.tmp",
+    "obj/src/Server.o",
+    "obj/src/Server-f70cdbcc.o.tmp",
+    "obj/main-089de227.o.tmp",
+    "obj/src/Request-abd1708e.o.tmp"
+  ]
+}

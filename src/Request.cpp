@@ -64,22 +64,6 @@ int Request::parse_request(const std::string &request_raw)
 	return 200;
 }
 
-void Request::process_request(int client_fd)
-{
-	(void)client_fd; // to be removed later, just to avoid unused variable error 
-	if (this->_method == "GET")
-		std::cout << "placeholder for processing GET method\n"; //send GET response
-	else if (this->_method == "POST")
-		std::cout << "placeholder for processing POST method\n"; //send POST response
-	else if (this->_method == "DELETE")
-		std::cout << "placeholder for processing DELETE method\n"; //send DELETE response
-	// other methods or send error method not allowed (405)
-	else
-		_code = 405; // and process this code
-	std::cout << *this;
-	
-}
-
 int Request::parse_headers(std::istringstream &rstream)
 {
 	std::string line;
@@ -129,3 +113,9 @@ std::ostream &operator<<(std::ostream &os, Request &request)
 
 
 void Request::setCode(int code) { _code = code; }
+
+int	Request::getCode() { return _code; }
+std::string Request::getMethod() { return _method; }
+std::string Request::getPath() { return _path; }
+std::string Request::getVersion() { return _version; }
+std::string Request::getBody() { return _body; }
