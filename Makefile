@@ -15,7 +15,7 @@ RM = rm -rf
 
 #Source files and objects
 SRCS = main.cpp \
-		src/Server.cpp src/Config.cpp
+		src/Server.cpp src/Config.cpp src/Request.cpp
 
 OBJ = $(patsubst %.cpp, $(OBJDIR)/%.o, $(SRCS))
 
