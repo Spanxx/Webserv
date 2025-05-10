@@ -9,7 +9,7 @@ Server::Server(char *av)
 		std::cerr << "Error creating server socket!\n";
 		exit(1);
 	}
-	conf = Server::createConfig(av);
+	conf = createConfig(av);
 	if (!conf)
 		exit(1); // call close?
 	//prepare server adress structure
@@ -27,7 +27,7 @@ Server::Server(char *av)
 		std::cerr << "Error binding server socket!\n";
 		exit(1);
 	}
-
+	delete conf;
 	std::cout << "Server socket created and bound\n";
 }
 
@@ -38,7 +38,6 @@ Server::~Server()
 {
 	close(_serverSocket);
 	std::cout << "Server socket closed\n";
-	delete conf;
 }
 
 void	Server::serverLoop()
@@ -104,16 +103,6 @@ void	Server::serverLoop()
 				std::cout << "Received request:" << buffer << std::endl;
 				//HTTP response
 				sendResponse(_socketArray[i].fd);
-
-				/*  // this below needs to be expanded and checked later when we have parsing, to make different handlers for keep-alive or not and timeout etc.
-				bool keepAlive = true;
-				if (!keepAlive)
-				{
-					std::cout << "no kep-alive connection, closing connection: fd " << _socketArray[i].fd << std::endl;
-					close(_socketArray[i].fd);
-					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
-					--i;
-				}*/
 			}
 
 		}
@@ -137,42 +126,6 @@ void	Server::startListen()
 	serverFd.fd = _serverSocket;
 	serverFd.events = POLLIN;	// wait for input
 	this->_socketArray.push_back(serverFd);
-	// //accept an incoming connection
-	// struct sockaddr_in	clientAddr;
-	// socklen_t			clientLen = sizeof(clientAddr);
-	// int					clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
-
-	// if (clientSocket < 0)
-	// {
-	// 	std::cerr << "Error accepting connection!\n";
-	// 	exit(1);
-	// }
-
-	// std::cout << "Client connected!\n";
-
-	// //Read data from the client
-	// char	buffer[1024] = {0};
-	// int 	n = read(clientSocket, buffer, sizeof(buffer));
-	// if (n < 0)
-	// {
-	// 	std::cerr << "Error reading from socket!\n";
-	// 	exit(1);
-	// }
-
-	// std::cout << "Received request:" << buffer << std::endl;
-
-	// //HTTP response
-	// const char *response =
-	// 	"HTTP/1.1 200 OK\r\n"
-	// 	"Content-Type: text/html\r\n"
-	// 	"Content-Length: 48\r\n"
-	// 	"\r\n"
-	// 	"<html><body><h1>Hello from C++ Server!</h1></body></html>";
-
-	// //send HTTP response
-	// send(clientSocket, response, strlen(response), 0);
-
-	// close(clientSocket);
 }
 
 void Server::sendResponse(int client_fd) {
@@ -232,6 +185,4 @@ void Server::closeServer() {
 		std::cout << "closing socket fd" << _socketArray[i].fd << std::endl;
 		close(_socketArray[i].fd);
 	}
-	// if (conf)
-	// 	delete conf;
 }

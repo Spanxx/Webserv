@@ -19,7 +19,7 @@ int main(int ac, char **av)
 	}
 	// browser: 127.0.0.1:555
 	Server newServer(av[1]);
-	std::cout << "map port: " << newServer.conf-> getPort() << std::endl;
+	//std::cout << "map port: " << newServer.conf-> getPort() << std::endl;
 	newServer.startListen();
 	newServer.serverLoop();
 	return (0);
