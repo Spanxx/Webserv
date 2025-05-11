@@ -40,6 +40,7 @@ public:
 private:
 	int			_serverSocket;
 	std::vector<struct pollfd> _socketArray;
+	std::map<int, time_t> lastActive;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

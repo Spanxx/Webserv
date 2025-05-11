@@ -1,7 +1,8 @@
 
-#include "../incl/Server.hpp"
-#include "../incl/Request.hpp"
-#include "../incl/Response.hpp"
+#include	"../incl/Server.hpp"
+#include	"../incl/Request.hpp"
+#include	"../incl/Response.hpp"
+// #include	<sys/time.h>
 
 Server::Server(char *av)
 {
@@ -44,27 +45,29 @@ Server::~Server()
 
 void	Server::serverLoop()
 {
-	int time = 5000;
+	int pollTimeout = 5000;			//timeout --> checks for new connections (milliseconds)
+	int clientTimeout = 5;		//timeout before a client gets disconnected (seconds)
+
 	while (!stopSignal)
 	{
-		int ret = poll(_socketArray.data(), _socketArray.size(), time);
-		// check ret == 0 for timeout and if we need to close manually or poll does by itself
-		if (ret < 0)
-		{
-			std::cerr << "poll error\n";
-			continue;
-		}
-		if (ret == 0) {
-			std::cout << "Poll timeout " << ret << std::endl; // TODO should we continue?
-		}
+		int ret = poll(_socketArray.data(), _socketArray.size(), pollTimeout);
+		(void)ret;
+		
+		time_t now = time(NULL);
+
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
-			// if (ret == 0 && i != 0) {							// Timeout handling for Client Socket?
-			// 	std::cout << "Poll timeout " << ret << std::endl;
-			// 	std::cout << "Client fd " <<  _socketArray[i].fd << " is closed\n";
-			// 	close(_socketArray[i].fd);
-			// }
-
+			//Timeout check for each client
+			if (_socketArray[i].fd != _serverSocket && now - lastActive[_socketArray[i].fd] > clientTimeout)
+			{
+				std::cout << "Timeout --> client fd " << _socketArray[i].fd << " is closed!" << std::endl;
+				close(_socketArray[i].fd);
+				lastActive.erase(_socketArray[i].fd);
+				_socketArray.erase(_socketArray.begin() + i);
+				--i;
+				continue;
+			}
+			//checks for new connections from clients
 			if (_socketArray[i].fd == _serverSocket && (_socketArray[i].revents & POLLIN)) //return a non-zero value if the POLLIN bit is set
 			{
 				struct sockaddr_in	clientAddr;
@@ -82,26 +85,22 @@ void	Server::serverLoop()
 				clientFd.events = POLLIN;	// wait for input
 				clientFd.revents = 0; // initializing this but poll() will handle it
 				this->_socketArray.push_back(clientFd);
+				lastActive[clientSocket] = now;
 				std::cout << "New connection accepted: fd = " << clientFd.fd << std::endl;
 			}
-			else if (_socketArray[i].revents & POLLIN)
+			else if (_socketArray[i].revents & POLLIN)		//handles the client connection
 			{
 				char	buffer[1024] = {0};
 				int 	n = read(_socketArray[i].fd, buffer, sizeof(buffer));
+
 				if (n < 0)
 				{
-					std::cerr << "Error reading from socket!\n";
-					//exit(1);
+					std::cerr << "Error reading from socket!\n";	//close the socket?
 					continue;
 				}
-				else if (n == 0) // when EOF is reached, so connection is closed by client
-				{
-					std::cout << "client disconnected: fd = " << _socketArray[i].fd << std::endl;
-					close(_socketArray[i].fd);
-					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
-					--i;
-					continue;
-				}
+				
+				lastActive[_socketArray[i].fd] = time(NULL);
+
 				std::cout << "Received request:" << buffer << std::endl;
 				Request *request = new Request;
 				request->setCode(request->parse_request(buffer)); // set error codes, depending on which the response will be sent
@@ -110,6 +109,23 @@ void	Server::serverLoop()
 				//HTTP response	
 				response->process_request(_socketArray[i].fd); // launch send responde from here later?
 				sendResponse(_socketArray[i].fd); // later maybe remove below, because will be called from inside process request function?
+
+				delete request;
+				delete response;
+			}
+			else if (_socketArray[i].revents & POLLERR || _socketArray[i].revents & POLLHUP || _socketArray[i].revents & POLLNVAL) //closed connection / EOF / error
+			{
+				std::cout << "client fd " << _socketArray[i].fd << " is closed!" << std::endl;
+				close(_socketArray[i].fd);
+				_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
+				--i;
+				continue;
+			}
+		}
+	}
+	closeServer();
+}
+
 
 				/*  // this below needs to be expanded and checked later when we have parsing, to make different handlers for keep-alive or not and timeout etc.
 				bool keepAlive = true;
@@ -120,14 +136,6 @@ void	Server::serverLoop()
 					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
 					--i;
 				}*/
-			delete request;
-			}
-
-		}
-
-	}
-	closeServer();
-}
 
 void	Server::startListen()
 {
@@ -138,7 +146,7 @@ void	Server::startListen()
 		exit(1);
 	}
 
-	std::cout << "Server starts listening for incomming connections \n";
+	std::cout << "Server starts listening for incomming connections on FD " << _serverSocket <<  "\n";
 
 	struct pollfd serverFd;
 	serverFd.fd = _serverSocket;
