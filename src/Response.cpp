@@ -65,14 +65,13 @@ void Response::assign_status_phrase()
 {
 	std::string line;
 	std::ifstream file("content/data/status_codes.txt");
-
-	_status["code"] = intToString(_code);
 	if (!file.is_open())
 	{
 		std::cerr << "Error extracting status phrase: error opening file\n";
 		this->_status["phrase"] = "Default";
 		return;
 	}
+	_status["code"] = intToString(_code);
 	while (std::getline(file, line))
 	{
 		if (!line.compare(0, 3, _status["code"])) //compare returns 0 when found matching
@@ -111,7 +110,7 @@ std::string Response::make_status_page_string()
 
 
     	std::ostringstream response_stream;
-    	response_stream << "HTTP/1.1 200 OK\r\n"
+    	response_stream << "HTTP/1.1 "<< _status["code"] << " " << _status["phrase"] <<"\r\n"
                     << "Content-Type: text/html\r\n"
                     << "Content-Length: " << html.length() << "\r\n"
                     << "\r\n"
