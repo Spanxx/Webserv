@@ -46,7 +46,7 @@ Server::~Server()
 void	Server::serverLoop()
 {
 	int pollTimeout = 5000;			//timeout --> checks for new connections (milliseconds)
-	int clientTimeout = 5;		//timeout before a client gets disconnected (seconds)
+	int clientTimeout = 50;		//timeout before a client gets disconnected (seconds)
 
 	while (!stopSignal)
 	{
@@ -67,7 +67,7 @@ void	Server::serverLoop()
 				--i;
 				continue;
 			}
-			//checks for new connections from clients
+			//checks the server for new connections from clients
 			if (_socketArray[i].fd == _serverSocket && (_socketArray[i].revents & POLLIN)) //return a non-zero value if the POLLIN bit is set
 			{
 				struct sockaddr_in	clientAddr;
@@ -101,14 +101,14 @@ void	Server::serverLoop()
 				
 				lastActive[_socketArray[i].fd] = time(NULL);
 
-				std::cout << "Received request:" << buffer << std::endl;
+				// std::cout << "Received request:" << buffer << std::endl;
 				Request *request = new Request;
 				request->setCode(request->parse_request(buffer)); // set error codes, depending on which the response will be sent
 				
 				Response *response = new Response(request);
 				//HTTP response	
 				response->process_request(_socketArray[i].fd); // launch send responde from here later?
-				sendResponse(_socketArray[i].fd); // later maybe remove below, because will be called from inside process request function?
+				// sendResponse(_socketArray[i].fd); // later maybe remove below, because will be called from inside process request function?
 
 				delete request;
 				delete response;
@@ -126,17 +126,6 @@ void	Server::serverLoop()
 	closeServer();
 }
 
-
-				/*  // this below needs to be expanded and checked later when we have parsing, to make different handlers for keep-alive or not and timeout etc.
-				bool keepAlive = true;
-				if (!keepAlive)
-				{
-					std::cout << "no kep-alive connection, closing connection: fd " << _socketArray[i].fd << std::endl;
-					close(_socketArray[i].fd);
-					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
-					--i;
-				}*/
-
 void	Server::startListen()
 {
 	//start listening for incoming connections
@@ -152,27 +141,6 @@ void	Server::startListen()
 	serverFd.fd = _serverSocket;
 	serverFd.events = POLLIN;	// wait for input
 	this->_socketArray.push_back(serverFd);
-}
-
-void Server::sendResponse(int client_fd) {
-    std::ostringstream html;
-    html << "<html><body><h1>Hello from C++ Server!</h1>"
-         << "<p>Your socket fd is: " << client_fd << "</p>"
-         << "</body></html>";
-
-    std::string body = html.str();
-
-    std::ostringstream response_stream;
-
-    response_stream << "HTTP/1.1 200 OK\r\n"
-                    << "Content-Type: text/html\r\n"
-                    << "Content-Length: " << body.length() << "\r\n"
-                    << "\r\n"
-                    << body;
-
-    std::string response = response_stream.str();
-
-    write(client_fd, response.c_str(), response.length());
 }
 
 Config*	Server::createConfig(char *av)
@@ -198,6 +166,8 @@ Config*	Server::createConfig(char *av)
 	// extractConfigMap(conFile, serverConfig, "dir{");
 	// std::map<std::string, std::string> fileConfig;
 	// extractConfigMap(conFile, serverConfig, "files{");
+	// std::map<std::string, std::string> filetypeConfig;
+	// extractConfigMap(conFile, serverConfig, "filetype{");
 
 	
 	Config *config = new Config(serverConfig);
@@ -212,3 +182,24 @@ void Server::closeServer() {
 		close(_socketArray[i].fd);
 	}
 }
+
+// void Server::sendResponse(int client_fd) {
+//     std::ostringstream html;
+//     html << "<html><body><h1>Hello from C++ Server!</h1>"
+//          << "<p>Your socket fd is: " << client_fd << "</p>"
+//          << "</body></html>";
+
+//     std::string body = html.str();
+
+//     std::ostringstream response_stream;
+
+//     response_stream << "HTTP/1.1 200 OK\r\n"
+//                     << "Content-Type: text/html\r\n"
+//                     << "Content-Length: " << body.length() << "\r\n"
+//                     << "\r\n"
+//                     << body;
+
+//     std::string response = response_stream.str();
+
+//     write(client_fd, response.c_str(), response.length());
+// }

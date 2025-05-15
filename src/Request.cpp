@@ -1,10 +1,7 @@
 
 #include "../incl/Request.hpp"
 
-Request::Request()
-{
-	
-}
+Request::Request() {}
 
 Request::Request(Request &other)
 {
@@ -44,9 +41,8 @@ Request& Request::operator=(Request &other)
 int Request::parse_request(const std::string &request_raw)
 {
 	std::istringstream rstream(request_raw); //turn string into stream so it can be read line by line with getline
-	Request request;
 	std::string line;
-	// std::cout << "Request raw: " << request_raw << std::endl;
+	std::cout << "Request raw:\n" << request_raw << std::endl;
 	if (std::getline(rstream, line))
 	{
 		std::istringstream lstream(line); //splits with space as delimiter
@@ -57,6 +53,8 @@ int Request::parse_request(const std::string &request_raw)
 	// make extra check for header too long for buffer --> code 431
 	if (!parse_headers(rstream))
 		return 400;
+	if (checkRequestedPath() == 1)
+		return (400);
 	std::ostringstream bstream; // body --> if there is no body, this just adds empty string 
 	while (std::getline(rstream, line))
 		bstream << line << "\n";
@@ -68,11 +66,11 @@ int Request::parse_headers(std::istringstream &rstream)
 {
 	std::string line;
 	bool blank = false;
-	while (std::getline(rstream, line) && line != "\r") //headers, until \r (empty line = end of header section) - getline removes \n but not \r 
+	while (std::getline(rstream, line)) // && line != "\r") //headers, until \r (empty line = end of header section) - getline removes \n but not \r 
 	{
 		if (!line.empty() && line[line.size() - 1] == '\r')
 			line.erase(line.size() - 1); //remove last char (trailing carriage return '\r')
-		if (line.empty())
+		if (line.empty())	//if there is no body, then there is maybe no empty line
 		{
 			blank = true;
 			break;
@@ -82,7 +80,9 @@ int Request::parse_headers(std::istringstream &rstream)
 			return 0;
 		std::string key = line.substr(0, pos);
 		std::string value = line.substr(pos + 2);
-		if (key.empty() || key != trim(key) || value != trim(value)) //if there is extra whitespace
+		trim(key);
+		trim(value);
+		if (key.empty() || value.empty())	// || key != trim(key) || value != trim(value)) //if there is extra whitespace
 			return 0;
 		_headers[key] = value;
 	}
@@ -120,3 +120,31 @@ std::string Request::getMethod() { return _method; }
 std::string Request::getPath() { return _path; }
 std::string Request::getVersion() { return _version; }
 std::string Request::getBody() { return _body; }
+
+int	Request::checkRequestedPath()
+{
+	//check if path is dir --> send to mainpage
+	if (*(this->_path.end() - 1) == '/')
+	{
+		std::cout << "Client is trying to request a directory --> redirect to index.html\n";
+		this->_path = "/index.html";
+		// return (302);
+	}
+	
+	//check with dir in config
+	std::string newPath;
+	//check for favicon and add content
+	if (this->_path == "/favicon.ico")
+		newPath = "content/files" + this->_path;
+	else
+		newPath = "content" + this->_path;
+	this->_path = newPath;
+
+	return (0);
+}
+int	Request::checkRequestedFiletype()
+{
+	return (0);
+}
+
+// Endless loop when client window is closed.

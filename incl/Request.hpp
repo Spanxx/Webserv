@@ -16,8 +16,10 @@ class Request
 		~Request();
 		Request& operator=(Request &other);
 
-		int parse_request(const std::string &request_raw);
-		int parse_headers(std::istringstream &rstream);
+		int	parse_request(const std::string &request_raw);
+		int	parse_headers(std::istringstream &rstream);
+		int	checkRequestedPath();
+		int	checkRequestedFiletype();
 
 		
 		void setCode(int code);
