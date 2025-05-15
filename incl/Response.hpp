@@ -7,6 +7,8 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <fstream>
+#include <unistd.h>
 #include "Request.hpp"
 
 class Response {
@@ -21,13 +23,17 @@ class Response {
 		std::string bodyBuilder();
 		std::string responseBuilder();
 		void process_request(int client_fd);
+		void assign_status_phrase();
+		std::string make_status_page_string();
+
+		void sendResponse(int client_fd);
 
 	private:
 		Request *_request;
 		int _code;
-		std::string _statusPhrase;
+		std::map<std::string, std::string> _status;
 		std::map<std::string, std::string> _headers;
 		std::string _body;
 };
 
-#endif
+#endif //RESPONSE_HPP

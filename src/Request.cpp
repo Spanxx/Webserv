@@ -1,5 +1,6 @@
 
 #include "../incl/Request.hpp"
+#include "../incl/Utils.hpp"
 
 Request::Request()
 {
@@ -46,7 +47,7 @@ int Request::parse_request(const std::string &request_raw)
 	std::istringstream rstream(request_raw); //turn string into stream so it can be read line by line with getline
 	Request request;
 	std::string line;
-	std::cout << "Request raw: " << request_raw << std::endl;
+	std::cout << "REQUEST RAW: " << request_raw << "UNTIL HERE" << std::endl;
 	if (std::getline(rstream, line))
 	{
 		std::istringstream lstream(line); //splits with space as delimiter
@@ -68,9 +69,9 @@ int Request::parse_headers(std::istringstream &rstream)
 {
 	std::string line;
 	bool blank = false;
-	while (std::getline(rstream, line) && line != "\r") //headers, until \r (empty line = end of header section) - getline removes \n but not \r 
+	while (std::getline(rstream, line))
 	{
-		if (!line.empty() && line[line.size() - 1] == '\r')
+		if (!line.empty() && line[line.size() - 1] == '\r') //getline removes \n but not \r 
 			line.erase(line.size() - 1); //remove last char (trailing carriage return '\r')
 		if (line.empty())
 		{
@@ -90,14 +91,7 @@ int Request::parse_headers(std::istringstream &rstream)
 		return 0; //no empty line after header
 	return 1;
 }
-std::string Request::trim(const std::string &str)
-{
-	size_t start = str.find_first_not_of(" \t\r\n");
-	size_t end = str.find_last_not_of(" \t\r\n");
-	if (start == std::string::npos || end == std::string::npos)
-		return "";
-	return str.substr(start, end - start + 1);
-}
+
 
 std::ostream &operator<<(std::ostream &os, Request &request)
 {

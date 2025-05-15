@@ -109,18 +109,8 @@ void	Server::serverLoop()
 				Response *response = new Response(request);
 				//HTTP response	
 				response->process_request(_socketArray[i].fd); // launch send responde from here later?
-				sendResponse(_socketArray[i].fd); // later maybe remove below, because will be called from inside process request function?
-
-				/*  // this below needs to be expanded and checked later when we have parsing, to make different handlers for keep-alive or not and timeout etc.
-				bool keepAlive = true;
-				if (!keepAlive)
-				{
-					std::cout << "no kep-alive connection, closing connection: fd " << _socketArray[i].fd << std::endl;
-					close(_socketArray[i].fd);
-					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
-					--i;
-				}*/
-			delete request;
+				//sendResponse(_socketArray[i].fd); // later maybe remove below, because will be called from inside process request function?
+				delete request;
 			}
 
 		}
@@ -145,6 +135,7 @@ void	Server::startListen()
 	serverFd.events = POLLIN;	// wait for input
 	this->_socketArray.push_back(serverFd);
 }
+
 
 void Server::sendResponse(int client_fd) {
     std::ostringstream html;
