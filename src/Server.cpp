@@ -12,15 +12,24 @@ Server::Server(char *av)
 		std::cerr << "Error creating server socket!\n";
 		exit(1);
 	}
-	conf = createConfig(av);
-	if (!conf)
-		exit(1); // call close?
+	// conf = createConfig(av);
+	if (this->createConfig(av) == 1)
+		exit(1);
+	// if (!conf)
+		// exit(1); // call close?
+		
+	//transfer the port from map/string to int for serversocket
+	int	port;
+	std::stringstream ss(_serverConfig["port"]);
+	ss >> port;
+		
 	//prepare server adress structure
 	struct sockaddr_in serverAddr;
 	memset(&serverAddr, 0, sizeof(serverAddr));
-	serverAddr.sin_family = AF_INET;			//IPv4
-	serverAddr.sin_addr.s_addr = INADDR_ANY;	//bind to any local adress
-	serverAddr.sin_port = htons(conf->getPort());			//port in network byte order
+	serverAddr.sin_family = AF_INET;				//IPv4
+	serverAddr.sin_addr.s_addr = INADDR_ANY;		//bind to any local adress
+	serverAddr.sin_port = htons(port);	//port in network byte order
+	// serverAddr.sin_port = htons(conf->getPort());	//port in network byte order
 
 	int yes = 1;
 	setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
@@ -30,7 +39,7 @@ Server::Server(char *av)
 		std::cerr << "Error binding server socket!\n";
 		exit(1);
 	}
-	delete conf;
+	// delete conf;
 	std::cout << "Server socket created and bound\n";
 }
 
@@ -45,7 +54,7 @@ Server::~Server()
 
 void	Server::serverLoop()
 {
-	int pollTimeout = 5000;			//timeout --> checks for new connections (milliseconds)
+	int pollTimeout = 5000;		//timeout --> checks for new connections (milliseconds)
 	int clientTimeout = 50;		//timeout before a client gets disconnected (seconds)
 
 	while (!stopSignal)
@@ -58,11 +67,11 @@ void	Server::serverLoop()
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
 			//Timeout check for each client
-			if (_socketArray[i].fd != _serverSocket && now - lastActive[_socketArray[i].fd] > clientTimeout)
+			if (_socketArray[i].fd != _serverSocket && now - _lastActive[_socketArray[i].fd] > clientTimeout)
 			{
 				std::cout << "Timeout --> client fd " << _socketArray[i].fd << " is closed!" << std::endl;
 				close(_socketArray[i].fd);
-				lastActive.erase(_socketArray[i].fd);
+				_lastActive.erase(_socketArray[i].fd);
 				_socketArray.erase(_socketArray.begin() + i);
 				--i;
 				continue;
@@ -85,7 +94,7 @@ void	Server::serverLoop()
 				clientFd.events = POLLIN;	// wait for input
 				clientFd.revents = 0; // initializing this but poll() will handle it
 				this->_socketArray.push_back(clientFd);
-				lastActive[clientSocket] = now;
+				_lastActive[clientSocket] = now;
 				std::cout << "New connection accepted: fd = " << clientFd.fd << std::endl;
 			}
 			else if (_socketArray[i].revents & POLLIN)		//handles the client connection
@@ -98,11 +107,20 @@ void	Server::serverLoop()
 					std::cerr << "Error reading from socket!\n";	//close the socket?
 					continue;
 				}
+				if (n == 0)	//if there is nothing to read, it goes in the statement????
+				{
+					std::cout << "[Browser closed] Client fd " << _socketArray[i].fd << " is closed!" << std::endl;
+					close(_socketArray[i].fd);
+					_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
+					--i;
+					continue;
+				}
 				
-				lastActive[_socketArray[i].fd] = time(NULL);
+				_lastActive[_socketArray[i].fd] = time(NULL);
 
 				// std::cout << "Received request:" << buffer << std::endl;
-				Request *request = new Request;
+				std::cout << "Request from client fd " << _socketArray[i].fd << std::endl;
+				Request *request = new Request(this);
 				request->setCode(request->parse_request(buffer)); // set error codes, depending on which the response will be sent
 				
 				Response *response = new Response(request);
@@ -143,63 +161,117 @@ void	Server::startListen()
 	this->_socketArray.push_back(serverFd);
 }
 
-Config*	Server::createConfig(char *av)
+void	Server::extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target)
 {
-	std::ifstream conFile(av);
-	if (!conFile)
+	std::string	line;
+
+	while (std::getline(conFile, line))
+	{
+		if (line == target)
+		{
+			while (std::getline(conFile, line))
+			{
+				if (line == "}")
+					break;
+
+				if (line.empty() || line[0] == '#')
+					continue;
+				
+				size_t	equalPos = line.find('=');
+				if (equalPos != std::string::npos)
+				{
+					std::string	key = line.substr(0, equalPos);
+					std::string value = line.substr(equalPos + 1);
+					//check for key duplicates
+					if (targetMap.find(key) != targetMap.end())
+					{
+						std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+								<< "new Value don't overwrites existing Value!\n";
+					}
+					else
+						targetMap[key] = value;
+				}
+			}
+		}
+	}
+}
+
+int	Server::checkConfigFile(std::ifstream &conFile)
+{
+	std::string	line;
+	while(std::getline(conFile, line))
+	{
+		for(int i = 0; line[i] != '\n' && line[i]; ++i)
+		{
+			if (line[0] == '#')
+				break ;
+			if (line[i] == 32)	//space
+			{
+				std::cout << "Error: Forbidden char <space> found in config file!\n";
+				return (1);
+			}
+		}
+		// maybe add more checks?
+	}
+	conFile.clear();                // Clear any error flags
+	conFile.seekg(0, std::ios::beg); // Go back to the beginning
+	return (0);
+}
+
+int	Server::createConfig(char *av)
+{
+	std::ifstream configFile(av);
+	if (!configFile)
 	{
 		std::cout << "Reading config File failed!\n";
-		return (NULL);
+		return (1);
 	}
-	if(conFile.peek() == std::ifstream::traits_type::eof())
+	if (configFile.peek() == std::ifstream::traits_type::eof())
 	{
 		std::cout << "The Config file is empty!\n";
-		return (NULL);
+		return (1);
 	}
-	
-	if (Config::checkConfigFile(conFile) == 1)
-		return (NULL);
 
-	std::map<std::string, std::string> serverConfig;
-	Config::extractConfigMap(conFile, serverConfig, "server{");
+	if (Config::checkConfigFile(configFile) == 1)
+		return (1);
+
+	// std::map<std::string, std::string> _serverConfig;
+	this->extractConfigMap(configFile, _serverConfig, "server{");
 	// std::map<std::string, std::string> dirConfig;
-	// extractConfigMap(conFile, serverConfig, "dir{");
+	this->extractConfigMap(configFile, _dirConfig, "dir{");
+	// std::map<std::string, std::string> pageConfig;
+	this->extractConfigMap(configFile, _pageConfig, "pages{");
 	// std::map<std::string, std::string> fileConfig;
-	// extractConfigMap(conFile, serverConfig, "files{");
+	this->extractConfigMap(configFile, _fileConfig, "files{");
 	// std::map<std::string, std::string> filetypeConfig;
-	// extractConfigMap(conFile, serverConfig, "filetype{");
+	this->extractConfigMap(configFile, _filetypeConfig, "filetypes{");
 
 	
-	Config *config = new Config(serverConfig);
+	// Config *config = new Config(_serverConfig);
 	// one class for each map or all together?
 
-	return (config);
+	return (0);
 }
 
 void Server::closeServer() {
 	for (size_t i = 0; i < _socketArray.size(); ++i) {
-		std::cout << "closing socket fd" << _socketArray[i].fd << std::endl;
+		std::cout << "Closing socket fd " << _socketArray[i].fd << std::endl;
 		close(_socketArray[i].fd);
 	}
 }
 
-// void Server::sendResponse(int client_fd) {
-//     std::ostringstream html;
-//     html << "<html><body><h1>Hello from C++ Server!</h1>"
-//          << "<p>Your socket fd is: " << client_fd << "</p>"
-//          << "</body></html>";
-
-//     std::string body = html.str();
-
-//     std::ostringstream response_stream;
-
-//     response_stream << "HTTP/1.1 200 OK\r\n"
-//                     << "Content-Type: text/html\r\n"
-//                     << "Content-Length: " << body.length() << "\r\n"
-//                     << "\r\n"
-//                     << body;
-
-//     std::string response = response_stream.str();
-
-//     write(client_fd, response.c_str(), response.length());
-// }
+std::map<std::string, std::string>* Server::getConfigMap(std::string configName)
+{
+	if (configName == "serverConfig")
+		return(&this->_serverConfig);
+	if (configName == "dirConfig")
+		return(&this->_dirConfig);
+	if (configName == "pageConfig")
+		return(&this->_pageConfig);
+	if (configName == "fileConfig")
+		return(&this->_fileConfig);
+	if (configName == "filetypeConfig")
+		return(&this->_filetypeConfig);
+	else
+		return (NULL);
+}

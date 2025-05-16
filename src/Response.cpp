@@ -2,7 +2,10 @@
 #include "../incl/Response.hpp"
 
 
-Response::Response(Request *request): _request(request), _code(request->getCode()) {}
+Response::Response(Request *request): _request(request), _code(request->getCode()) 
+{
+	std::cout << "Response constructed\n";
+}
 
 Response::Response(Response &other)
 {
@@ -97,6 +100,8 @@ std::string	Response::headersBuilder()
 			<< this->_request->getPath() << "\r\n"
 			<< "Content-Type: text/html\r\n"
 			<< "Content-Length: " << this->_headers["Content-Length"] << "\r\n"
+			<< "Connection: keep-alive\r\n"
+			<< "Location: " << this->_request->getPath() << "\r\n"
 			<< "\r\n";	//empty newline to seperate header and body
 
 	return (header.str());
@@ -106,8 +111,8 @@ std::string	Response::bodyBuilder()
 	std::string 		line;
 	std::string 		body;
 	std::string			path;
-	int					lineCount = 0;
 	std::stringstream	ss;
+	int					lineCount = 0;
 
 	path = this->_request->getPath();
 	std::cout << "Trying to open: " << path << '\n';

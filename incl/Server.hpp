@@ -34,13 +34,24 @@ public:
 	void	serverLoop();
 	void	sendResponse(int client_fd);
 	void	closeServer();
-	Config	*conf;
-	static Config*	createConfig(char *av);
+	
+	// Config	*conf;
+	int		createConfig(char *av);
+	int		checkConfigFile(std::ifstream &conFile);
+	void	extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target);
+
+	std::map<std::string, std::string>* getConfigMap(std::string configName);
+	//add exceptions?
 
 private:
-	int			_serverSocket;
-	std::vector<struct pollfd> _socketArray;
-	std::map<int, time_t> lastActive;
+	int									_serverSocket;
+	std::vector<struct pollfd>			_socketArray;
+	std::map<int, time_t> 				_lastActive;
+	std::map<std::string, std::string>	_serverConfig;
+	std::map<std::string, std::string>	_dirConfig;
+	std::map<std::string, std::string>	_pageConfig;
+	std::map<std::string, std::string>	_fileConfig;
+	std::map<std::string, std::string>	_filetypeConfig;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

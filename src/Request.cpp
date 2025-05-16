@@ -1,7 +1,10 @@
 
 #include "../incl/Request.hpp"
 
-Request::Request() {}
+Request::Request(Server *server) : _server(server)
+{
+	std::cout << "Request constructed\n";
+}
 
 Request::Request(Request &other)
 {
@@ -52,8 +55,12 @@ int Request::parse_request(const std::string &request_raw)
 	}
 	// make extra check for header too long for buffer --> code 431
 	if (!parse_headers(rstream))
-		return 400;
+		return (400);
+	if (checkPathChars() == 1)
+		return (400);
 	if (checkRequestedPath() == 1)
+		return (400);
+	if (checkRequestedFiletype() == 1)
 		return (400);
 	std::ostringstream bstream; // body --> if there is no body, this just adds empty string 
 	while (std::getline(rstream, line))
@@ -121,17 +128,38 @@ std::string Request::getPath() { return _path; }
 std::string Request::getVersion() { return _version; }
 std::string Request::getBody() { return _body; }
 
+int	Request::checkPathChars()
+{
+	const std::string allowedChars = "-_./~";	//inclued A-Z a-Z 0-9 (checked with isalnum())
+	const std::string reservedChars = "!*'();:@&=+$,/?#";
+	const std::string unsafeChars = "`<>\"{}";
+
+	for (int i = 0; this->_path[i]; ++i)
+	{
+		//allowed chars, don't need to be unencoded
+		if (std::isalnum(this->_path[i]) || allowedChars.find(this->_path[i]) != std::string::npos)
+			continue;
+		//Reserved	! * ' ( ) ; : @ & = + $ , / ? # (allowed but context-sensitive)
+		else if (reservedChars.find(this->_path[i]) != std::string::npos)
+			continue;
+		else
+			return (1);
+	}
+	return (0);
+}
+
 int	Request::checkRequestedPath()
 {
 	//check if path is dir --> send to mainpage
 	if (*(this->_path.end() - 1) == '/')
 	{
-		std::cout << "Client is trying to request a directory --> redirect to index.html\n";
-		this->_path = "/index.html";
-		// return (302);
+		std::cout << "Client is trying to request a directory --> redirect to content/index.html\n";
+		this->_path = "content/index.html";
+		this->_code = 301;
+		return (0);
 	}
-	
-	//check with dir in config
+
+	//add content dir in front of path
 	std::string newPath;
 	//check for favicon and add content
 	if (this->_path == "/favicon.ico")
@@ -140,11 +168,76 @@ int	Request::checkRequestedPath()
 		newPath = "content" + this->_path;
 	this->_path = newPath;
 
-	return (0);
-}
-int	Request::checkRequestedFiletype()
-{
+	//check with dir in config
+	std::map<std::string, std::string> *dirs = this->_server->getConfigMap("dirConfig");
+	if (!dirs)
+	{
+		std::cerr << "Config map 'dirConfig' not found!\n";
+		return (1);
+	}
+
+	std::cout << "Map pointer: " << dirs << "\n";
+	std::cout << "Map size: " << dirs->size() << "\n";
+
+	std::map<std::string, std::string>::iterator it = dirs->begin();
+	int	lastSlash = this->_path.find_last_of("/");
+	std::string dirString = this->_path.substr(0, lastSlash);
+	
+	std::cout << dirString << '\n';
+
+	while (it != dirs->end())
+	{
+		if (dirString == it->second)
+		{
+			std::cout << "Valid dir found in config file\n";
+			break;
+		}
+		else
+			++it;
+	}
+	if (it == dirs->end())
+	{
+		std::cout << "Invalid dir requested!\n";
+		//reset map iterator
+		it = dirs->begin();
+		return (1);
+	}
+
 	return (0);
 }
 
-// Endless loop when client window is closed.
+int	Request::checkRequestedFiletype()
+{
+	std::map<std::string, std::string> *fileTypes = this->_server->getConfigMap("fileTypesConfig");
+	if (!fileTypes)
+	{
+		std::cerr << "Config map 'fileTypesConfig' not found!\n";
+		return (1);
+	}
+
+	std::map<std::string, std::string>::iterator it = fileTypes->begin();
+	int	lastDot = this->_path.find_last_of(".");
+	std::string typeString = this->_path.substr(lastDot);
+	
+	std::cout << typeString << '\n';
+
+	while (it != fileTypes->end())
+	{
+		if (typeString == it->second)
+		{
+			std::cout << "Valid dir found in config file\n";
+			break;
+		}
+		else
+			++it;
+	}
+	if (it == fileTypes->end())
+	{
+		std::cout << "Invalid dir requested!\n";
+		it = fileTypes->begin();
+		return (1);
+	}
+	//reset map iterator
+	it = fileTypes->begin();
+	return (0);
+}

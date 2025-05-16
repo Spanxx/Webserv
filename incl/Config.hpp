@@ -28,7 +28,6 @@ protected:
 	std::string	_host;
 	std::string	_root;
 	std::string _index;
-	// std::string	_tryFiles;
 };
 
 #endif //CONFIG_HPP

@@ -7,20 +7,22 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <cctype>	//needed for std::isalnum
+#include "Server.hpp"
 
 class Request
 {
 	public:
-		Request();
+		Request(Server *server);
 		Request(Request &other);
 		~Request();
 		Request& operator=(Request &other);
 
 		int	parse_request(const std::string &request_raw);
 		int	parse_headers(std::istringstream &rstream);
+		int	checkPathChars();
 		int	checkRequestedPath();
 		int	checkRequestedFiletype();
-
 		
 		void setCode(int code);
 		int getCode();
@@ -39,6 +41,7 @@ class Request
 		std::map<std::string, std::string> _headers;
 		std::string _body;
 		int _code;
+		Server 		*_server;
 };
 
 #endif

@@ -1,11 +1,11 @@
 
 #include "../incl/Config.hpp"
 
-Config::Config(std::map<std::string, std::string> serverConfig)
+Config::Config(std::map<std::string, std::string> _serverConfig)
 {
 	try
 	{
-		for (std::map<std::string, std::string>::iterator it = serverConfig.begin(); it != serverConfig.end(); ++it)
+		for (std::map<std::string, std::string>::iterator it = _serverConfig.begin(); it != _serverConfig.end(); ++it)
 		{	
 			if (it->first == "host)")
 			this->_host = it->second;
@@ -66,41 +66,41 @@ int Config::getPort()
 	return (this->_port);
 }
 
-void	Config::extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target)
-{
-	std::string	line;
+// void	Config::extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target)
+// {
+// 	std::string	line;
 
-	while (std::getline(conFile, line))
-	{
-		if (line == target)
-		{
-			while (std::getline(conFile, line))
-			{
-				if (line == "}")
-					break;
+// 	while (std::getline(conFile, line))
+// 	{
+// 		if (line == target)
+// 		{
+// 			while (std::getline(conFile, line))
+// 			{
+// 				if (line == "}")
+// 					break;
 
-				if (line.empty() || line[0] == '#')
-					continue;
+// 				if (line.empty() || line[0] == '#')
+// 					continue;
 				
-				size_t	equalPos = line.find('=');
-				if (equalPos != std::string::npos)
-				{
-					std::string	key = line.substr(0, equalPos);
-					std::string value = line.substr(equalPos + 1);
+// 				size_t	equalPos = line.find('=');
+// 				if (equalPos != std::string::npos)
+// 				{
+// 					std::string	key = line.substr(0, equalPos);
+// 					std::string value = line.substr(equalPos + 1);
 
-					//check for key duplicates
-					if (targetMap.find(key) != targetMap.end())
-					{
-						std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
-								<< "new Value don't overwrites existing Value!\n";
-					}
-					else
-						targetMap[key] = value;
-				}
-			}
-		}
-	}
-}
+// 					//check for key duplicates
+// 					if (targetMap.find(key) != targetMap.end())
+// 					{
+// 						std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+// 								<< "new Value don't overwrites existing Value!\n";
+// 					}
+// 					else
+// 						targetMap[key] = value;
+// 				}
+// 			}
+// 		}
+// 	}
+// }
 
 int	Config::checkConfigFile(std::ifstream &conFile)
 {
