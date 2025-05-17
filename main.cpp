@@ -1,6 +1,5 @@
 
-#include "incl/Server.hpp" 
-#include "incl/Config.hpp"
+#include "incl/Server.hpp"
 
 volatile sig_atomic_t stopSignal = 0;
 

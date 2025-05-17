@@ -17,11 +17,7 @@
 #include <sstream>
 #include <csignal>
 
-#include "Config.hpp"
-
 extern volatile sig_atomic_t stopSignal;
-
-// class Config;
 
 class Server
 {
@@ -35,7 +31,6 @@ public:
 	void	sendResponse(int client_fd);
 	void	closeServer();
 	
-	// Config	*conf;
 	int		createConfig(char *av);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target);

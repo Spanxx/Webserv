@@ -12,11 +12,8 @@ Server::Server(char *av)
 		std::cerr << "Error creating server socket!\n";
 		exit(1);
 	}
-	// conf = createConfig(av);
 	if (this->createConfig(av) == 1)
 		exit(1);
-	// if (!conf)
-		// exit(1); // call close?
 		
 	//transfer the port from map/string to int for serversocket
 	int	port;
@@ -29,7 +26,6 @@ Server::Server(char *av)
 	serverAddr.sin_family = AF_INET;				//IPv4
 	serverAddr.sin_addr.s_addr = INADDR_ANY;		//bind to any local adress
 	serverAddr.sin_port = htons(port);	//port in network byte order
-	// serverAddr.sin_port = htons(conf->getPort());	//port in network byte order
 
 	int yes = 1;
 	setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
@@ -39,7 +35,6 @@ Server::Server(char *av)
 		std::cerr << "Error binding server socket!\n";
 		exit(1);
 	}
-	// delete conf;
 	std::cout << "Server socket created and bound\n";
 }
 
@@ -173,7 +168,6 @@ void	Server::extractConfigMap(std::ifstream &conFile, std::map<std::string, std:
 				{
 					conFile.clear();                // Clear any error flags
 					conFile.seekg(0, std::ios::beg); // Go back to the beginning	
-					// break;
 					return ;
 				}
 
@@ -235,24 +229,14 @@ int	Server::createConfig(char *av)
 		return (1);
 	}
 
-	// if (Config::checkConfigFile(configFile) == 1)
 	if (Server::checkConfigFile(configFile) == 1)
 		return (1);
 
-	// std::map<std::string, std::string> _serverConfig;
 	this->extractConfigMap(configFile, _serverConfig, "server{");
-	// std::map<std::string, std::string> dirConfig;
 	this->extractConfigMap(configFile, _dirConfig, "dir{");
-	// std::map<std::string, std::string> pageConfig;
 	this->extractConfigMap(configFile, _pageConfig, "pages{");
-	// std::map<std::string, std::string> fileConfig;
 	this->extractConfigMap(configFile, _fileConfig, "files{");
-	// std::map<std::string, std::string> filetypeConfig;
 	this->extractConfigMap(configFile, _filetypeConfig, "filetypes{");
-
-	
-	// Config *config = new Config(_serverConfig);
-	// one class for each map or all together?
 
 	return (0);
 }
