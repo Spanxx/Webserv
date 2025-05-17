@@ -46,6 +46,7 @@ void Response::setCode(int code) { _code = code; }
 void Response::process_request(int client_fd)
 {
 	this->assign_status_phrase();
+	std::cout << _code << std::endl;
 	if (_code != 200)
 		this->handleERROR(client_fd);
 	else if (_request->getMethod() == "GET")
@@ -56,8 +57,8 @@ void Response::process_request(int client_fd)
 		this->handleDELETE(client_fd);
 	//else	// other methods or send error method not allowed (405)
 		//_code = 405; // and process this code
-	
-	std::cout << *this->_request << this->_status["phrase"] << std::endl;
+	std::cout << *this->_request << std::endl;
+	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	//this->sendResponse(client_fd);
 }
 
@@ -125,14 +126,14 @@ void	Response::handleERROR(int client_fd)
 
 	response.append(header);
 	response.append(body);
-	std::cout << "Response send\n";
+	std::cout << "Response sent\n";
 	write(client_fd, response.c_str(), response.length());
 }
 
 void	Response::handleGET(int client_fd)
 {
 	std::string response = responseBuilder();
-	std::cout << "Response send\n";
+	std::cout << "Response sent\n";
 	write(client_fd, response.c_str(), response.length());
 }
 
@@ -155,6 +156,8 @@ std::string Response::responseBuilder()
 
 	// handle body at first, to get content size and type
 	body = this->bodyBuilder();
+	if (body.empty())
+		body = this->make_status_page_string();
 	header = this->headersBuilder();
 
 	response.append(header);
@@ -193,6 +196,8 @@ std::string	Response::bodyBuilder()
 	{
 		std::cerr << "Requested file open error!\n";
 		//load error page 404??
+		_code = 404;
+		assign_status_phrase();
 		return ("");
 	}
 

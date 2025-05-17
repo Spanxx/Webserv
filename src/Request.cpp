@@ -108,7 +108,7 @@ std::ostream &operator<<(std::ostream &os, Request &request)
 		os << "  " << it->first << ": " << it->second << "\n";
 	    }
 	    os << "Body:\n" << request._body << "\n";
-	os << "CODE: " << request._code << std::endl;
+	//os << "CODE: " << request._code << std::endl;
 	return os;
 }
 
