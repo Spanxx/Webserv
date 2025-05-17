@@ -105,15 +105,6 @@ std::string Response::make_status_page_string()
 	replaceAll(html, "{{MESSAGE}}", _status["phrase"]);
 
 	return html;
-
-    	//std::ostringstream response_stream;
-    	// response_stream << "HTTP/1.1 "<< _status["code"] << " " << _status["phrase"] <<"\r\n"
-        //             << "Content-Type: text/html\r\n"
-        //             << "Content-Length: " << html.length() << "\r\n"
-        //             << "\r\n"
-        //             << html;
-
-	//return response_stream.str();
 }
 void	Response::handleERROR(int client_fd)
 {
