@@ -21,7 +21,7 @@
 
 extern volatile sig_atomic_t stopSignal;
 
-class Config;
+// class Config;
 
 class Server
 {
@@ -40,7 +40,7 @@ public:
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target);
 
-	std::map<std::string, std::string>* getConfigMap(std::string configName);
+	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 	//add exceptions?
 
 	class ServerException : std::runtime_error {

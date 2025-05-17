@@ -172,7 +172,12 @@ void	Server::extractConfigMap(std::ifstream &conFile, std::map<std::string, std:
 			while (std::getline(conFile, line))
 			{
 				if (line == "}")
-					break;
+				{
+					conFile.clear();                // Clear any error flags
+					conFile.seekg(0, std::ios::beg); // Go back to the beginning	
+					// break;
+					return ;
+				}
 
 				if (line.empty() || line[0] == '#')
 					continue;
@@ -232,7 +237,8 @@ int	Server::createConfig(char *av)
 		return (1);
 	}
 
-	if (Config::checkConfigFile(configFile) == 1)
+	// if (Config::checkConfigFile(configFile) == 1)
+	if (Server::checkConfigFile(configFile) == 1)
 		return (1);
 
 	// std::map<std::string, std::string> _serverConfig;
@@ -260,7 +266,7 @@ void Server::closeServer() {
 	}
 }
 
-std::map<std::string, std::string>* Server::getConfigMap(std::string configName)
+std::map<std::string, std::string>* Server::getConfigMap(const std::string &configName)
 {
 	if (configName == "serverConfig")
 		return(&this->_serverConfig);

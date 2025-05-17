@@ -56,11 +56,8 @@ void Response::process_request(int client_fd)
 
 void	Response::handleGET(int client_fd)
 {
-	//check path or check in request?
-	//extract requested filetype (html, png, jpg..)
-	//build response
 	std::string response = responseBuilder();
-
+	std::cout << "Response send\n";
 	write(client_fd, response.c_str(), response.length());
 }
 
@@ -119,8 +116,8 @@ std::string	Response::bodyBuilder()
 	std::ifstream file(path.c_str());
 	if (!file)
 	{
-		std::cerr << "Requested file not Found\n";
-		//load error page 404
+		std::cerr << "Requested file open error!\n";
+		//load error page 404??
 		return ("");
 	}
 
@@ -130,10 +127,12 @@ std::string	Response::bodyBuilder()
 		body.append("\n");
 		++lineCount;
 	}
-
-	std::cout << "Lines read: " << lineCount << '\n';
-
+	
 	ss << body.size();
+
+	std::cout << "Lines read: " << lineCount << '\n'
+			<< "Chars read: " << ss.str() << std::endl;
+
 	this->_headers["Content-Length"] = ss.str();
 
 	return(body);

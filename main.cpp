@@ -24,5 +24,6 @@ int main(int ac, char **av)
 
 	newServer.startListen();
 	newServer.serverLoop();
+	
 	return (0);
 }
