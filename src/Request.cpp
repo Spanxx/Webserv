@@ -46,7 +46,7 @@ int Request::parse_request(const std::string &request_raw)
 {
 	std::istringstream rstream(request_raw); //turn string into stream so it can be read line by line with getline
 	std::string line;
-	std::cout << "REQUEST RAW: " << request_raw << "UNTIL HERE" << std::endl;
+	// std::cout << "REQUEST RAW: " << request_raw << "UNTIL HERE" << std::endl;
 	if (std::getline(rstream, line))
 	{
 		std::istringstream lstream(line); //splits with space as delimiter

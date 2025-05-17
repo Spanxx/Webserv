@@ -45,17 +45,20 @@ void Response::setCode(int code) { _code = code; }
 
 void Response::process_request(int client_fd)
 {
-	if (_request->getMethod() == "GET")
+	this->assign_status_phrase();
+	if (_code != 200)
+		this->handleERROR(client_fd);
+	else if (_request->getMethod() == "GET")
 		this->handleGET(client_fd);
 	else if (_request->getMethod() == "POST")
 		this->handlePOST(client_fd);
 	else if (_request->getMethod() == "DELETE")
 		this->handleDELETE(client_fd);
-	else	// other methods or send error method not allowed (405)
-		_code = 405; // and process this code
-	this->assign_status_phrase();
+	//else	// other methods or send error method not allowed (405)
+		//_code = 405; // and process this code
+	
 	std::cout << *this->_request << this->_status["phrase"] << std::endl;
-	this->sendResponse(client_fd);
+	//this->sendResponse(client_fd);
 }
 
 void Response::assign_status_phrase()
@@ -82,11 +85,6 @@ void Response::assign_status_phrase()
 
 
 
-void Response::sendResponse(int client_fd)
-{
-	std::string response = this->make_status_page_string();
-	write(client_fd, response.c_str(), response.length());
-}
 
 std::string Response::make_status_page_string()
 {
@@ -105,17 +103,31 @@ std::string Response::make_status_page_string()
 	replaceAll(html, "{{CODE}}", _status["code"]);
 	replaceAll(html, "{{MESSAGE}}", _status["phrase"]);
 
+	return html;
 
-    	std::ostringstream response_stream;
-    	response_stream << "HTTP/1.1 "<< _status["code"] << " " << _status["phrase"] <<"\r\n"
-                    << "Content-Type: text/html\r\n"
-                    << "Content-Length: " << html.length() << "\r\n"
-                    << "\r\n"
-                    << html;
+    	//std::ostringstream response_stream;
+    	// response_stream << "HTTP/1.1 "<< _status["code"] << " " << _status["phrase"] <<"\r\n"
+        //             << "Content-Type: text/html\r\n"
+        //             << "Content-Length: " << html.length() << "\r\n"
+        //             << "\r\n"
+        //             << html;
 
-	return response_stream.str();
+	//return response_stream.str();
 }
+void	Response::handleERROR(int client_fd)
+{
+	std::string response;
+	std::string header;
+	std::string body;
 
+	body = this->make_status_page_string();
+	header = this->headersBuilder();
+
+	response.append(header);
+	response.append(body);
+	std::cout << "Response send\n";
+	write(client_fd, response.c_str(), response.length());
+}
 
 void	Response::handleGET(int client_fd)
 {
@@ -155,12 +167,12 @@ std::string	Response::headersBuilder()
 {
 	std::ostringstream header;
 	header << this->_request->getVersion() << ' ' 
-			<< this->_code << ' ' 
-			<< this->_statusPhrase << "\r\n"
+			<< this->_code << ' '
+			<< this->_status["phrase"] << "\r\n"
 			<< this->_request->getPath() << "\r\n"
-			<< "Content-Type: text/html\r\n"
+			<< "Content-Type: text/html\r\n" //make dynamic
 			<< "Content-Length: " << this->_headers["Content-Length"] << "\r\n"
-			<< "Connection: keep-alive\r\n"
+			<< "Connection: keep-alive\r\n" //get from request header
 			<< "Location: " << this->_request->getPath() << "\r\n"
 			<< "\r\n";	//empty newline to seperate header and body
 

@@ -80,8 +80,8 @@ void	Server::serverLoop()
 			if (_socketArray[i].fd == _serverSocket && (_socketArray[i].revents & POLLIN)) //return a non-zero value if the POLLIN bit is set
 			{
 				struct sockaddr_in	clientAddr;
-				socklen_t			clientLen = sizeof(clientAddr);
-				int					clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
+				socklen_t		clientLen = sizeof(clientAddr);
+				int			clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
 				if (clientSocket < 0)
 				{
 					std::cerr << "client socket error\n";
@@ -133,7 +133,7 @@ void	Server::serverLoop()
 			}
 			else if (_socketArray[i].revents & POLLERR || _socketArray[i].revents & POLLHUP || _socketArray[i].revents & POLLNVAL) //closed connection / EOF / error
 			{
-				std::cout << "client fd " << _socketArray[i].fd << " is closed!" << std::endl;
+				std::cout << "REVENTS: client fd " << _socketArray[i].fd << " is closed!" << std::endl;
 				close(_socketArray[i].fd);
 				_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
 				--i;
@@ -265,7 +265,6 @@ void Server::closeServer() {
 		close(_socketArray[i].fd);
 	}
 }
-
 
 std::map<std::string, std::string>* Server::getConfigMap(const std::string &configName)
 {
