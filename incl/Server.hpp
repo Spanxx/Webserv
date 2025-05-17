@@ -43,6 +43,11 @@ public:
 	std::map<std::string, std::string>* getConfigMap(std::string configName);
 	//add exceptions?
 
+	class ServerException : std::runtime_error {
+	public:
+		ServerException(std::string error);
+	};
+
 private:
 	int									_serverSocket;
 	std::vector<struct pollfd>			_socketArray;

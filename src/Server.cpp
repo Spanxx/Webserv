@@ -275,3 +275,5 @@ std::map<std::string, std::string>* Server::getConfigMap(std::string configName)
 	else
 		return (NULL);
 }
+
+Server::ServerException::ServerException(std::string error) : std::runtime_error(error) {}
