@@ -8,10 +8,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
-<<<<<<< HEAD
-=======
 #include <fstream>
->>>>>>> Henrizz-error_pages_creation
 #include <unistd.h>
 #include "Request.hpp"
 
@@ -25,20 +22,17 @@ class Response {
 		void 		setCode(int code);
 		void 		process_request(int client_fd);
 		std::string responseBuilder();
-<<<<<<< HEAD
 		std::string	headersBuilder();
 		std::string	bodyBuilder();
 
 		void	handleGET(int client_fd);
 		void	handlePOST(int client_fd);
 		void	handleDELETE(int client_fd);
-=======
 		void process_request(int client_fd);
 		void assign_status_phrase();
 		std::string make_status_page_string();
 
 		void sendResponse(int client_fd);
->>>>>>> Henrizz-error_pages_creation
 
 	private:
 		Request *_request;
