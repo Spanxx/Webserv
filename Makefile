@@ -17,6 +17,7 @@ RM = rm -rf
 SRCS = main.cpp \
 		src/Server.cpp src/Config.cpp src/Response.cpp \
 		src/Request.cpp src/RequestChecks.cpp
+		src/Utils.cpp
 
 OBJ = $(patsubst %.cpp, $(OBJDIR)/%.o, $(SRCS))
 

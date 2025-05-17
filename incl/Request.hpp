@@ -30,7 +30,6 @@ class Request
 		std::string getPath();
 		std::string getVersion();
 		std::string getBody();
-		static std::string trim(const std::string &str);
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 

@@ -266,6 +266,7 @@ void Server::closeServer() {
 	}
 }
 
+
 std::map<std::string, std::string>* Server::getConfigMap(const std::string &configName)
 {
 	if (configName == "serverConfig")
