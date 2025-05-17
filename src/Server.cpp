@@ -126,8 +126,6 @@ void	Server::serverLoop()
 				Response *response = new Response(request);
 				//HTTP response	
 				response->process_request(_socketArray[i].fd); // launch send responde from here later?
-				// sendResponse(_socketArray[i].fd); // later maybe remove below, because will be called from inside process request function?
-
 				delete request;
 				delete response;
 			}

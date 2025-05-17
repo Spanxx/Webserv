@@ -42,11 +42,11 @@ Response& Response::operator=(Response &other)
 }
 
 void Response::setCode(int code) { _code = code; }
+int Response::getCode() { return _code; }
 
 void Response::process_request(int client_fd)
 {
 	this->assign_status_phrase();
-	std::cout << _code << std::endl;
 	if (_code != 200)
 		this->handleERROR(client_fd);
 	else if (_request->getMethod() == "GET")
@@ -103,7 +103,9 @@ std::string Response::make_status_page_string()
 	// 
 	replaceAll(html, "{{CODE}}", _status["code"]);
 	replaceAll(html, "{{MESSAGE}}", _status["phrase"]);
-
+	std::stringstream ss;
+	ss << html.size();
+	this->_headers["Content-Length"] = ss.str();
 	return html;
 }
 void	Response::handleERROR(int client_fd)

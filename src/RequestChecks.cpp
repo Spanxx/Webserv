@@ -94,7 +94,10 @@ int	Request::checkRequestedFiletype()
 	}
 
 	std::map<std::string, std::string>::iterator it = fileTypes->begin();
-	int	lastDot = this->_path.find_last_of(".");
+	size_t	lastDot = this->_path.find_last_of(".");
+	if (lastDot == std::string::npos)
+		return (1);
+
 	std::string typeString = this->_path.substr(lastDot);
 	
 	std::cout << "Requested filetype: " << typeString << '\n';

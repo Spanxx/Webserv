@@ -20,6 +20,7 @@ class Response {
 		Response& operator=(Response &other);
 
 		void 		setCode(int code);
+		int 		getCode();
 		void 		process_request(int client_fd);
 		std::string responseBuilder();
 		std::string	headersBuilder();
