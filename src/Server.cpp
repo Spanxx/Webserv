@@ -1,7 +1,8 @@
 
-#include "../incl/Server.hpp"
-#include "../incl/Request.hpp"
-#include "../incl/Response.hpp"
+#include	"../incl/Server.hpp"
+#include	"../incl/Request.hpp"
+#include	"../incl/Response.hpp"
+// #include	<sys/time.h>
 
 Server::Server(char *av)
 {
@@ -11,15 +12,20 @@ Server::Server(char *av)
 		std::cerr << "Error creating server socket!\n";
 		exit(1);
 	}
-	conf = createConfig(av);
-	if (!conf)
-		exit(1); // call close?
+	if (this->createConfig(av) == 1)
+		exit(1);
+		
+	//transfer the port from map/string to int for serversocket
+	int	port;
+	std::stringstream ss(_serverConfig["port"]);
+	ss >> port;
+		
 	//prepare server adress structure
 	struct sockaddr_in serverAddr;
 	memset(&serverAddr, 0, sizeof(serverAddr));
-	serverAddr.sin_family = AF_INET;			//IPv4
-	serverAddr.sin_addr.s_addr = INADDR_ANY;	//bind to any local adress
-	serverAddr.sin_port = htons(conf->getPort());			//port in network byte order
+	serverAddr.sin_family = AF_INET;				//IPv4
+	serverAddr.sin_addr.s_addr = INADDR_ANY;		//bind to any local adress
+	serverAddr.sin_port = htons(port);	//port in network byte order
 
 	int yes = 1;
 	setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
@@ -29,7 +35,6 @@ Server::Server(char *av)
 		std::cerr << "Error binding server socket!\n";
 		exit(1);
 	}
-	delete conf;
 	std::cout << "Server socket created and bound\n";
 }
 
@@ -44,32 +49,34 @@ Server::~Server()
 
 void	Server::serverLoop()
 {
-	int time = 5000;
+	int pollTimeout = 5000;		//timeout --> checks for new connections (milliseconds)
+	int clientTimeout = 50;		//timeout before a client gets disconnected (seconds)
+
 	while (!stopSignal)
 	{
-		int ret = poll(_socketArray.data(), _socketArray.size(), time);
-		// check ret == 0 for timeout and if we need to close manually or poll does by itself
-		if (ret < 0)
-		{
-			std::cerr << "poll error\n";
-			continue;
-		}
-		if (ret == 0) {
-			std::cout << "Poll timeout " << ret << std::endl; // TODO should we continue?
-		}
+		int ret = poll(_socketArray.data(), _socketArray.size(), pollTimeout);
+		(void)ret;
+		
+		time_t now = time(NULL);
+
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
-			// if (ret == 0 && i != 0) {							// Timeout handling for Client Socket?
-			// 	std::cout << "Poll timeout " << ret << std::endl;
-			// 	std::cout << "Client fd " <<  _socketArray[i].fd << " is closed\n";
-			// 	close(_socketArray[i].fd);
-			// }
-
+			//Timeout check for each client
+			if (_socketArray[i].fd != _serverSocket && now - _lastActive[_socketArray[i].fd] > clientTimeout)
+			{
+				std::cout << "Timeout --> client fd " << _socketArray[i].fd << " is closed!" << std::endl;
+				close(_socketArray[i].fd);
+				_lastActive.erase(_socketArray[i].fd);
+				_socketArray.erase(_socketArray.begin() + i);
+				--i;
+				continue;
+			}
+			//checks the server for new connections from clients
 			if (_socketArray[i].fd == _serverSocket && (_socketArray[i].revents & POLLIN)) //return a non-zero value if the POLLIN bit is set
 			{
 				struct sockaddr_in	clientAddr;
-				socklen_t			clientLen = sizeof(clientAddr);
-				int					clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
+				socklen_t		clientLen = sizeof(clientAddr);
+				int			clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
 				if (clientSocket < 0)
 				{
 					std::cerr << "client socket error\n";
@@ -82,49 +89,50 @@ void	Server::serverLoop()
 				clientFd.events = POLLIN;	// wait for input
 				clientFd.revents = 0; // initializing this but poll() will handle it
 				this->_socketArray.push_back(clientFd);
+				_lastActive[clientSocket] = now;
 				std::cout << "New connection accepted: fd = " << clientFd.fd << std::endl;
 			}
-			else if (_socketArray[i].revents & POLLIN)
+			else if (_socketArray[i].revents & POLLIN)		//handles the client connection
 			{
 				char	buffer[1024] = {0};
 				int 	n = read(_socketArray[i].fd, buffer, sizeof(buffer));
+
 				if (n < 0)
 				{
-					std::cerr << "Error reading from socket!\n";
-					//exit(1);
+					std::cerr << "Error reading from socket!\n";	//close the socket?
 					continue;
 				}
-				else if (n == 0) // when EOF is reached, so connection is closed by client
+				if (n == 0)	//if there is nothing to read, it goes in the statement????
 				{
-					std::cout << "client disconnected: fd = " << _socketArray[i].fd << std::endl;
+					std::cout << "[Browser closed] Client fd " << _socketArray[i].fd << " is closed!" << std::endl;
 					close(_socketArray[i].fd);
-					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
+					_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
 					--i;
 					continue;
 				}
-				std::cout << "Received request:" << buffer << std::endl;
-				Request *request = new Request;
+				
+				_lastActive[_socketArray[i].fd] = time(NULL);
+
+				// std::cout << "Received request:" << buffer << std::endl;
+				std::cout << "Request from client fd " << _socketArray[i].fd << std::endl;
+				Request *request = new Request(this);
 				request->setCode(request->parse_request(buffer)); // set error codes, depending on which the response will be sent
 				
 				Response *response = new Response(request);
 				//HTTP response	
 				response->process_request(_socketArray[i].fd); // launch send responde from here later?
-				sendResponse(_socketArray[i].fd); // later maybe remove below, because will be called from inside process request function?
-
-				/*  // this below needs to be expanded and checked later when we have parsing, to make different handlers for keep-alive or not and timeout etc.
-				bool keepAlive = true;
-				if (!keepAlive)
-				{
-					std::cout << "no kep-alive connection, closing connection: fd " << _socketArray[i].fd << std::endl;
-					close(_socketArray[i].fd);
-					_socketArray.erase(_socketArray.begin() + i); //erases and automatically shifts all later elements one forward
-					--i;
-				}*/
-			delete request;
+				delete request;
+				delete response;
 			}
-
+			else if (_socketArray[i].revents & POLLERR || _socketArray[i].revents & POLLHUP || _socketArray[i].revents & POLLNVAL) //closed connection / EOF / error
+			{
+				std::cout << "REVENTS: client fd " << _socketArray[i].fd << " is closed!" << std::endl;
+				close(_socketArray[i].fd);
+				_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
+				--i;
+				continue;
+			}
 		}
-
 	}
 	closeServer();
 }
@@ -138,7 +146,7 @@ void	Server::startListen()
 		exit(1);
 	}
 
-	std::cout << "Server starts listening for incomming connections \n";
+	std::cout << "Server starts listening for incomming connections on FD " << _serverSocket <<  "\n";
 
 	struct pollfd serverFd;
 	serverFd.fd = _serverSocket;
@@ -146,61 +154,114 @@ void	Server::startListen()
 	this->_socketArray.push_back(serverFd);
 }
 
-void Server::sendResponse(int client_fd) {
-    std::ostringstream html;
-    html << "<html><body><h1>Hello from C++ Server!</h1>"
-         << "<p>Your socket fd is: " << client_fd << "</p>"
-         << "</body></html>";
+void	Server::extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target)
+{
+	std::string	line;
 
-    std::string body = html.str();
+	while (std::getline(conFile, line))
+	{
+		if (line == target)
+		{
+			while (std::getline(conFile, line))
+			{
+				if (line == "}")
+				{
+					conFile.clear();                // Clear any error flags
+					conFile.seekg(0, std::ios::beg); // Go back to the beginning	
+					return ;
+				}
 
-    std::ostringstream response_stream;
-
-    response_stream << "HTTP/1.1 200 OK\r\n"
-                    << "Content-Type: text/html\r\n"
-                    << "Content-Length: " << body.length() << "\r\n"
-                    << "\r\n"
-                    << body;
-
-    std::string response = response_stream.str();
-
-    write(client_fd, response.c_str(), response.length());
+				if (line.empty() || line[0] == '#')
+					continue;
+				
+				size_t	equalPos = line.find('=');
+				if (equalPos != std::string::npos)
+				{
+					std::string	key = line.substr(0, equalPos);
+					std::string value = line.substr(equalPos + 1);
+					//check for key duplicates
+					if (targetMap.find(key) != targetMap.end())
+					{
+						std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+								<< "new Value don't overwrites existing Value!\n";
+					}
+					else
+						targetMap[key] = value;
+				}
+			}
+		}
+	}
 }
 
-Config*	Server::createConfig(char *av)
+int	Server::checkConfigFile(std::ifstream &conFile)
 {
-	std::ifstream conFile(av);
-	if (!conFile)
+	std::string	line;
+	while(std::getline(conFile, line))
+	{
+		for(int i = 0; line[i] != '\n' && line[i]; ++i)
+		{
+			if (line[0] == '#')
+				break ;
+			if (line[i] == 32)	//space
+			{
+				std::cout << "Error: Forbidden char <space> found in config file!\n";
+				return (1);
+			}
+		}
+		// maybe add more checks?
+	}
+	conFile.clear();                // Clear any error flags
+	conFile.seekg(0, std::ios::beg); // Go back to the beginning
+	return (0);
+}
+
+int	Server::createConfig(char *av)
+{
+	std::ifstream configFile(av);
+	if (!configFile)
 	{
 		std::cout << "Reading config File failed!\n";
-		return (NULL);
+		return (1);
 	}
-	if(conFile.peek() == std::ifstream::traits_type::eof())
+	if (configFile.peek() == std::ifstream::traits_type::eof())
 	{
 		std::cout << "The Config file is empty!\n";
-		return (NULL);
+		return (1);
 	}
-	
-	if (Config::checkConfigFile(conFile) == 1)
-		return (NULL);
 
-	std::map<std::string, std::string> serverConfig;
-	Config::extractConfigMap(conFile, serverConfig, "server{");
-	// std::map<std::string, std::string> dirConfig;
-	// extractConfigMap(conFile, serverConfig, "dir{");
-	// std::map<std::string, std::string> fileConfig;
-	// extractConfigMap(conFile, serverConfig, "files{");
+	if (Server::checkConfigFile(configFile) == 1)
+		return (1);
 
-	
-	Config *config = new Config(serverConfig);
-	// one class for each map or all together?
+	this->extractConfigMap(configFile, _serverConfig, "server{");
+	this->extractConfigMap(configFile, _dirConfig, "dir{");
+	this->extractConfigMap(configFile, _pageConfig, "pages{");
+	this->extractConfigMap(configFile, _fileConfig, "files{");
+	this->extractConfigMap(configFile, _filetypeConfig, "filetypes{");
 
-	return (config);
+	return (0);
 }
 
 void Server::closeServer() {
 	for (size_t i = 0; i < _socketArray.size(); ++i) {
-		std::cout << "closing socket fd" << _socketArray[i].fd << std::endl;
+		std::cout << "Closing socket fd " << _socketArray[i].fd << std::endl;
 		close(_socketArray[i].fd);
 	}
 }
+
+std::map<std::string, std::string>* Server::getConfigMap(const std::string &configName)
+{
+	if (configName == "serverConfig")
+		return(&this->_serverConfig);
+	if (configName == "dirConfig")
+		return(&this->_dirConfig);
+	if (configName == "pageConfig")
+		return(&this->_pageConfig);
+	if (configName == "fileConfig")
+		return(&this->_fileConfig);
+	if (configName == "filetypeConfig")
+		return(&this->_filetypeConfig);
+	else
+		return (NULL);
+}
+
+Server::ServerException::ServerException(std::string error) : std::runtime_error(error) {}

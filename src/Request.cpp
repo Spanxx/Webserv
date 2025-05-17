@@ -1,9 +1,10 @@
 
 #include "../incl/Request.hpp"
+#include "../incl/Utils.hpp"
 
-Request::Request()
+Request::Request(Server *server) : _server(server)
 {
-	
+	std::cout << "Request constructed\n";
 }
 
 Request::Request(Request &other)
@@ -44,9 +45,8 @@ Request& Request::operator=(Request &other)
 int Request::parse_request(const std::string &request_raw)
 {
 	std::istringstream rstream(request_raw); //turn string into stream so it can be read line by line with getline
-	Request request;
 	std::string line;
-	std::cout << "Request raw: " << request_raw << std::endl;
+	std::cout << "REQUEST RAW: " << request_raw << "UNTIL HERE" << std::endl;
 	if (std::getline(rstream, line))
 	{
 		std::istringstream lstream(line); //splits with space as delimiter
@@ -56,7 +56,13 @@ int Request::parse_request(const std::string &request_raw)
 	}
 	// make extra check for header too long for buffer --> code 431
 	if (!parse_headers(rstream))
-		return 400;
+		return (400);
+	if (checkPathChars() == 1)
+		return (400);
+	if (checkRequestedPath() == 1)
+		return (400);
+	if (checkRequestedFiletype() == 1)
+		return (400);
 	std::ostringstream bstream; // body --> if there is no body, this just adds empty string 
 	while (std::getline(rstream, line))
 		bstream << line << "\n";
@@ -68,11 +74,11 @@ int Request::parse_headers(std::istringstream &rstream)
 {
 	std::string line;
 	bool blank = false;
-	while (std::getline(rstream, line) && line != "\r") //headers, until \r (empty line = end of header section) - getline removes \n but not \r 
+	while (std::getline(rstream, line))
 	{
-		if (!line.empty() && line[line.size() - 1] == '\r')
+		if (!line.empty() && line[line.size() - 1] == '\r') //getline removes \n but not \r 
 			line.erase(line.size() - 1); //remove last char (trailing carriage return '\r')
-		if (line.empty())
+		if (line.empty())	//if there is no body, then there is maybe no empty line
 		{
 			blank = true;
 			break;
@@ -82,7 +88,9 @@ int Request::parse_headers(std::istringstream &rstream)
 			return 0;
 		std::string key = line.substr(0, pos);
 		std::string value = line.substr(pos + 2);
-		if (key.empty() || key != trim(key) || value != trim(value)) //if there is extra whitespace
+		trim(key);
+		trim(value);
+		if (key.empty() || value.empty())	// || key != trim(key) || value != trim(value)) //if there is extra whitespace
 			return 0;
 		_headers[key] = value;
 	}
@@ -90,14 +98,7 @@ int Request::parse_headers(std::istringstream &rstream)
 		return 0; //no empty line after header
 	return 1;
 }
-std::string Request::trim(const std::string &str)
-{
-	size_t start = str.find_first_not_of(" \t\r\n");
-	size_t end = str.find_last_not_of(" \t\r\n");
-	if (start == std::string::npos || end == std::string::npos)
-		return "";
-	return str.substr(start, end - start + 1);
-}
+
 
 std::ostream &operator<<(std::ostream &os, Request &request)
 {
@@ -107,7 +108,7 @@ std::ostream &operator<<(std::ostream &os, Request &request)
 		os << "  " << it->first << ": " << it->second << "\n";
 	    }
 	    os << "Body:\n" << request._body << "\n";
-	os << "CODE: " << request._code << std::endl;
+	//os << "CODE: " << request._code << std::endl;
 	return os;
 }
 

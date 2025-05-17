@@ -17,11 +17,7 @@
 #include <sstream>
 #include <csignal>
 
-#include "Config.hpp"
-
 extern volatile sig_atomic_t stopSignal;
-
-class Config;
 
 class Server
 {
@@ -34,12 +30,28 @@ public:
 	void	serverLoop();
 	void	sendResponse(int client_fd);
 	void	closeServer();
-	Config	*conf;
-	static Config*	createConfig(char *av);
+	
+	int		createConfig(char *av);
+	int		checkConfigFile(std::ifstream &conFile);
+	void	extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target);
+
+	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
+	//add exceptions?
+
+	class ServerException : std::runtime_error {
+	public:
+		ServerException(std::string error);
+	};
 
 private:
-	int			_serverSocket;
-	std::vector<struct pollfd> _socketArray;
+	int									_serverSocket;
+	std::vector<struct pollfd>			_socketArray;
+	std::map<int, time_t> 				_lastActive;
+	std::map<std::string, std::string>	_serverConfig;
+	std::map<std::string, std::string>	_dirConfig;
+	std::map<std::string, std::string>	_pageConfig;
+	std::map<std::string, std::string>	_fileConfig;
+	std::map<std::string, std::string>	_filetypeConfig;
 
 	Server(Server &other);
 	Server& operator=(Server &other);
