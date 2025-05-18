@@ -26,8 +26,8 @@ class Response {
 		std::string	headersBuilder();
 		std::string	bodyBuilder();
 
-		std::string	handleERROR(int client_fd);
-		std::string	handleGET(int client_fd);
+		std::string	handleERROR();
+		std::string	handleGET();
 		std::string	handlePOST(int client_fd);
 		std::string	handleDELETE(int client_fd);
 		void assign_status_phrase();

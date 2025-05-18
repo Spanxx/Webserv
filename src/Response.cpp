@@ -48,19 +48,17 @@ std::string Response::process_request(int client_fd)
 {
 	this->assign_status_phrase();
 	if (_code != 200)
-		return handleERROR(client_fd);
+		return handleERROR();
 	else if (_request->getMethod() == "GET")
-		return handleGET(client_fd);
+		return handleGET();
 	else if (_request->getMethod() == "POST")
 		return handlePOST(client_fd);
 	else if (_request->getMethod() == "DELETE")
 		return handleDELETE(client_fd);
-	//else	// other methods or send error method not allowed (405)
-		//_code = 405; // and process this code
-	//std::cout << *this->_request << std::endl;
+	std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	//this->sendResponse(client_fd);
-	return NULL;
+	return handleERROR(); //placeholder, check with logc later
 }
 
 void Response::assign_status_phrase()
@@ -109,7 +107,7 @@ std::string Response::make_status_page_string()
 	this->_headers["Content-Length"] = ss.str();
 	return html;
 }
-std::string	Response::handleERROR(int client_fd)
+std::string	Response::handleERROR()
 {
 	std::string response;
 	std::string header;
@@ -122,17 +120,22 @@ std::string	Response::handleERROR(int client_fd)
 	response.append(body);
 	//std::cout << "Response sent\n";
 	//write(client_fd, response.c_str(), response.length());
-	(void)client_fd;
 	return response;
 }
 
-std::string	Response::handleGET(int client_fd)
+std::string	Response::handleGET()
 {
-	std::string response = responseBuilder();
-	//std::cout << "Response sent\n";
-	//write(client_fd, response.c_str(), response.length());
-	(void)client_fd;
-	return response;
+	std::string path = this->_request->getPath();
+	if (path.size() >= 8 && path.substr(0, 8) == "/cgi-bin")
+	{
+		std::string exec_path = "." + path;
+		std::string query_string = this->_request->getQuery();
+		std::cout << "QUERY STRING: " << query_string << std::endl;
+		//return cgiExecuter(exec_path, query_string);
+		return responseBuilder(); //placeholder
+	}
+	else
+		return responseBuilder();
 }
 
 std::string	Response::handlePOST(int client_fd)

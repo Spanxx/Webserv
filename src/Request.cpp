@@ -55,6 +55,8 @@ int Request::parse_request(const std::string &request_raw)
 			return 400;
 	}
 	// make extra check for header too long for buffer --> code 431
+	splitURI();
+	std::cout << "PATH: " << _path << ", QUERY: " << _query << std::endl;
 	if (!parse_headers(rstream))
 		return (400);
 	if (checkPathChars() == 1)
@@ -120,3 +122,18 @@ std::string Request::getMethod() { return _method; }
 std::string Request::getPath() { return _path; }
 std::string Request::getVersion() { return _version; }
 std::string Request::getBody() { return _body; }
+std::string Request::getQuery() { return _query; }
+
+
+void	Request::splitURI()
+{
+	size_t pos = _path.find('?');
+	if (pos == std::string::npos)
+		_query = "";
+	else
+	{
+		_query = _path.substr(pos + 1);
+		_path = _path.substr(0, pos);
+	}
+	
+}

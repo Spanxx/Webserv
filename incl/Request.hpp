@@ -19,6 +19,7 @@ class Request
 		Request& operator=(Request &other);
 
 		int	parse_request(const std::string &request_raw);
+		void	splitURI();
 		int	parse_headers(std::istringstream &rstream);
 		int	checkPathChars();
 		int	checkRequestedPath();
@@ -30,12 +31,14 @@ class Request
 		std::string getPath();
 		std::string getVersion();
 		std::string getBody();
+		std::string getQuery();
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 
 	private:
 		std::string _method;
 		std::string _path;
+		std::string _query;
 		std::string _version;
 		std::map<std::string, std::string> _headers;
 		std::string _body;
