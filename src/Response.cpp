@@ -44,22 +44,23 @@ Response& Response::operator=(Response &other)
 void Response::setCode(int code) { _code = code; }
 int Response::getCode() { return _code; }
 
-void Response::process_request(int client_fd)
+std::string Response::process_request(int client_fd)
 {
 	this->assign_status_phrase();
 	if (_code != 200)
-		this->handleERROR(client_fd);
+		return handleERROR(client_fd);
 	else if (_request->getMethod() == "GET")
-		this->handleGET(client_fd);
+		return handleGET(client_fd);
 	else if (_request->getMethod() == "POST")
-		this->handlePOST(client_fd);
+		return handlePOST(client_fd);
 	else if (_request->getMethod() == "DELETE")
-		this->handleDELETE(client_fd);
+		return handleDELETE(client_fd);
 	//else	// other methods or send error method not allowed (405)
 		//_code = 405; // and process this code
-	std::cout << *this->_request << std::endl;
+	//std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	//this->sendResponse(client_fd);
+	return NULL;
 }
 
 void Response::assign_status_phrase()
@@ -108,7 +109,7 @@ std::string Response::make_status_page_string()
 	this->_headers["Content-Length"] = ss.str();
 	return html;
 }
-void	Response::handleERROR(int client_fd)
+std::string	Response::handleERROR(int client_fd)
 {
 	std::string response;
 	std::string header;
@@ -119,25 +120,31 @@ void	Response::handleERROR(int client_fd)
 
 	response.append(header);
 	response.append(body);
-	std::cout << "Response sent\n";
-	write(client_fd, response.c_str(), response.length());
+	//std::cout << "Response sent\n";
+	//write(client_fd, response.c_str(), response.length());
+	(void)client_fd;
+	return response;
 }
 
-void	Response::handleGET(int client_fd)
+std::string	Response::handleGET(int client_fd)
 {
 	std::string response = responseBuilder();
-	std::cout << "Response sent\n";
-	write(client_fd, response.c_str(), response.length());
+	//std::cout << "Response sent\n";
+	//write(client_fd, response.c_str(), response.length());
+	(void)client_fd;
+	return response;
 }
 
-void	Response::handlePOST(int client_fd)
+std::string	Response::handlePOST(int client_fd)
 {
 	(void)client_fd;
+	return NULL;
 }
 
-void	Response::handleDELETE(int client_fd)
+std::string	Response::handleDELETE(int client_fd)
 {
 	(void)client_fd;
+	return NULL;
 }
 
 

@@ -21,15 +21,15 @@ class Response {
 
 		void 		setCode(int code);
 		int 		getCode();
-		void 		process_request(int client_fd);
+		std::string 		process_request(int client_fd);
 		std::string responseBuilder();
 		std::string	headersBuilder();
 		std::string	bodyBuilder();
 
-		void	handleERROR(int client_fd);
-		void	handleGET(int client_fd);
-		void	handlePOST(int client_fd);
-		void	handleDELETE(int client_fd);
+		std::string	handleERROR(int client_fd);
+		std::string	handleGET(int client_fd);
+		std::string	handlePOST(int client_fd);
+		std::string	handleDELETE(int client_fd);
 		void assign_status_phrase();
 		std::string make_status_page_string();
 

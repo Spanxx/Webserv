@@ -38,6 +38,10 @@ public:
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 	//add exceptions?
 
+	void make_new_connections(time_t &now);
+	void read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i);
+	void write_to_connection(std::map<int, std::string> &response_collector, size_t &i);
+
 	class ServerException : std::runtime_error {
 	public:
 		ServerException(std::string error);
