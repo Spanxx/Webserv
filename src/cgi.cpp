@@ -1,20 +1,25 @@
 #include "../incl/Response.hpp"
 #include <sys/wait.h>
 
-std::string Response::cgiExecuter(const std::string &path, const std::string &query)
+void Response::cgiExecuter(const std::string &path, const std::string &query)
 {
-
 	int pipe_fd[2];
 	if (pipe(pipe_fd) == -1)
 	{
 		std::cerr << "Pipe fail\n";
-		return make_status_page_string(042);
+		setCode(500);
+		_body = "<h1>500 Internal Server Error</h1>"; //phrase
+		return;
+		//return make_status_page_string(042);
 	}
 	pid_t pid = fork();
 	if (pid < 0)
 	{
 		std::cerr << "Fork fail\n";
-		return make_status_page_string(042);
+		setCode(500);
+		_body = "<h1>500 Internal Server Error</h1>"; //phrase
+		return;
+		//return make_status_page_string(042);
 	}
 	if (pid == 0)	//child
 	{
@@ -25,12 +30,18 @@ std::string Response::cgiExecuter(const std::string &path, const std::string &qu
 			const_cast<char *>(querySTR.c_str()),
 			NULL
 		};
-		
+
 		dup2(pipe_fd[1], STDOUT_FILENO);
 		close(pipe_fd[0]);
 		close(pipe_fd[1]);
-		char *av[] = {(char *)path.c_str(), NULL};
-		execve(path.c_str(), av, env);
+		char resolved_path[PATH_MAX];
+if (realpath(path.c_str(), resolved_path) == NULL)
+{
+	perror("realpath");
+	exit(1);
+}
+char *av[] = {resolved_path, NULL};
+execve(resolved_path, av, env);
 		perror("execve");
 		exit(1);
 	}
@@ -45,6 +56,33 @@ std::string Response::cgiExecuter(const std::string &path, const std::string &qu
 			output.append(buffer, n);
 		close(pipe_fd[0]);
 		waitpid(pid, NULL, 0);
-		return output;
+		parseCGIOutput(output);
+		setCode(200);
 	}
+}
+
+void Response::parseCGIOutput(const std::string &output)
+{
+	std::istringstream stream(output);
+	std::string line;
+
+	while (std::getline(stream, line))
+	{
+		if (!line.empty() && line[line.size() - 1] == '\r') 		// CGI often uses \r\n so remove \r if present
+			line.erase(line.size() - 1);
+		if (line.empty())
+			break;
+
+		size_t sep = line.find(": ");
+		if (sep != std::string::npos)
+		{
+			std::string key = line.substr(0, sep);
+			std::string value = line.substr(sep + 2);
+			_headers[key] = value;
+		}
+	}
+	std::string body((std::istreambuf_iterator<char>(stream)),
+						std::istreambuf_iterator<char>());  //using fancy iterator to read the rest of the body
+	std::cout << "CGI body: " << body << std::endl;
+	_body = body;
 }

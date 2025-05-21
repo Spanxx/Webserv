@@ -24,10 +24,10 @@ class Response {
 		std::string 		process_request(int client_fd);
 		std::string responseBuilder();
 		std::string	headersBuilder();
-		std::string	bodyBuilder();
+		void	bodyBuilder();
 
 		std::string	handleERROR();
-		std::string	handleGET();
+		void	handleGET();
 		std::string	handlePOST(int client_fd);
 		std::string	handleDELETE(int client_fd);
 		void assign_status_phrase();
@@ -35,13 +35,17 @@ class Response {
 		std::string make_status_page_string(unsigned int code);
 
 		void sendResponse(int client_fd);
-		std::string cgiExecuter(const std::string &path, const std::string &query);
+		void cgiExecuter(const std::string &path, const std::string &query);
+		void parseCGIOutput(const std::string &output);
+		std::string getMimeType(const std::string &path);
+		bool isCGI(const std::string &path);
 
 	private:
 		Request *_request;
 		int _code;
 		std::map<std::string, std::string> _status;
 		std::map<std::string, std::string> _headers;
+		std::string header;
 		std::string _body;
 };
 

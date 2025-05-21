@@ -2,7 +2,7 @@
 #include "../incl/Response.hpp"
 #include "../incl/Utils.hpp"
 
-Response::Response(Request *request): _request(request), _code(request->getCode()) 
+Response::Response(Request *request): _request(request), _code(request->getCode())
 {
 	std::cout << "Response constructed\n";
 	//status phrase + code here? or set to which default?
@@ -44,21 +44,21 @@ Response& Response::operator=(Response &other)
 void Response::setCode(int code) { _code = code; }
 int Response::getCode() { return _code; }
 
-std::string Response::process_request(int client_fd)
+std::string Response::process_request(int client_fd) // Every handler shoudl update _body, _code and the headers are built in the end
 {
 	this->assign_status_phrase();
 	if (_code != 200)
-		return handleERROR();
+		handleERROR();
 	else if (_request->getMethod() == "GET")
-		return handleGET();
+		handleGET();
 	else if (_request->getMethod() == "POST")
-		return handlePOST(client_fd);
+		handlePOST(client_fd);
 	else if (_request->getMethod() == "DELETE")
-		return handleDELETE(client_fd);
+		handleDELETE(client_fd);
+	this->header = headersBuilder(); // to have the headerBuilder centralized
 	std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
-	//this->sendResponse(client_fd);
-	return handleERROR(); //placeholder, check with logc later
+	return responseBuilder(); // //placeholder, check with logc later
 }
 
 void Response::assign_status_phrase()
@@ -83,9 +83,6 @@ void Response::assign_status_phrase()
 	_status["phrase"] = "Not found";
 }
 
-
-
-
 std::string Response::make_status_page_string(unsigned int code)
 {
 	if (code)
@@ -104,7 +101,7 @@ std::string Response::make_status_page_string(unsigned int code)
 	buffer  << file.rdbuf(); //rdbuf to read entire content of file stream into stringstream
 	std::string html = buffer.str();
 
-	// 
+	//
 	replaceAll(html, "{{CODE}}", _status["code"]);
 	replaceAll(html, "{{MESSAGE}}", _status["phrase"]);
 	std::stringstream ss;
@@ -119,27 +116,28 @@ std::string	Response::handleERROR()
 	std::string body;
 
 	body = this->make_status_page_string(0);
-	header = this->headersBuilder();
+	//header = this->headersBuilder(); this will be done in the process_request
 
 	response.append(header);
 	response.append(body);
-	//std::cout << "Response sent\n";
-	//write(client_fd, response.c_str(), response.length());
 	return response;
 }
 
-std::string	Response::handleGET()
+void	Response::handleGET()
 {
-	std::string path = this->_request->getPath();
-	if (path.substr(0, 8) == "/cgi-bin")
+	std::string uri = this->_request->getPath();
+	std::string fileType = getMimeType(uri);
+	if (isCGI(uri))
 	{
-		std::string exec_path = "." + path;
+		std::string exec_path = "./" + uri;
+		std::cout << "EXEC PATH: " << exec_path << std::endl;
 		std::string query_string = this->_request->getQuery();
 		std::cout << "QUERY STRING: " << query_string << std::endl;
-		return cgiExecuter(exec_path, query_string);
+		cgiExecuter(exec_path, query_string);
+		return;
 	}
 	else
-		return responseBuilder();
+		bodyBuilder();
 }
 
 std::string	Response::handlePOST(int client_fd)
@@ -162,11 +160,10 @@ std::string Response::responseBuilder()
 	std::string body;
 
 	// handle body at first, to get content size and type
-	body = this->bodyBuilder();
 	header = this->headersBuilder();
 
 	response.append(header);
-	response.append(body);
+	response.append(_body);
 
 	return (response);
 }
@@ -174,11 +171,14 @@ std::string Response::responseBuilder()
 std::string	Response::headersBuilder()
 {
 	std::ostringstream header;
-	header << this->_request->getVersion() << ' ' 
+	_headers["Content-Length"] = std::to_string(_body.size());
+	if (_headers.find("Content-Type") == _headers.end())
+		_headers["Content-Type"] = "text/plain";
+	header << this->_request->getVersion() << ' '
 			<< this->_code << ' '
 			<< this->_status["phrase"] << "\r\n"
 			<< this->_request->getPath() << "\r\n"
-			<< "Content-Type: text/html\r\n" //make dynamic
+			<< "Content-Type:" << this->_headers["Content-type"] <<"\r\n"
 			<< "Content-Length: " << this->_headers["Content-Length"] << "\r\n"
 			<< "Connection: keep-alive\r\n" //get from request header
 			<< "Location: " << this->_request->getPath() << "\r\n"
@@ -186,7 +186,8 @@ std::string	Response::headersBuilder()
 
 	return (header.str());
 }
-std::string	Response::bodyBuilder()
+
+void	Response::bodyBuilder()
 {
 	std::string 		line;
 	std::string 		body;
@@ -200,7 +201,9 @@ std::string	Response::bodyBuilder()
 	if (!file)
 	{
 		std::cerr << "Requested file open error!\n";
-		return make_status_page_string(404);
+		this->_code = 404; //phrase
+		return;
+		//return make_status_page_string(404);
 	}
 
 	while (getline(file, line))
@@ -209,7 +212,7 @@ std::string	Response::bodyBuilder()
 		body.append("\n");
 		++lineCount;
 	}
-	
+
 	ss << body.size();
 
 	std::cout << "Lines read: " << lineCount << '\n'
@@ -217,5 +220,28 @@ std::string	Response::bodyBuilder()
 
 	this->_headers["Content-Length"] = ss.str();
 
-	return(body);
+	this->_body = body;
+}
+
+std::string Response::getMimeType(const std::string &path) {
+	size_t dotPos = path.find_last_of('.');
+	if (dotPos == std::string::npos)
+		return "application/octet-stream"; // default binary?
+
+	std::string ext = path.substr(dotPos + 1);
+	if (ext == "html" || ext == "htm") return "text/html";
+	if (ext == "css") return "text/css";
+	if (ext == "js") return "application/javascript";
+	if (ext == "json") return "application/json";
+	if (ext == "png") return "image/png";
+	if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
+	if (ext == "gif") return "image/gif";
+	//we can add more types here
+	return "application/octet-stream";
+}
+
+bool Response::isCGI(const std::string &path) {
+	if (path.find("/cgi-bin/") != std::string::npos) { return true; }
+	if (path.find(".cgi") != std::string::npos) { return true; }
+	return false;
 }
