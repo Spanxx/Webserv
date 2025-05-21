@@ -31,9 +31,11 @@ class Response {
 		std::string	handlePOST(int client_fd);
 		std::string	handleDELETE(int client_fd);
 		void assign_status_phrase();
-		std::string make_status_page_string();
+		//std::string make_status_page_string();
+		std::string make_status_page_string(unsigned int code);
 
 		void sendResponse(int client_fd);
+		std::string cgiExecuter(const std::string &path, const std::string &query);
 
 	private:
 		Request *_request;

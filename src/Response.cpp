@@ -86,8 +86,13 @@ void Response::assign_status_phrase()
 
 
 
-std::string Response::make_status_page_string()
+std::string Response::make_status_page_string(unsigned int code)
 {
+	if (code)
+	{
+		_code = code;
+		assign_status_phrase();
+	}
 	// read file into string
 	std::ifstream file("content/data/status_page.html");
 	if (!file)
@@ -113,7 +118,7 @@ std::string	Response::handleERROR()
 	std::string header;
 	std::string body;
 
-	body = this->make_status_page_string();
+	body = this->make_status_page_string(0);
 	header = this->headersBuilder();
 
 	response.append(header);
@@ -126,13 +131,12 @@ std::string	Response::handleERROR()
 std::string	Response::handleGET()
 {
 	std::string path = this->_request->getPath();
-	if (path.size() >= 8 && path.substr(0, 8) == "/cgi-bin")
+	if (path.substr(0, 8) == "/cgi-bin")
 	{
 		std::string exec_path = "." + path;
 		std::string query_string = this->_request->getQuery();
 		std::cout << "QUERY STRING: " << query_string << std::endl;
-		//return cgiExecuter(exec_path, query_string);
-		return responseBuilder(); //placeholder
+		return cgiExecuter(exec_path, query_string);
 	}
 	else
 		return responseBuilder();
@@ -159,8 +163,6 @@ std::string Response::responseBuilder()
 
 	// handle body at first, to get content size and type
 	body = this->bodyBuilder();
-	if (body.empty())
-		body = this->make_status_page_string();
 	header = this->headersBuilder();
 
 	response.append(header);
@@ -198,10 +200,7 @@ std::string	Response::bodyBuilder()
 	if (!file)
 	{
 		std::cerr << "Requested file open error!\n";
-		//load error page 404??
-		_code = 404;
-		assign_status_phrase();
-		return ("");
+		return make_status_page_string(404);
 	}
 
 	while (getline(file, line))

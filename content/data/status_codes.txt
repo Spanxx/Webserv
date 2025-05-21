@@ -22,4 +22,7 @@
 500 = Internal Server Error  
 501 = Not Implemented  
 502 = Bad Gateway  
-503 = Service Unavailable  
+503 = Service Unavailable
+
+## our own error message for internal issues? or should we use 500 Internal server error 
+042 = Something Went Wrong, Sorry
