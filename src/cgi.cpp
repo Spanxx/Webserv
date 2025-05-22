@@ -8,18 +8,16 @@ void Response::cgiExecuter(const std::string &path, const std::string &query)
 	{
 		std::cerr << "Pipe fail\n";
 		setCode(500);
-		_body = "<h1>500 Internal Server Error</h1>"; //phrase
+		handleERROR();
 		return;
-		//return make_status_page_string(042);
 	}
 	pid_t pid = fork();
 	if (pid < 0)
 	{
 		std::cerr << "Fork fail\n";
 		setCode(500);
-		_body = "<h1>500 Internal Server Error</h1>"; //phrase
+		handleERROR();
 		return;
-		//return make_status_page_string(042);
 	}
 	if (pid == 0)	//child
 	{
@@ -30,20 +28,23 @@ void Response::cgiExecuter(const std::string &path, const std::string &query)
 			const_cast<char *>(querySTR.c_str()),
 			NULL
 		};
-
 		dup2(pipe_fd[1], STDOUT_FILENO);
 		close(pipe_fd[0]);
 		close(pipe_fd[1]);
-		char resolved_path[PATH_MAX];
-if (realpath(path.c_str(), resolved_path) == NULL)
-{
-	perror("realpath");
-	exit(1);
-}
-char *av[] = {resolved_path, NULL};
-execve(resolved_path, av, env);
+		char resolved_path[PATH_MAX]; //check the directories
+		if (realpath(path.c_str(), resolved_path) == NULL)
+		{
+			perror("realpath");
+			setCode(404); //check if this is the right code
+			handleERROR();
+			return;
+		}
+		char *av[] = {resolved_path, NULL};
+		execve(resolved_path, av, env);
 		perror("execve");
-		exit(1);
+		setCode(500); //check if this is the right code
+		handleERROR();
+		return;
 	}
 	else	//parent
 	{

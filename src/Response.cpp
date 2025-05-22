@@ -55,7 +55,6 @@ std::string Response::process_request(int client_fd) // Every handler shoudl upd
 		handlePOST(client_fd);
 	else if (_request->getMethod() == "DELETE")
 		handleDELETE(client_fd);
-	this->header = headersBuilder(); // to have the headerBuilder centralized
 	std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	return responseBuilder(); // //placeholder, check with logc later
@@ -83,7 +82,7 @@ void Response::assign_status_phrase()
 	_status["phrase"] = "Not found";
 }
 
-std::string Response::make_status_page_string(unsigned int code)
+/*void Response::make_status_page_string(unsigned int code)
 {
 	if (code)
 	{
@@ -95,7 +94,8 @@ std::string Response::make_status_page_string(unsigned int code)
 	if (!file)
     	{
 		std::cerr << "Error opening status code file\n";
-		return NULL;
+		return;
+		//return NULL;
 	}
  	std::stringstream buffer;
 	buffer  << file.rdbuf(); //rdbuf to read entire content of file stream into stringstream
@@ -107,26 +107,41 @@ std::string Response::make_status_page_string(unsigned int code)
 	std::stringstream ss;
 	ss << html.size();
 	this->_headers["Content-Length"] = ss.str();
-	return html;
-}
-std::string	Response::handleERROR()
+	this->_body = html;
+	//return html;
+}*/
+
+void	Response::handleERROR()
 {
-	std::string response;
-	std::string header;
-	std::string body;
+		assign_status_phrase();
+	// read file into string
+	std::ifstream file("content/data/status_page.html");
+	if (!file)
+    	{
+		std::cerr << "Error opening status code file\n";
+		return;
+		//return NULL;
+	}
+ 	std::stringstream buffer;
+	buffer  << file.rdbuf(); //rdbuf to read entire content of file stream into stringstream
+	std::string html = buffer.str();
 
-	body = this->make_status_page_string(this->_code);
-	//header = this->headersBuilder(); this will be done in the process_request
-
-	response.append(header);
-	response.append(body);
-	return response;
+	//
+	replaceAll(html, "{{CODE}}", _status["code"]);
+	replaceAll(html, "{{MESSAGE}}", _status["phrase"]);
+	std::stringstream ss;
+	ss << html.size();
+	this->_headers["Content-Length"] = ss.str();
+	this->_body = html;
+	//return html;
 }
 
 void	Response::handleGET()
 {
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
+	this->_headers["Content-Type"] = fileType;
+	std::cout << "File type: " << fileType << std::endl;
 	if (isCGI(uri))
 	{
 		std::string exec_path = "./" + uri;
@@ -156,16 +171,9 @@ std::string	Response::handleDELETE(int client_fd)
 std::string Response::responseBuilder()
 {
 	std::string response;
-	std::string phrase;
-	std::string header;
-	std::string body;
 
-	std::string status = this->make_status_page_string(_code);
 	// handle body at first, to get content size and type
-	header = this->headersBuilder();
-
-	response.append(this->_statusPhrase);
-	response.append(header);
+	response.append(this->headersBuilder());
 	response.append(this->_body);
 
 	std::cout << " --> Response:\n" << response << std::endl;
@@ -205,9 +213,9 @@ void	Response::bodyBuilder()
 	if (!file)
 	{
 		std::cerr << "Requested file open error!\n";
-		this->_code = 404; //phrase
+		setCode(404);
+		handleERROR();
 		return;
-		//return make_status_page_string(404);
 	}
 
 	while (getline(file, line))
@@ -223,7 +231,6 @@ void	Response::bodyBuilder()
 			<< "Chars read: " << ss.str() << std::endl;
 
 	this->_headers["Content-Length"] = ss.str();
-
 	this->_body = body;
 }
 

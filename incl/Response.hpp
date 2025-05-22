@@ -26,13 +26,13 @@ class Response {
 		std::string	headersBuilder();
 		void	bodyBuilder();
 
-		std::string	handleERROR();
+		void	handleERROR();
 		void	handleGET();
 		std::string	handlePOST(int client_fd);
 		std::string	handleDELETE(int client_fd);
 		void assign_status_phrase();
 		//std::string make_status_page_string();
-		std::string make_status_page_string(unsigned int code);
+		//void make_status_page_string(unsigned int code);
 
 		void sendResponse(int client_fd);
 		void cgiExecuter(const std::string &path, const std::string &query);
@@ -45,9 +45,7 @@ class Response {
 		int _code;
 		std::map<std::string, std::string> _status;
 		std::map<std::string, std::string> _headers;
-		std::string header;
 		std::string _body;
-		std::string _statusPhrase;
 };
 
 #endif //RESPONSE_HPP
