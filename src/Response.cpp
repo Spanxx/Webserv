@@ -115,7 +115,7 @@ std::string	Response::handleERROR()
 	std::string header;
 	std::string body;
 
-	body = this->make_status_page_string(0);
+	body = this->make_status_page_string(this->_code);
 	//header = this->headersBuilder(); this will be done in the process_request
 
 	response.append(header);
@@ -156,15 +156,19 @@ std::string	Response::handleDELETE(int client_fd)
 std::string Response::responseBuilder()
 {
 	std::string response;
+	std::string phrase;
 	std::string header;
 	std::string body;
 
+	std::string status = this->make_status_page_string(_code);
 	// handle body at first, to get content size and type
 	header = this->headersBuilder();
 
+	response.append(this->_statusPhrase);
 	response.append(header);
-	response.append(_body);
+	response.append(this->_body);
 
+	std::cout << " --> Response:\n" << response << std::endl;
 	return (response);
 }
 

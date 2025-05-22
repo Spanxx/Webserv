@@ -47,6 +47,7 @@ class Response {
 		std::map<std::string, std::string> _headers;
 		std::string header;
 		std::string _body;
+		std::string _statusPhrase;
 };
 
 #endif //RESPONSE_HPP
