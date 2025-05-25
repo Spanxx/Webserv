@@ -1,61 +1,91 @@
 #include "../incl/Response.hpp"
 #include <sys/wait.h>
 
-void Response::cgiExecuter(const std::string &path, const std::string &query)
+void Response::cgiExecuter(std::string path, const std::string &query)
 {
-	int pipe_fd[2];
-	if (pipe(pipe_fd) == -1)
+	int inPipe[2];
+	int outPipe[2];
+
+	if (pipe(inPipe) == -1 || pipe(outPipe) == -1)
 	{
-		std::cerr << "Pipe fail\n";
-		setCode(500);
-		handleERROR();
+		std::cerr << "ERROR: Pipe fail\n";
+		this->handleERROR(500);
 		return;
 	}
+
 	pid_t pid = fork();
 	if (pid < 0)
 	{
-		std::cerr << "Fork fail\n";
-		setCode(500);
-		handleERROR();
+		std::cerr << "ERROR: Fork fail\n";
+		this->handleERROR(500);
 		return;
 	}
+	
+	std::string method = this->_request->getMethod();
+
 	if (pid == 0)	//child
 	{
 		std::string methodSTR = "REQUEST_METHOD=" + _request->getMethod();
 		std::string querySTR = "QUERY_STRING=" + query;
+		
 		char *env[] = {
 			const_cast<char *>(methodSTR.c_str()),
 			const_cast<char *>(querySTR.c_str()),
 			NULL
 		};
-		dup2(pipe_fd[1], STDOUT_FILENO);
-		close(pipe_fd[0]);
-		close(pipe_fd[1]);
+
+		if (method == "POST")
+		{
+			dup2(inPipe[0], STDIN_FILENO);	// child reads from inPipe
+		}
+		dup2(outPipe[1], STDOUT_FILENO);	// child reads from outPipe
+
+		close(inPipe[0]);
+		close(inPipe[1]);
+		close(outPipe[0]);
+		close(outPipe[1]);
+
 		char resolved_path[PATH_MAX]; //check the directories
 		if (realpath(path.c_str(), resolved_path) == NULL)
 		{
-			perror("realpath");
-			setCode(404); //check if this is the right code
-			handleERROR();
-			return;
+			// perror("ERROR: realpath (child) fail!");
+			std::cerr << "ERROR: realpath (child) fail!\n";
+			this->handleERROR(404);
+			exit(EXIT_FAILURE);	// to close the child
 		}
+
 		char *av[] = {resolved_path, NULL};
 		execve(resolved_path, av, env);
-		perror("execve");
-		setCode(500); //check if this is the right code
-		handleERROR();
-		return;
+		// perror("execve");
+		std::cerr << "ERROR: execve fail!\n";
+		this->handleERROR(500);
+		exit(EXIT_FAILURE);
 	}
 	else	//parent
 	{
-		close(pipe_fd[1]);
+		if (method == "POST")
+		{
+			close(inPipe[0]);
+			// write content from the post request to the input for read
+			write(inPipe[1], this->_request->getBody().c_str(), this->_request->getBody().length());
+			close(inPipe[1]);
+		}
+		else
+		{
+			close(inPipe[0]);
+			close(inPipe[1]);
+		}
+
+		close(outPipe[1]);
+
 		char buffer[1024];
 		std::string output;
 		ssize_t n;
 
-		while ((n = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
+		while ((n = read(outPipe[0], buffer, sizeof(buffer))) > 0)
 			output.append(buffer, n);
-		close(pipe_fd[0]);
+
+		close(outPipe[0]);
 		waitpid(pid, NULL, 0);
 		parseCGIOutput(output);
 		setCode(200);
@@ -86,4 +116,6 @@ void Response::parseCGIOutput(const std::string &output)
 						std::istreambuf_iterator<char>());  //using fancy iterator to read the rest of the body
 	std::cout << "CGI body: " << body << std::endl;
 	_body = body;
+	int bodyLen = _body.size();
+	this->_headers["Content-Length"] = intToString(bodyLen);
 }

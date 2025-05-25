@@ -19,10 +19,17 @@ int main(int ac, char **av)
 		return (0);
 	}
 
-	Server newServer(av[1]);
+	try
+	{
+		Server newServer(av[1]);
+		newServer.serverLoop();
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 
-	newServer.startListen();
-	newServer.serverLoop();
+	// newServer.startListen();
 	
 	return (0);
 }

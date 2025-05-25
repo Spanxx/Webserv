@@ -2,13 +2,74 @@
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
 
+void	Server::portHandler()
+{
+	
+}
+
+// void	Server::serverLoop()
+// {
+// 	int pollTimeout = 5000;		//timeout --> checks for new connections (milliseconds)
+// 	int clientTimeout = 50;		//timeout before a client gets disconnected (seconds)
+// 	std::map<int, std::string> response_collector;
+
+// 	fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
+// 	while (!stopSignal)
+// 	{
+// 		int ret = poll(_socketArray.data(), _socketArray.size(), pollTimeout);
+// 		(void)ret;
+		
+// 		time_t now = time(NULL);
+
+// 		for (size_t i = 0; i < _socketArray.size(); ++i)
+// 		{
+// 			//Timeout check for each client
+// 			if (_socketArray[i].fd != _serverSocket && now - _lastActive[_socketArray[i].fd] > clientTimeout)
+// 			{
+// 				std::cout << "Timeout --> client fd " << _socketArray[i].fd << " is closed!" << std::endl;
+// 				close(_socketArray[i].fd);
+// 				_lastActive.erase(_socketArray[i].fd);
+// 				_socketArray.erase(_socketArray.begin() + i);
+// 				--i;
+// 				continue;
+// 			}
+
+// 			if (_socketArray[i].revents & POLLIN)   //return a non-zero value if the POLLIN bit is set	//handles the client connection
+// 				read_from_connection(now, response_collector, i);
+// 			else if (_socketArray[i].revents & POLLOUT)
+// 				write_to_connection(response_collector, i);
+// 			else if (_socketArray[i].revents & POLLERR || _socketArray[i].revents & POLLHUP || _socketArray[i].revents & POLLNVAL) //closed connection / EOF / error
+// 			{
+// 				std::cout << "REVENTS: client fd " << _socketArray[i].fd << " is closed!" << std::endl;
+// 				close(_socketArray[i].fd);
+// 				_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
+// 				--i;
+// 				continue;
+// 			}
+// 		}
+// 	}
+// 	closeServer();
+// }
+
+bool Server::isServerSocket(int fd)
+{
+	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
+	{
+		if (this->_serverSocket[i] == fd)
+			return true;
+	}
+	return false;
+}
+
 void	Server::serverLoop()
 {
 	int pollTimeout = 5000;		//timeout --> checks for new connections (milliseconds)
 	int clientTimeout = 50;		//timeout before a client gets disconnected (seconds)
 	std::map<int, std::string> response_collector;
 
-	fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
+	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
+		fcntl(this->_serverSocket[i], F_SETFL, O_NONBLOCK);
+	
 	while (!stopSignal)
 	{
 		int ret = poll(_socketArray.data(), _socketArray.size(), pollTimeout);
@@ -19,7 +80,7 @@ void	Server::serverLoop()
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
 			//Timeout check for each client
-			if (_socketArray[i].fd != _serverSocket && now - _lastActive[_socketArray[i].fd] > clientTimeout)
+			if (!isServerSocket(_socketArray[i].fd) && now - _lastActive[_socketArray[i].fd] > clientTimeout)
 			{
 				std::cout << "Timeout --> client fd " << _socketArray[i].fd << " is closed!" << std::endl;
 				close(_socketArray[i].fd);
@@ -47,13 +108,14 @@ void	Server::serverLoop()
 }
 
 
-void Server::make_new_connections(time_t &now)
+void Server::make_new_connections(time_t &now, int server_fd)
 {
 	while (true) //loops over all pending connections and accepts them until there are no more (EAGAIN or EWOULDBLOCK)
 	{
 		struct sockaddr_in	clientAddr;
-		socklen_t		clientLen = sizeof(clientAddr);
-		int			clientSocket = accept(_serverSocket, (struct sockaddr *)&clientAddr, &clientLen);
+		socklen_t			clientLen = sizeof(clientAddr);
+		int					clientSocket = accept(server_fd, (struct sockaddr *)&clientAddr, &clientLen);
+		
 		if (clientSocket < 0)
 		{
 			if (errno == EAGAIN || errno == EWOULDBLOCK) //there are no more connections to accept right now
@@ -77,12 +139,11 @@ void Server::make_new_connections(time_t &now)
 }
 
 
-
 void Server::read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i)
 {
-	if (_socketArray[i].fd == _serverSocket) 
+	if (isServerSocket(_socketArray[i].fd))
 	{
-		make_new_connections(now);
+		make_new_connections(now, this->_socketArray[i].fd);
 		return;
 	}
 	char	buffer[1024] = {0};
@@ -110,7 +171,8 @@ void Server::read_from_connection(time_t &now, std::map<int, std::string> &respo
 	// std::cout << "Received request:" << buffer << std::endl;
 	std::cout << "Request from client fd " << _socketArray[i].fd << std::endl;
 	Request *request = new Request(this);
-	request->setCode(request->parse_request(buffer)); // set error codes, depending on which the response will be sent
+	request->parse_request(buffer);
+	// request->setCode(request->parse_request(buffer)); // set error codes, depending on which the response will be sent
 				
 	Response *response = new Response(request);
 				

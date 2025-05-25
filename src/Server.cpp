@@ -4,38 +4,92 @@
 #include	"../incl/Response.hpp"
 // #include	<sys/time.h>
 
-Server::Server(char *av)
+int	Server::createServerSocket(int port)
 {
-	_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (_serverSocket < 0)
+	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock < 0)
 	{
-		std::cerr << "Error creating server socket!\n";
-		exit(1);
+		throw ServerException("Creating server socket failed!");
 	}
-	if (this->createConfig(av) == 1)
-		exit(1);
-		
-	//transfer the port from map/string to int for serversocket
-	int	port;
-	std::stringstream ss(_serverConfig["port"]);
-	ss >> port;
-		
+
 	//prepare server adress structure
 	struct sockaddr_in serverAddr;
 	memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;				//IPv4
 	serverAddr.sin_addr.s_addr = INADDR_ANY;		//bind to any local adress
-	serverAddr.sin_port = htons(port);	//port in network byte order
+	serverAddr.sin_port = htons(port);				//port in network byte order
 
 	int yes = 1;
-	setsockopt(this->_serverSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));	// check if needed?
 
-	if (bind(_serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
+	if (bind(sock, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
 	{
-		std::cerr << "Error binding server socket!\n";
-		exit(1);
+		throw ServerException("Bind failed!");
+		// std::cerr << "Error binding server socket!\n";
+		// exit(1);
 	}
-	std::cout << "Server socket created and bound\n";
+	return (sock);
+}
+
+void	Server::extractPorts()
+{
+	int port;
+	std::string item;
+
+	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
+	
+	if (!config)
+		throw ServerException("Extracting serverConfig map failed!");
+
+	std::map<std::string, std::string>::iterator it = config->begin();
+	while (it != config->end())
+	{
+		if (it->first.find("ports") != std::string::npos)
+		{	
+			std::stringstream ss(it->second);
+
+			while (std::getline(ss, item, ','))
+			{
+				port = strToInt(item);
+				this->_ports.push_back(port);
+			}
+		}
+		++it;
+	}
+
+	std::vector<int>::iterator iPorts = this->_ports.begin();
+	while (iPorts != this->_ports.end())
+	{
+		std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
+		++iPorts;
+	}
+}
+
+Server::Server(char *av)
+{
+	try
+	{
+		if (this->createConfig(av) == 1)
+			throw ServerException("Creating Config failed!");
+
+		this->extractPorts();
+
+		std::vector<int>::iterator it = this->_ports.begin();
+
+		while (it != this->_ports.end())	// maybe change to for with index
+		{
+			int sock = this->createServerSocket(*it);
+			this->_serverSocket.push_back(sock);
+			startListen(sock);
+			std::cout << "Server socket fd: " << sock << " created and bound\n";
+			++it;
+		}
+	}
+	catch (std::exception &e)
+	{
+		std::cout << "Server exception: " << e.what() << std::endl;
+		return ;
+	}
 }
 
 // Server::Server(Server &other) {}			//a server should not be copyied or assigned to another one.
@@ -43,27 +97,47 @@ Server::Server(char *av)
 
 Server::~Server()
 {
-	close(_serverSocket);
-	std::cout << "Server socket closed\n";
+	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
+	{
+		close(this->_serverSocket[i]);
+		std::cout << "Server socket fd: " << this->_serverSocket[i] << " closed\n";
+	}
 }
 
-
-void	Server::startListen()
+void	Server::startListen(int socket)
 {
 	//start listening for incoming connections
-	if (listen(this->_serverSocket, 1) < 0)
+	if (listen(socket, 10) < 0)	// was 1, 10 is to test / amount of connections
 	{
-		std::cerr << "Error listening on server socket!\n";
-		exit(1);
+		throw ServerException("Listen failed!");
+		// std::cerr << "Error listening on server socket!\n";
+		// exit(1);
 	}
 
-	std::cout << "Server starts listening for incomming connections on FD " << _serverSocket <<  "\n";
+	std::cout << "Server starts listening for incomming connections on FD " << socket <<  "\n";
 
 	struct pollfd serverFd;
-	serverFd.fd = _serverSocket;
+	serverFd.fd = socket;
 	serverFd.events = POLLIN;	// wait for input
 	this->_socketArray.push_back(serverFd);
 }
+
+// void	Server::startListen()
+// {
+// 	//start listening for incoming connections
+// 	if (listen(this->_serverSocket, 1) < 0)
+// 	{
+// 		std::cerr << "Error listening on server socket!\n";
+// 		exit(1);
+// 	}
+
+// 	std::cout << "Server starts listening for incomming connections on FD " << _serverSocket <<  "\n";
+
+// 	struct pollfd serverFd;
+// 	serverFd.fd = _serverSocket;
+// 	serverFd.events = POLLIN;	// wait for input
+// 	this->_socketArray.push_back(serverFd);
+// }
 
 void	Server::extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target)
 {
@@ -90,6 +164,7 @@ void	Server::extractConfigMap(std::ifstream &conFile, std::map<std::string, std:
 				{
 					std::string	key = line.substr(0, equalPos);
 					std::string value = line.substr(equalPos + 1);
+					// std::cout << "config key: " << key << " || value: " << value << '\n';	debug for config values
 					//check for key duplicates
 					if (targetMap.find(key) != targetMap.end())
 					{
@@ -115,7 +190,12 @@ int	Server::checkConfigFile(std::ifstream &conFile)
 				break ;
 			if (line[i] == 32)	//space
 			{
-				std::cout << "Error: Forbidden char <space> found in config file!\n";
+				std::cerr << "Error: Forbidden char <space> found in config file!\n";
+				return (1);
+			}
+			if (line[i] == '=' && line[i + 1] == '-')	//negative value found //  must be changed for new version 111,222,333
+			{
+				std::cerr << "Error: Non-positive value found in config file!\n";
 				return (1);
 			}
 		}
@@ -126,9 +206,27 @@ int	Server::checkConfigFile(std::ifstream &conFile)
 	return (0);
 }
 
+// void	Server::countPortsInConfig(std::ifstream &conFile)
+// {
+// 	int	num = 0;
+// 	std::string line;
+
+// 	while (std::getline(conFile, line))
+// 	{
+// 		if (line.find("port") != std::string::npos && line[0] != '#')
+// 			++num;
+// 	}
+
+// 	this->_numPorts = num;
+// 	std::cout << "Number of Ports to listen: " << num << '\n';
+// }
+
 int	Server::createConfig(char *av)
 {
-	std::ifstream configFile(av);
+	std::string filePath = checkFilePath(av);
+
+	// std::ifstream configFile(av);
+	std::ifstream configFile(filePath.c_str());
 	if (!configFile)
 	{
 		std::cout << "Reading config File failed!\n";
@@ -143,16 +241,26 @@ int	Server::createConfig(char *av)
 	if (Server::checkConfigFile(configFile) == 1)
 		return (1);
 
+	//countPortsInConfig(configFile);
+	
 	this->extractConfigMap(configFile, _serverConfig, "server{");
 	this->extractConfigMap(configFile, _dirConfig, "dir{");
 	this->extractConfigMap(configFile, _pageConfig, "pages{");
 	this->extractConfigMap(configFile, _fileConfig, "files{");
 	this->extractConfigMap(configFile, _filetypeConfig, "filetypes{");
 
+	//add a port if there is no specified in the config
+	// if (this->_numPorts == 0)
+	// {
+	// 	std::cerr << "No port specified in config, default is used: 8080\n";
+	// 	this->_serverConfig["port1"] = "8080";
+	// }
+
 	return (0);
 }
 
-void Server::closeServer() {
+void Server::closeServer()
+{
 	for (size_t i = 0; i < _socketArray.size(); ++i) {
 		std::cout << "Closing socket fd " << _socketArray[i].fd << std::endl;
 		close(_socketArray[i].fd);

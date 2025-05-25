@@ -18,12 +18,14 @@ class Request
 		~Request();
 		Request& operator=(Request &other);
 
-		int	parse_request(const std::string &request_raw);
+		// int	parse_request(const std::string &request_raw);
+		void	parse_request(const std::string &request_raw);
 		void	splitURI();
-		int	parse_headers(std::istringstream &rstream);
-		int	checkPathChars();
-		int	checkRequestedPath();
-		int	checkRequestedFiletype();
+		int		parse_headers(std::istringstream &rstream);
+		int		checkURILength();
+		int		checkPathChars();
+		int		checkRequestedPath();
+		int		checkRequestedFiletype();
 		
 		void setCode(int code);
 		int getCode();
@@ -32,6 +34,7 @@ class Request
 		std::string getVersion();
 		std::string getBody();
 		std::string getQuery();
+		// std::string getConnection();
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 
