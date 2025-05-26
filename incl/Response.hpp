@@ -10,7 +10,9 @@
 #include <vector>
 #include <fstream>
 #include <unistd.h>
+#include <limits.h>
 #include "Request.hpp"
+#include "Utils.hpp"
 
 class Response {
 	public:
@@ -21,19 +23,24 @@ class Response {
 
 		void 		setCode(int code);
 		int 		getCode();
-		void 		process_request(int client_fd);
+		std::string process_request(int client_fd);
 		std::string responseBuilder();
 		std::string	headersBuilder();
-		std::string	bodyBuilder();
+		void		bodyBuilder();
 
-		void	handleERROR(int client_fd);
-		void	handleGET(int client_fd);
-		void	handlePOST(int client_fd);
-		void	handleDELETE(int client_fd);
-		void assign_status_phrase();
-		std::string make_status_page_string();
+		void		handleERROR(int statusCode);
+		void		handleGET();
+		void		handlePOST();
+		void		handleDELETE(int client_fd);
+		void 		assign_status_phrase();
+		//std::string make_status_page_string();
+		//void make_status_page_string(unsigned int code);
 
-		void sendResponse(int client_fd);
+		void 		sendResponse(int client_fd);
+		void 		cgiExecuter(std::string path, const std::string &query);
+		void 		parseCGIOutput(const std::string &output);
+		std::string getMimeType(const std::string &path);
+		bool 		isCGI(const std::string &path);
 
 	private:
 		Request *_request;

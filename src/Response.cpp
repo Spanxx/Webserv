@@ -2,7 +2,7 @@
 #include "../incl/Response.hpp"
 #include "../incl/Utils.hpp"
 
-Response::Response(Request *request): _request(request), _code(request->getCode()) 
+Response::Response(Request *request): _request(request), _code(request->getCode())
 {
 	std::cout << "Response constructed\n";
 	//status phrase + code here? or set to which default?
@@ -44,28 +44,26 @@ Response& Response::operator=(Response &other)
 void Response::setCode(int code) { _code = code; }
 int Response::getCode() { return _code; }
 
-void Response::process_request(int client_fd)
+std::string Response::process_request(int client_fd) // Every handler shoudl update _body, _code and the headers are built in the end
 {
 	this->assign_status_phrase();
 	if (_code != 200)
-		this->handleERROR(client_fd);
+		handleERROR(this->_code);
 	else if (_request->getMethod() == "GET")
-		this->handleGET(client_fd);
+		handleGET();
 	else if (_request->getMethod() == "POST")
-		this->handlePOST(client_fd);
+		handlePOST();
 	else if (_request->getMethod() == "DELETE")
-		this->handleDELETE(client_fd);
-	//else	// other methods or send error method not allowed (405)
-		//_code = 405; // and process this code
+		handleDELETE(client_fd);
 	std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
-	//this->sendResponse(client_fd);
+	return responseBuilder();
 }
 
 void Response::assign_status_phrase()
 {
 	std::string line;
-	std::ifstream file("content/data/status_codes.txt");
+	std::ifstream file("www/private/status_codes.txt");
 	if (!file.is_open())
 	{
 		std::cerr << "Error extracting status phrase: error opening file\n";
@@ -84,55 +82,95 @@ void Response::assign_status_phrase()
 	_status["phrase"] = "Not found";
 }
 
-
-
-
-std::string Response::make_status_page_string()
+/*void Response::make_status_page_string(unsigned int code)
 {
+	if (code)
+	{
+		_code = code;
+		assign_status_phrase();
+	}
 	// read file into string
 	std::ifstream file("content/data/status_page.html");
 	if (!file)
     	{
 		std::cerr << "Error opening status code file\n";
-		return NULL;
+		return;
+		//return NULL;
 	}
  	std::stringstream buffer;
 	buffer  << file.rdbuf(); //rdbuf to read entire content of file stream into stringstream
 	std::string html = buffer.str();
 
-	// 
+	//
 	replaceAll(html, "{{CODE}}", _status["code"]);
 	replaceAll(html, "{{MESSAGE}}", _status["phrase"]);
 	std::stringstream ss;
 	ss << html.size();
 	this->_headers["Content-Length"] = ss.str();
-	return html;
-}
-void	Response::handleERROR(int client_fd)
+	this->_body = html;
+	//return html;
+}*/
+
+void	Response::handleERROR(int statusCode)
 {
-	std::string response;
-	std::string header;
-	std::string body;
+	this->_code = statusCode;
+	assign_status_phrase();
+	// read file into string
+	std::ifstream file("www/private/status_page.html");
+	if (!file)
+	{
+		std::cerr << "Error opening status code file\n";
+		return;
+	}
+ 	std::stringstream buffer;
+	buffer  << file.rdbuf(); //rdbuf to read entire content of file stream into stringstream
+	std::string html = buffer.str();
 
-	body = this->make_status_page_string();
-	header = this->headersBuilder();
-
-	response.append(header);
-	response.append(body);
-	std::cout << "Response sent\n";
-	write(client_fd, response.c_str(), response.length());
+	replaceAll(html, "{{CODE}}", _status["code"]);
+	replaceAll(html, "{{MESSAGE}}", _status["phrase"]);
+	std::stringstream ss;
+	ss << html.size();
+	this->_headers["Content-Length"] = ss.str();
+	this->_body = html;
+	//return html;
 }
 
-void	Response::handleGET(int client_fd)
+void	Response::handleGET()
 {
-	std::string response = responseBuilder();
-	std::cout << "Response sent\n";
-	write(client_fd, response.c_str(), response.length());
+	std::string uri = this->_request->getPath();
+	std::string fileType = getMimeType(uri);
+	this->_headers["Content-Type"] = fileType;
+	std::cout << "File type: " << fileType << std::endl;
+	if (isCGI(uri))
+	{
+		// std::string exec_path = "./" + uri;
+		std::string exec_path = uri;
+		std::cout << "EXEC PATH: " << exec_path << std::endl;
+		std::string query_string = this->_request->getQuery();
+		std::cout << "QUERY STRING: " << query_string << std::endl;
+		cgiExecuter(exec_path, query_string);
+	}
+	else
+		bodyBuilder();
 }
 
-void	Response::handlePOST(int client_fd)
+void	Response::handlePOST()
 {
-	(void)client_fd;
+	std::string uri = this->_request->getPath();
+	std::string fileType = getMimeType(uri);
+	this->_headers["Content-Type"] = fileType;
+	std::cout << "File type: " << fileType << std::endl;
+	if (isCGI(uri))
+	{
+		std::string exec_path = "./" + uri;
+		std::cout << "EXEC PATH: " << exec_path << std::endl;
+		std::string query_string = this->_request->getQuery();
+		std::cout << "QUERY STRING: " << query_string << std::endl;
+		cgiExecuter(exec_path, query_string);
+		return;
+	}
+	// else
+		// bodyBuilder();
 }
 
 void	Response::handleDELETE(int client_fd)
@@ -140,41 +178,44 @@ void	Response::handleDELETE(int client_fd)
 	(void)client_fd;
 }
 
-
 std::string Response::responseBuilder()
 {
 	std::string response;
-	std::string header;
-	std::string body;
 
 	// handle body at first, to get content size and type
-	body = this->bodyBuilder();
-	if (body.empty())
-		body = this->make_status_page_string();
-	header = this->headersBuilder();
+	response.append(this->headersBuilder());
+	response.append(this->_body);
 
-	response.append(header);
-	response.append(body);
-
+	if (this->_request->getPath() != "www/files/favicon.ico")
+		std::cout << " --> Response:\n" << response << std::endl;
 	return (response);
 }
 
 std::string	Response::headersBuilder()
 {
 	std::ostringstream header;
-	header << this->_request->getVersion() << ' ' 
+
+	if (_headers.find("Content-Type") == _headers.end())
+		_headers["Content-Type"] = "text/html";	// should we change these to text/html for the error pages
+	// _headers["Content-Type"] = "text/plain";	// should we change these to text/html for the error pages
+	
+	header << this->_request->getVersion() << ' '
 			<< this->_code << ' '
 			<< this->_status["phrase"] << "\r\n"
-			<< this->_request->getPath() << "\r\n"
-			<< "Content-Type: text/html\r\n" //make dynamic
-			<< "Content-Length: " << this->_headers["Content-Length"] << "\r\n"
-			<< "Connection: keep-alive\r\n" //get from request header
+			// << this->_request->getPath() << "\r\n"							// needed?
+			<< "Host: webServ42" << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
+			<< "Connection: " << this->_headers["Connection"] << "\r\n"			//is always empty??
+			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
+			<< "Content-Length: " << strToInt(this->_headers["Content-Length"]) << "\r\n"
 			<< "Location: " << this->_request->getPath() << "\r\n"
 			<< "\r\n";	//empty newline to seperate header and body
 
+	std::cout << "Location for redir: " << this->_request->getPath() << '\n';
+
 	return (header.str());
 }
-std::string	Response::bodyBuilder()
+
+void	Response::bodyBuilder()
 {
 	std::string 		line;
 	std::string 		body;
@@ -188,10 +229,9 @@ std::string	Response::bodyBuilder()
 	if (!file)
 	{
 		std::cerr << "Requested file open error!\n";
-		//load error page 404??
-		_code = 404;
-		assign_status_phrase();
-		return ("");
+		// setCode(404);
+		handleERROR(404);
+		return;
 	}
 
 	while (getline(file, line))
@@ -200,13 +240,39 @@ std::string	Response::bodyBuilder()
 		body.append("\n");
 		++lineCount;
 	}
-	
+
 	ss << body.size();
 
 	std::cout << "Lines read: " << lineCount << '\n'
 			<< "Chars read: " << ss.str() << std::endl;
 
 	this->_headers["Content-Length"] = ss.str();
+	this->_body = body;
+}
 
-	return(body);
+std::string Response::getMimeType(const std::string &path)
+{
+	size_t dotPos = path.find_last_of('.');
+	if (dotPos == std::string::npos)
+		return "application/octet-stream"; // default binary?
+
+	std::string ext = path.substr(dotPos + 1);
+	if (ext == "html" || ext == "htm") return "text/html";
+	if (ext == "css") return "text/css";
+	if (ext == "js") return "application/javascript";
+	if (ext == "json") return "application/json";
+	if (ext == "png") return "image/png";
+	if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
+	if (ext == "gif") return "image/gif";
+	if (ext == "cgi") return "text/html";
+	//we can add more types here
+	return "application/octet-stream";
+}
+
+bool Response::isCGI(const std::string &path)
+{
+	if (path.find("/cgi-bin/") != std::string::npos) { return true; }
+	if (path.find(".cgi") != std::string::npos) { return true; }		//this would allow to execute scripts which are not in the cgi/bin folder? Maybe we add both conditions in one if?
+
+	return (false);
 }

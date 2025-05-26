@@ -42,7 +42,7 @@ Request& Request::operator=(Request &other)
 	return (*this);
 }
 
-int Request::parse_request(const std::string &request_raw)
+void	Request::parse_request(const std::string &request_raw)
 {
 	std::istringstream rstream(request_raw); //turn string into stream so it can be read line by line with getline
 	std::string line;
@@ -52,22 +52,32 @@ int Request::parse_request(const std::string &request_raw)
 		std::istringstream lstream(line); //splits with space as delimiter
 		std::string extra;
 		if (!(lstream >> _method >> _path >> _version) || lstream >> extra) // less than or more than 3 parts
-			return 400;
+			// return 400;
+			this->_code = 400;
 	}
 	// make extra check for header too long for buffer --> code 431
-	if (!parse_headers(rstream))
-		return (400);
+	// URI to long
+	splitURI();
+	std::cout << "PATH: " << _path << ", QUERY: " << _query << std::endl;
+
+	if (parse_headers(rstream) == 1)
+		return ;
+	if (checkURILength() == 1)
+		return ;
 	if (checkPathChars() == 1)
-		return (400);
+		return;
 	if (checkRequestedPath() == 1)
-		return (400);
+		return ;
 	if (checkRequestedFiletype() == 1)
-		return (400);
+		return ;
+
 	std::ostringstream bstream; // body --> if there is no body, this just adds empty string 
 	while (std::getline(rstream, line))
 		bstream << line << "\n";
 	_body = bstream.str();
-	return 200;
+
+	//all checks successfull --> setcode 200
+	this->_code = 200;
 }
 
 int Request::parse_headers(std::istringstream &rstream)
@@ -90,13 +100,18 @@ int Request::parse_headers(std::istringstream &rstream)
 		std::string value = line.substr(pos + 2);
 		trim(key);
 		trim(value);
-		if (key.empty() || value.empty())	// || key != trim(key) || value != trim(value)) //if there is extra whitespace
+		// std::cout << "key: " << key << " // value: " << value << '\n';	//header values for debugging
+		if (key.empty() || value.empty())
 			return 0;
 		_headers[key] = value;
 	}
+
 	if (!blank)
-		return 0; //no empty line after header
-	return 1;
+	{
+		this->_code = 400;
+		return (1); //no empty line after header
+	}
+	return 0;
 }
 
 
@@ -120,3 +135,19 @@ std::string Request::getMethod() { return _method; }
 std::string Request::getPath() { return _path; }
 std::string Request::getVersion() { return _version; }
 std::string Request::getBody() { return _body; }
+std::string Request::getQuery() { return _query; }
+// std::string Request::getConnection() { return _connection; }
+
+
+void	Request::splitURI()
+{
+	size_t pos = _path.find('?');
+	if (pos == std::string::npos)
+		_query = "";
+	else
+	{
+		_query = _path.substr(pos + 1);
+		_path = _path.substr(0, pos);
+	}
+	
+}
