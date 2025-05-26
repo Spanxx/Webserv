@@ -20,7 +20,7 @@ int	Server::createServerSocket(int port)
 	serverAddr.sin_port = htons(port);				//port in network byte order
 
 	int yes = 1;
-	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));	// check if needed?
+	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));	// reuse port
 
 	if (bind(sock, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
 	{
@@ -283,4 +283,4 @@ std::map<std::string, std::string>* Server::getConfigMap(const std::string &conf
 		return (NULL);
 }
 
-Server::ServerException::ServerException(std::string error) : std::runtime_error(error) {}
+Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}

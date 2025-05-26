@@ -6,7 +6,15 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 	int inPipe[2];
 	int outPipe[2];
 
-	if (pipe(inPipe) == -1 || pipe(outPipe) == -1)
+	std::string method = this->_request->getMethod();
+	std::ifstream file(path.c_str());
+	if (!file)
+	{
+		std::cerr << "Requested file open error!\n";
+		handleERROR(404);
+		return;
+	}
+	if ((method == "POST" && pipe(inPipe) == -1) || pipe(outPipe) == -1)
 	{
 		std::cerr << "ERROR: Pipe fail\n";
 		this->handleERROR(500);
@@ -20,12 +28,10 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		this->handleERROR(500);
 		return;
 	}
-	
-	std::string method = this->_request->getMethod();
 
 	if (pid == 0)	//child
 	{
-		std::string methodSTR = "REQUEST_METHOD=" + _request->getMethod();
+		std::string methodSTR = "REQUEST_METHOD=" + method;
 		std::string querySTR = "QUERY_STRING=" + query;
 		
 		char *env[] = {
@@ -37,11 +43,13 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		if (method == "POST")
 		{
 			dup2(inPipe[0], STDIN_FILENO);	// child reads from inPipe
+			close(inPipe[0]);
+			close(inPipe[1]);
 		}
 		dup2(outPipe[1], STDOUT_FILENO);	// child reads from outPipe
 
-		close(inPipe[0]);
-		close(inPipe[1]);
+		// close(inPipe[0]);
+		// close(inPipe[1]);
 		close(outPipe[0]);
 		close(outPipe[1]);
 
@@ -50,7 +58,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		{
 			// perror("ERROR: realpath (child) fail!");
 			std::cerr << "ERROR: realpath (child) fail!\n";
-			this->handleERROR(404);
+			// this->handleERROR(404);
 			exit(EXIT_FAILURE);	// to close the child
 		}
 
@@ -58,7 +66,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		execve(resolved_path, av, env);
 		// perror("execve");
 		std::cerr << "ERROR: execve fail!\n";
-		this->handleERROR(500);
+		// this->handleERROR(500);
 		exit(EXIT_FAILURE);
 	}
 	else	//parent
@@ -70,11 +78,11 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			write(inPipe[1], this->_request->getBody().c_str(), this->_request->getBody().length());
 			close(inPipe[1]);
 		}
-		else
-		{
-			close(inPipe[0]);
-			close(inPipe[1]);
-		}
+		// else
+		// {
+		// 	close(inPipe[0]);
+		// 	close(inPipe[1]);
+		// }
 
 		close(outPipe[1]);
 
@@ -86,9 +94,23 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			output.append(buffer, n);
 
 		close(outPipe[0]);
-		waitpid(pid, NULL, 0);
-		parseCGIOutput(output);
-		setCode(200);
+		int status;
+		waitpid(pid, &status, 0);
+		if (WIFEXITED(status))
+		{
+			int exit_status = WEXITSTATUS(status);
+			if (exit_status == 0)
+			{
+				parseCGIOutput(output);
+				setCode(200);
+			}
+			else
+			{
+				std::cerr << "CGI script exited with status: " << exit_status << std::endl;
+				this->handleERROR(500);
+			}
+		}
+		
 	}
 }
 

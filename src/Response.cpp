@@ -265,6 +265,7 @@ std::string Response::getMimeType(const std::string &path)
 	if (ext == "jpg" || ext == "jpeg") return "image/jpeg";
 	if (ext == "gif") return "image/gif";
 	if (ext == "cgi") return "text/html";
+	if (ext == "py") return "text/html";
 	//we can add more types here
 	return "application/octet-stream";
 }

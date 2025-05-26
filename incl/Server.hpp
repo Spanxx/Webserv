@@ -49,9 +49,9 @@ public:
 	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i);
 	void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i);
 
-	class ServerException : std::runtime_error {
+	class ServerException : public std::runtime_error {
 	public:
-		ServerException(std::string error);
+		ServerException(const std::string &error);
 	};
 
 private:

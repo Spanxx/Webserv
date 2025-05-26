@@ -105,10 +105,12 @@ int	Request::checkRequestedPath()
 	//check for cgi, favicon and html page and add directory
 	if (this->_path == "/favicon.ico")
 		newPath = "www/files" + this->_path;
-	else if (ext == "cgi")
-		newPath = "www/cgi-bin" + this->_path;
 	else if (ext == "html")
 		newPath = "www/html" + this->_path;
+	else if (ext == "py" || ext == "js")
+		newPath = "www/cgi-bin" + this->_path;
+	else
+		newPath = "www" + this->_path;
 
 	this->_path = newPath;
 
