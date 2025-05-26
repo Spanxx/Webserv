@@ -107,7 +107,7 @@ int	Request::checkRequestedPath()
 		newPath = "www/files" + this->_path;
 	else if (ext == "html")
 		newPath = "www/html" + this->_path;
-	else if (ext == "py" || ext == "js")
+	else if (ext == "py" || ext == "js" || ext == "cgi")
 		newPath = "www/cgi-bin" + this->_path;
 	else
 		newPath = "www" + this->_path;

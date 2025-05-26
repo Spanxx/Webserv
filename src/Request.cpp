@@ -71,6 +71,7 @@ void	Request::parse_request(const std::string &request_raw)
 	if (checkRequestedFiletype() == 1)
 		return ;
 
+/* THIS NEEDS FIXING! ACTUAL PARSING OF THE BODY AND HOW TO HANDLE IT, NO GETLINE */
 	std::ostringstream bstream; // body --> if there is no body, this just adds empty string 
 	while (std::getline(rstream, line))
 		bstream << line << "\n";
@@ -141,6 +142,14 @@ bool Request::getConnection()
 	if (_headers["Connection"] == "keep-alive")
 		return true;
 	return false;
+}
+std::string Request::getHeader(const std::string &key) 
+{ 
+	std::map<std::string, std::string>::const_iterator it = _headers.find(key);
+	if (it != _headers.end())
+        	return it->second;
+	std::cout << "Header " << key << " does not exist\n";
+	return ""; 
 }
 
 

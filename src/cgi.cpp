@@ -33,10 +33,14 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 	{
 		std::string methodSTR = "REQUEST_METHOD=" + method;
 		std::string querySTR = "QUERY_STRING=" + query;
+		std::string contentType = "CONTENT_TYPE=" + _request->getHeader("Content-Type");
+		std::string contentLength = "CONTENT_LENGTH=" + _request->getHeader("Content-Length");
 		
 		char *env[] = {
 			const_cast<char *>(methodSTR.c_str()),
 			const_cast<char *>(querySTR.c_str()),
+			const_cast<char *>(contentType.c_str()),
+			const_cast<char *>(contentLength.c_str()),
 			NULL
 		};
 
@@ -74,8 +78,16 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		if (method == "POST")
 		{
 			close(inPipe[0]);
+			std::string body = this->_request->getBody();
+    			std::cerr << "DEBUG: POST body length: " << body.size() << std::endl;
+   			if (body.empty())
+       				std::cerr << "WARNING: POST body is empty!" << std::endl;
+
+    			ssize_t written = write(inPipe[1], body.c_str(), body.size());
+    			std::cerr << "DEBUG: Written bytes to CGI stdin: " << written << std::endl;
+
 			// write content from the post request to the input for read
-			write(inPipe[1], this->_request->getBody().c_str(), this->_request->getBody().length());
+			//write(inPipe[1], this->_request->getBody().c_str(), this->_request->getBody().length());
 			close(inPipe[1]);
 		}
 		// else

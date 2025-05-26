@@ -4,18 +4,6 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Our beautiful webserver</title>
-</head>
-<body></body>
-	<h1>Hello from C++ Server with created response!</h1>
-	<p>"I used to be addicted to soap, but I'm clean now."</p>
-	<br><br>
-	<h2>Upload a File</h2>
-
-	<form action="cgi-bin/upload.js" method="POST" enctype="multipart/form-data">
-		<input type="file" name="file" multiple accept="image/jpeg, image/png">
-		<button type="submit">Upload</button>
-	</form>
-
 	<style>
 		body {
 		font-family: Arial, sans-serif;
@@ -56,5 +44,17 @@
 		width: 50%;
 		}
 	</style>
+</head>
+<body>
+	<h1>Hello from C++ Server with created response!</h1>
+	<p>"I used to be addicted to soap, but I'm clean now."</p>
+	<br><br>
+	<h2>Upload a File</h2>
+
+	<form action="/upload.py" method="POST" enctype="multipart/form-data">
+		<input type="file" name="file">
+		<button type="submit">Upload</button>
+	</form>
+</body>
 </html>
 
