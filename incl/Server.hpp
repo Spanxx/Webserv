@@ -46,8 +46,10 @@ public:
 	void	portHandler();
 
 	void	make_new_connections(time_t &now, int server_fd);
-	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i);
-	void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i);
+	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+	void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+	void	close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+
 
 	class ServerException : public std::runtime_error {
 	public:

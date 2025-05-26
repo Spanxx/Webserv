@@ -136,7 +136,12 @@ std::string Request::getPath() { return _path; }
 std::string Request::getVersion() { return _version; }
 std::string Request::getBody() { return _body; }
 std::string Request::getQuery() { return _query; }
-// std::string Request::getConnection() { return _connection; }
+bool Request::getConnection()
+{ 
+	if (_headers["Connection"] == "keep-alive")
+		return true;
+	return false;
+}
 
 
 void	Request::splitURI()

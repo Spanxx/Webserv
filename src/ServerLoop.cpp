@@ -6,51 +6,6 @@ void	Server::portHandler()
 {
 	
 }
-
-// void	Server::serverLoop()
-// {
-// 	int pollTimeout = 5000;		//timeout --> checks for new connections (milliseconds)
-// 	int clientTimeout = 50;		//timeout before a client gets disconnected (seconds)
-// 	std::map<int, std::string> response_collector;
-
-// 	fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
-// 	while (!stopSignal)
-// 	{
-// 		int ret = poll(_socketArray.data(), _socketArray.size(), pollTimeout);
-// 		(void)ret;
-		
-// 		time_t now = time(NULL);
-
-// 		for (size_t i = 0; i < _socketArray.size(); ++i)
-// 		{
-// 			//Timeout check for each client
-// 			if (_socketArray[i].fd != _serverSocket && now - _lastActive[_socketArray[i].fd] > clientTimeout)
-// 			{
-// 				std::cout << "Timeout --> client fd " << _socketArray[i].fd << " is closed!" << std::endl;
-// 				close(_socketArray[i].fd);
-// 				_lastActive.erase(_socketArray[i].fd);
-// 				_socketArray.erase(_socketArray.begin() + i);
-// 				--i;
-// 				continue;
-// 			}
-
-// 			if (_socketArray[i].revents & POLLIN)   //return a non-zero value if the POLLIN bit is set	//handles the client connection
-// 				read_from_connection(now, response_collector, i);
-// 			else if (_socketArray[i].revents & POLLOUT)
-// 				write_to_connection(response_collector, i);
-// 			else if (_socketArray[i].revents & POLLERR || _socketArray[i].revents & POLLHUP || _socketArray[i].revents & POLLNVAL) //closed connection / EOF / error
-// 			{
-// 				std::cout << "REVENTS: client fd " << _socketArray[i].fd << " is closed!" << std::endl;
-// 				close(_socketArray[i].fd);
-// 				_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
-// 				--i;
-// 				continue;
-// 			}
-// 		}
-// 	}
-// 	closeServer();
-// }
-
 bool Server::isServerSocket(int fd)
 {
 	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
@@ -66,6 +21,7 @@ void	Server::serverLoop()
 	int pollTimeout = 5000;		//timeout --> checks for new connections (milliseconds)
 	int clientTimeout = 50;		//timeout before a client gets disconnected (seconds)
 	std::map<int, std::string> response_collector;
+	std::map<int, bool> keepAlive;
 
 	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
 		fcntl(this->_serverSocket[i], F_SETFL, O_NONBLOCK);
@@ -83,23 +39,18 @@ void	Server::serverLoop()
 			if (!isServerSocket(_socketArray[i].fd) && now - _lastActive[_socketArray[i].fd] > clientTimeout)
 			{
 				std::cout << "Timeout --> client fd " << _socketArray[i].fd << " is closed!" << std::endl;
-				close(_socketArray[i].fd);
-				_lastActive.erase(_socketArray[i].fd);
-				_socketArray.erase(_socketArray.begin() + i);
-				--i;
+				close_erase(response_collector, i, keepAlive);
 				continue;
 			}
 
 			if (_socketArray[i].revents & POLLIN)   //return a non-zero value if the POLLIN bit is set	//handles the client connection
-				read_from_connection(now, response_collector, i);
+				read_from_connection(now, response_collector, i, keepAlive);
 			else if (_socketArray[i].revents & POLLOUT)
-				write_to_connection(response_collector, i);
+				write_to_connection(response_collector, i, keepAlive);
 			else if (_socketArray[i].revents & POLLERR || _socketArray[i].revents & POLLHUP || _socketArray[i].revents & POLLNVAL) //closed connection / EOF / error
 			{
 				std::cout << "REVENTS: client fd " << _socketArray[i].fd << " is closed!" << std::endl;
-				close(_socketArray[i].fd);
-				_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
-				--i;
+				close_erase(response_collector, i, keepAlive);
 				continue;
 			}
 		}
@@ -139,7 +90,7 @@ void Server::make_new_connections(time_t &now, int server_fd)
 }
 
 
-void Server::read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i)
+void Server::read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
 {
 	if (isServerSocket(_socketArray[i].fd))
 	{
@@ -157,11 +108,7 @@ void Server::read_from_connection(time_t &now, std::map<int, std::string> &respo
 	if (n == 0)	//if there is nothing to read, it goes in the statement????
 	{
 		std::cout << "[Browser closed] Client fd " << _socketArray[i].fd << " is closed!" << std::endl;
-		close(_socketArray[i].fd);
-		_lastActive.erase(_socketArray[i].fd);
-		response_collector.erase(_socketArray[i].fd);
-		_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
-		--i;
+		close_erase(response_collector, i, keepAlive);
 		return;
 	}
 				
@@ -172,6 +119,7 @@ void Server::read_from_connection(time_t &now, std::map<int, std::string> &respo
 	std::cout << "Request from client fd " << _socketArray[i].fd << std::endl;
 	Request *request = new Request(this);
 	request->parse_request(buffer);
+	keepAlive[_socketArray[i].fd] = request->getConnection();
 	// request->setCode(request->parse_request(buffer)); // set error codes, depending on which the response will be sent
 				
 	Response *response = new Response(request);
@@ -186,26 +134,39 @@ void Server::read_from_connection(time_t &now, std::map<int, std::string> &respo
 }
 
 
-void Server::write_to_connection(std::map<int, std::string> &response_collector, size_t &i)
+void Server::write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
 {
 	std::string resp = response_collector[_socketArray[i].fd];
-				ssize_t sent = send(_socketArray[i].fd, resp.c_str(), resp.size(), 0);
-				if (sent < 0)
-				{
-					std::cerr << "Send error on fd " << _socketArray[i].fd << std::endl;
-					close(_socketArray[i].fd);
-					_lastActive.erase(_socketArray[i].fd);
-					response_collector.erase(_socketArray[i].fd);
-					_socketArray.erase(_socketArray.begin() + i);	//erases and automatically shifts all later elements one forward
-					--i;
-					return;
-				}
-				if ((size_t)sent < resp.size())
-					response_collector[_socketArray[i].fd] = resp.substr(sent); //cuts off first sent amount of bytes and updates response string
-				else
-				{
-					response_collector.erase(_socketArray[i].fd);
-					_socketArray[i].events = POLLIN; //switch back to read mode
-					std::cout << "Switched to POLLIN\n";
-				}
+
+	ssize_t sent = send(_socketArray[i].fd, resp.c_str(), resp.size(), 0);
+	if (sent < 0)
+	{
+		std::cerr << "Send error on fd " << _socketArray[i].fd << std::endl;
+		close_erase(response_collector, i, keepAlive);
+		return;
+	}
+	if ((size_t)sent < resp.size())
+		response_collector[_socketArray[i].fd] = resp.substr(sent); //cuts off first sent amount of bytes and updates response string
+	else
+	{
+		
+		if (keepAlive[_socketArray[i].fd])
+		{
+			response_collector.erase(_socketArray[i].fd);
+			_socketArray[i].events = POLLIN; //switch back to read mode
+			std::cout << "Switched to POLLIN\n";
+		}
+		else
+			close_erase(response_collector, i, keepAlive);
+	}
+}
+
+void	Server::close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
+{
+	close(_socketArray[i].fd);
+	_lastActive.erase(_socketArray[i].fd);
+	response_collector.erase(_socketArray[i].fd);
+	keepAlive.erase(_socketArray[i].fd);
+	_socketArray.erase(_socketArray.begin() + i);
+	--i;
 }
