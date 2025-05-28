@@ -14,7 +14,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		handleERROR(404);
 		return;
 	}
-	if ((method == "POST" && pipe(inPipe) == -1) || pipe(outPipe) == -1)
+	if (pipe(inPipe) == -1 || pipe(outPipe) == -1)
 	{
 		std::cerr << "ERROR: Pipe fail\n";
 		this->handleERROR(500);
@@ -33,23 +33,22 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 	{
 		std::string methodSTR = "REQUEST_METHOD=" + method;
 		std::string querySTR = "QUERY_STRING=" + query;
+		std::string contentType = "CONTENT_TYPE=" + _request->getHeader("Content-Type");
+		std::string contentLength = "CONTENT_LENGTH=" + _request->getHeader("Content-Length");
 		
 		char *env[] = {
 			const_cast<char *>(methodSTR.c_str()),
 			const_cast<char *>(querySTR.c_str()),
+			const_cast<char *>(contentType.c_str()),
+			const_cast<char *>(contentLength.c_str()),
 			NULL
 		};
 
-		if (method == "POST")
-		{
-			dup2(inPipe[0], STDIN_FILENO);	// child reads from inPipe
-			close(inPipe[0]);
-			close(inPipe[1]);
-		}
-		dup2(outPipe[1], STDOUT_FILENO);	// child reads from outPipe
+		dup2(inPipe[0], STDIN_FILENO);	
+		dup2(outPipe[1], STDOUT_FILENO);
 
-		// close(inPipe[0]);
-		// close(inPipe[1]);
+		close(inPipe[0]);
+		close(inPipe[1]);
 		close(outPipe[0]);
 		close(outPipe[1]);
 
@@ -71,19 +70,21 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 	}
 	else	//parent
 	{
+		close(inPipe[0]);
 		if (method == "POST")
 		{
-			close(inPipe[0]);
-			// write content from the post request to the input for read
-			write(inPipe[1], this->_request->getBody().c_str(), this->_request->getBody().length());
-			close(inPipe[1]);
-		}
-		// else
-		// {
-		// 	close(inPipe[0]);
-		// 	close(inPipe[1]);
-		// }
+			std::string body = this->_request->getBody();
+    			std::cerr << "DEBUG: POST body length: " << body.size() << std::endl;
+   			if (body.empty())
+       				std::cerr << "WARNING: POST body is empty!" << std::endl;
 
+    			ssize_t written = write(inPipe[1], body.c_str(), body.size());
+    			std::cerr << "DEBUG: Written bytes to CGI stdin: " << written << std::endl;
+
+			// write content from the post request to the input for read
+			//write(inPipe[1], this->_request->getBody().c_str(), this->_request->getBody().length());
+		}
+		close(inPipe[1]);
 		close(outPipe[1]);
 
 		char buffer[1024];
@@ -92,8 +93,8 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 
 		while ((n = read(outPipe[0], buffer, sizeof(buffer))) > 0)
 			output.append(buffer, n);
-
 		close(outPipe[0]);
+	
 		int status;
 		waitpid(pid, &status, 0);
 		if (WIFEXITED(status))

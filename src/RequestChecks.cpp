@@ -46,8 +46,8 @@ int Request::checkURILength()
 
 int	Request::checkPathChars()
 {
-	const std::string allowedChars = "-_./~";	//inclued A-Z a-Z 0-9 (checked with isalnum())
-	const std::string reservedChars = "!*'();:@&=+$,/?#";
+	const std::string allowedChars = "-_./~ ";	//inclued A-Z a-Z 0-9 (checked with isalnum())
+	const std::string reservedChars = "!*'();:@&=+$,/?#%";
 	const std::string unsafeChars = "`<>\"{}";
 
 	for (int i = 0; this->_path[i]; ++i)
@@ -58,12 +58,12 @@ int	Request::checkPathChars()
 		if (std::isalnum(c) || allowedChars.find(c) != std::string::npos)
 			continue;
 			
-		// Handle percent-encoding: %XX (3 characters total)
-		if (c == '%' && std::isxdigit(this->_path[i + 1]) && std::isxdigit(this->_path[i + 2]))
-		{
-			i += 2; // skip over the two hex digits
-			continue;
-		}
+		// // Handle percent-encoding: %XX (3 characters total)
+		// if (c == '%' && std::isxdigit(this->_path[i + 1]) && std::isxdigit(this->_path[i + 2]))
+		// {
+		// 	i += 2; // skip over the two hex digits
+		// 	continue;
+		// }
 
 		//Reserved raw chars - not encoded
 		if (reservedChars.find(c) != std::string::npos)
@@ -107,8 +107,10 @@ int	Request::checkRequestedPath()
 		newPath = "www/files" + this->_path;
 	else if (ext == "html")
 		newPath = "www/html" + this->_path;
-	else if (ext == "py" || ext == "js")
+	else if (ext == "py" || ext == "js" || ext == "cgi")
 		newPath = "www/cgi-bin" + this->_path;
+	else if (ext == "png" || ext == "jpg")
+		newPath = "www/files" + this->_path;
 	else
 		newPath = "www" + this->_path;
 

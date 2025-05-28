@@ -206,9 +206,10 @@ std::string	Response::headersBuilder()
 			<< "Host: webServ42" << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
 			<< "Connection: " << this->_headers["Connection"] << "\r\n"			//is always empty??
 			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
-			<< "Content-Length: " << strToInt(this->_headers["Content-Length"]) << "\r\n"
-			<< "Location: " << this->_request->getPath() << "\r\n"
-			<< "\r\n";	//empty newline to seperate header and body
+			<< "Content-Length: " << strToInt(this->_headers["Content-Length"]) << "\r\n";
+			if (this->_code >= 300 && this->_code < 400)
+				header << "Location: " << this->_request->getPath() << "\r\n";
+			header << "\r\n";	//empty newline to seperate header and body
 
 	std::cout << "Location for redir: " << this->_request->getPath() << '\n';
 
@@ -218,14 +219,14 @@ std::string	Response::headersBuilder()
 void	Response::bodyBuilder()
 {
 	std::string 		line;
-	std::string 		body;
+	
 	std::string			path;
 	std::stringstream	ss;
-	int					lineCount = 0;
+	//int					lineCount = 0;
 
 	path = this->_request->getPath();
 	std::cout << "Trying to open: " << path << '\n';
-	std::ifstream file(path.c_str());
+	std::ifstream file(path.c_str(), std::ios::binary);
 	if (!file)
 	{
 		std::cerr << "Requested file open error!\n";
@@ -233,18 +234,17 @@ void	Response::bodyBuilder()
 		handleERROR(404);
 		return;
 	}
-
-	while (getline(file, line))
-	{
-		body.append(line);
-		body.append("\n");
-		++lineCount;
-	}
+	std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	// while (getline(file, line))
+	// {
+	// 	body.append(line);
+	// 	body.append("\n");
+	// 	++lineCount;
+	// }
 
 	ss << body.size();
 
-	std::cout << "Lines read: " << lineCount << '\n'
-			<< "Chars read: " << ss.str() << std::endl;
+	std::cout << "Bytes read: " << ss.str() << std::endl;
 
 	this->_headers["Content-Length"] = ss.str();
 	this->_body = body;
