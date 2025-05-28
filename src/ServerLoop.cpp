@@ -118,12 +118,12 @@ void Server::read_from_connection(time_t &now, std::map<int, std::string> &respo
 	if (header_end == std::string::npos) //still no header end 
 		return;
 	// Extract headers and check Content-Length
-	if (!_requestCollector[_socketArray[i].fd])
+	if (!_requestCollector[_socketArray[i].fd]) //request is complete
 	{
 		std::string header_part = data.substr(0, header_end + 4);
 		std::cout << "Request from client fd " << _socketArray[i].fd << std::endl;
 		Request *request = new Request(this);
-		request->parse_request(header_part);
+		request->parse_request(header_part); //change name here because it's only header parsing
 		//keepAlive[_socketArray[i].fd] = request->getConnection();
 		_requestCollector[_socketArray[i].fd] = request;
 		
