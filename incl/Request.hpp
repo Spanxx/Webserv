@@ -20,6 +20,7 @@ class Request
 
 		// int	parse_request(const std::string &request_raw);
 		void	parse_request(const std::string &request_raw);
+		void	append_body(const std::string &body_part);
 		void	splitURI();
 		int		parse_headers(std::istringstream &rstream);
 		int		checkURILength();
@@ -36,6 +37,7 @@ class Request
 		std::string getQuery();
 		bool getConnection();
 		std::string getHeader(const std::string &key);
+		int getContentLength();
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 
@@ -45,6 +47,7 @@ class Request
 		std::string _query;
 		std::string _version;
 		std::map<std::string, std::string> _headers;
+		int _content_length;
 		std::string _body;
 		int _code;
 		Server 		*_server;

@@ -20,6 +20,8 @@
 
 extern volatile sig_atomic_t stopSignal;
 
+class Request;
+
 class Server
 {
 public:
@@ -60,6 +62,8 @@ private:
 	int									_numPorts;
 	std::vector<int>					_ports;
 	std::vector<int>					_serverSocket;
+	std::map<int, std::string> 		_socketBuffers;
+	std::map<int, Request*> 		_requestCollector;
 	std::vector<struct pollfd>			_socketArray;
 	std::map<int, time_t> 				_lastActive;
 	std::map<std::string, std::string>	_serverConfig;
