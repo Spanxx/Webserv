@@ -16,5 +16,6 @@ void replaceAll(std::string &str, const std::string &placeholder, const std::str
 //	### Server Utils ###
 
 std::string checkFilePath(char *av);
+std::string urlDecode(const std::string &str);
 
 #endif

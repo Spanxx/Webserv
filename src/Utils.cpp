@@ -1,5 +1,7 @@
 
 #include "../incl/Utils.hpp"
+#include <cctype>  // for isxdigit
+#include <cstdio>  // for sscanf
 
 std::string trim(const std::string &str)
 {
@@ -35,4 +37,39 @@ void replaceAll(std::string &str, const std::string &placeholder, const std::str
 		str.replace(start, placeholder.length(), goal);
 		start += goal.length();
 	}
+}
+
+
+std::string urlDecode(const std::string &str)
+{
+	std::string result;
+	size_t i = 0;
+	while (i < str.length())
+	{
+        	if (str[i] == '%')
+        	{
+			if (i + 2 < str.length() && std::isxdigit(str[i+1]) && std::isxdigit(str[i+2]))
+			{
+                		char hex[3] = { str[i+1], str[i+2], '\0' };
+                		unsigned int val;
+                		sscanf(hex, "%x", &val); // converts hex string to integer
+                		result += static_cast<char>(val);
+                		i += 3;
+            		}
+            		else
+            		{
+                		// malformed %
+                		result += str[i++];
+				return "";
+            		}
+        	}
+        	else if (str[i] == '+') // '+' in URL encoding means space, so convert it
+        	{
+			result += ' ';
+			++i;
+        	}
+        	else
+        		result += str[i++]; // Normal character, just append
+    }
+    return result;
 }

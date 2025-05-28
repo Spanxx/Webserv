@@ -57,6 +57,12 @@ void	Request::parse_request(const std::string &request_raw)
 	}
 	// make extra check for header too long for buffer --> code 431
 	// URI to long
+	_path = urlDecode(_path);
+	if (_path.empty())
+	{
+		this->_code = 400;
+		return;
+	}
 	splitURI();
 	std::cout << "PATH: " << _path << ", QUERY: " << _query << std::endl;
 
@@ -177,3 +183,5 @@ void	Request::splitURI()
 	}
 	
 }
+
+
