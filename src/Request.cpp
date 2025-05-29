@@ -76,14 +76,6 @@ void	Request::check_headers(const std::string &headers_raw)
 		return ;
 	if (checkRequestedFiletype() == 1)
 		return ;
-
-// /* THIS NEEDS FIXING! ACTUAL PARSING OF THE BODY AND HOW TO HANDLE IT, NO GETLINE */
-// 	std::ostringstream bstream; // body --> if there is no body, this just adds empty string 
-// 	while (std::getline(rstream, line))
-// 		bstream << line << "\n";
-// 	_body = bstream.str();
-
-	//all checks successfull --> setcode 200
 	this->_code = 200;
 }
 

@@ -36,6 +36,7 @@ $(OBJDIR)/%.o: %.cpp
 #Clean up
 clean:
 	$(RM) $(OBJ)
+	$(RM) www/files/uploads
 
 fclean: clean
 	$(RM) $(NAME)

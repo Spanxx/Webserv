@@ -120,48 +120,7 @@ void Server::read_from_connection(time_t &now, std::map<int, std::string> &respo
 	// Extract headers and check Content-Length
 	if (_requestCollector.find(_socketArray[i].fd) == _requestCollector.end()) //no entry made yet for this request
 		initialize_request(_socketArray[i].fd, data, header_end);
-	// {
-	// 	std::string header_part = data.substr(0, header_end + 4);
-	// 	std::cout << "Request from client fd " << _socketArray[i].fd << std::endl;
-	// 	Request *request = new Request(this);
-	// 	request->check_headers(header_part);
-	// 	//keepAlive[_socketArray[i].fd] = request->getConnection();
-	// 	_requestCollector[_socketArray[i].fd] = request;
-		
-	// }
-	else
-		handle_request(data, header_end, response_collector, keepAlive, i);
-
-
-	// Request *request = _requestCollector[_socketArray[i].fd];
-	// int content_length = request->getContentLength();
-	// if (content_length < 0)
-	// {
-	// 	std::cerr << "Missing or invalid Content-Length\n";
-	// 	close_erase(response_collector, i, keepAlive);
-	// 	return;
-	// }
-	// size_t total_required = header_end + 4 + content_length;
-	// if (content_length == 0 || data.size() >= total_required)
-	// {
-	// 	std::string body_part;
-	// 	if (content_length > 0)
-	// 		body_part = data.substr(header_end + 4, content_length);
-	// 	request->append_body(body_part);
-	// 	keepAlive[_socketArray[i].fd] = request->getConnection();
-		
-	// 	Response *response = new Response(request);
-	// 	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd); 
-	// 	_socketArray[i].events = POLLOUT; //switch to writing
-	// 	std::cout << "Switched to POLLOUT\n";
-
-	// 	delete request;
-	// 	delete response;
-	// 	_requestCollector.erase(_socketArray[i].fd);
-	// 	_socketBuffers.erase(_socketArray[i].fd);
-	// }
-	// else //still waiting for body data - wait for next read
-	// 	return;
+	handle_request(data, header_end, response_collector, keepAlive, i);
 }
 
 

@@ -82,35 +82,6 @@ void Response::assign_status_phrase()
 	_status["phrase"] = "Not found";
 }
 
-/*void Response::make_status_page_string(unsigned int code)
-{
-	if (code)
-	{
-		_code = code;
-		assign_status_phrase();
-	}
-	// read file into string
-	std::ifstream file("content/data/status_page.html");
-	if (!file)
-    	{
-		std::cerr << "Error opening status code file\n";
-		return;
-		//return NULL;
-	}
- 	std::stringstream buffer;
-	buffer  << file.rdbuf(); //rdbuf to read entire content of file stream into stringstream
-	std::string html = buffer.str();
-
-	//
-	replaceAll(html, "{{CODE}}", _status["code"]);
-	replaceAll(html, "{{MESSAGE}}", _status["phrase"]);
-	std::stringstream ss;
-	ss << html.size();
-	this->_headers["Content-Length"] = ss.str();
-	this->_body = html;
-	//return html;
-}*/
-
 void	Response::handleERROR(int statusCode)
 {
 	this->_code = statusCode;
@@ -186,8 +157,8 @@ std::string Response::responseBuilder()
 	response.append(this->headersBuilder());
 	response.append(this->_body);
 
-	if (this->_request->getPath() != "www/files/favicon.ico")
-		std::cout << " --> Response:\n" << response << std::endl;
+	// if (this->_request->getPath() != "www/files/favicon.ico")
+	// 	std::cout << " --> Response:\n" << response << std::endl;
 	return (response);
 }
 
@@ -204,7 +175,7 @@ std::string	Response::headersBuilder()
 			<< this->_status["phrase"] << "\r\n"
 			// << this->_request->getPath() << "\r\n"							// needed?
 			<< "Host: webServ42" << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
-			<< "Connection: " << this->_headers["Connection"] << "\r\n"			//is always empty??
+			<< "Connection: " << this->_request->getHeader("Connection") << "\r\n"
 			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
 			<< "Content-Length: " << strToInt(this->_headers["Content-Length"]) << "\r\n";
 			if (this->_code >= 300 && this->_code < 400)
@@ -234,14 +205,9 @@ void	Response::bodyBuilder()
 		handleERROR(404);
 		return;
 	}
-	std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-	// while (getline(file, line))
-	// {
-	// 	body.append(line);
-	// 	body.append("\n");
-	// 	++lineCount;
-	// }
-
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string body = buffer.str();
 	ss << body.size();
 
 	std::cout << "Bytes read: " << ss.str() << std::endl;
