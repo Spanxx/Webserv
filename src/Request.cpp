@@ -42,11 +42,11 @@ Request& Request::operator=(Request &other)
 	return (*this);
 }
 
-void	Request::parse_request(const std::string &request_raw)
+void	Request::check_headers(const std::string &headers_raw)
 {
-	std::istringstream rstream(request_raw); //turn string into stream so it can be read line by line with getline
+	std::istringstream rstream(headers_raw); //turn string into stream so it can be read line by line with getline
 	std::string line;
-	std::cout << "REQUEST RAW: " << request_raw << "UNTIL HERE" << std::endl;
+	std::cout << "HEADERS RAW: " << headers_raw << "UNTIL HERE" << std::endl;
 	if (std::getline(rstream, line))
 	{
 		std::istringstream lstream(line); //splits with space as delimiter
@@ -66,7 +66,7 @@ void	Request::parse_request(const std::string &request_raw)
 	splitURI();
 	std::cout << "PATH: " << _path << ", QUERY: " << _query << std::endl;
 
-	if (parse_headers(rstream) == 1)
+	if (split_headers(rstream) == 1)
 		return ;
 	if (checkURILength() == 1)
 		return ;
@@ -87,7 +87,7 @@ void	Request::parse_request(const std::string &request_raw)
 	this->_code = 200;
 }
 
-int Request::parse_headers(std::istringstream &rstream)
+int Request::split_headers(std::istringstream &rstream)
 {
 	std::string line;
 	bool blank = false;

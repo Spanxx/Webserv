@@ -118,46 +118,50 @@ void Server::read_from_connection(time_t &now, std::map<int, std::string> &respo
 	if (header_end == std::string::npos) //still no header end 
 		return;
 	// Extract headers and check Content-Length
-	if (!_requestCollector[_socketArray[i].fd]) //request is complete
-	{
-		std::string header_part = data.substr(0, header_end + 4);
-		std::cout << "Request from client fd " << _socketArray[i].fd << std::endl;
-		Request *request = new Request(this);
-		request->parse_request(header_part); //change name here because it's only header parsing
-		//keepAlive[_socketArray[i].fd] = request->getConnection();
-		_requestCollector[_socketArray[i].fd] = request;
+	if (_requestCollector.find(_socketArray[i].fd) == _requestCollector.end()) //no entry made yet for this request
+		initialize_request(_socketArray[i].fd, data, header_end);
+	// {
+	// 	std::string header_part = data.substr(0, header_end + 4);
+	// 	std::cout << "Request from client fd " << _socketArray[i].fd << std::endl;
+	// 	Request *request = new Request(this);
+	// 	request->check_headers(header_part);
+	// 	//keepAlive[_socketArray[i].fd] = request->getConnection();
+	// 	_requestCollector[_socketArray[i].fd] = request;
 		
-	}
+	// }
+	else
+		handle_request(data, header_end, response_collector, keepAlive, i);
 
-	Request *request = _requestCollector[_socketArray[i].fd];
-	int content_length = request->getContentLength();
-	if (content_length < 0)
-	{
-		std::cerr << "Missing or invalid Content-Length\n";
-		close_erase(response_collector, i, keepAlive);
-		return;
-	}
-	size_t total_required = header_end + 4 + content_length;
-	if (content_length == 0 || data.size() >= total_required)
-	{
-		std::string body_part;
-		if (content_length > 0)
-			body_part = data.substr(header_end + 4, content_length);
-		request->append_body(body_part);
-		keepAlive[_socketArray[i].fd] = request->getConnection();
+
+	// Request *request = _requestCollector[_socketArray[i].fd];
+	// int content_length = request->getContentLength();
+	// if (content_length < 0)
+	// {
+	// 	std::cerr << "Missing or invalid Content-Length\n";
+	// 	close_erase(response_collector, i, keepAlive);
+	// 	return;
+	// }
+	// size_t total_required = header_end + 4 + content_length;
+	// if (content_length == 0 || data.size() >= total_required)
+	// {
+	// 	std::string body_part;
+	// 	if (content_length > 0)
+	// 		body_part = data.substr(header_end + 4, content_length);
+	// 	request->append_body(body_part);
+	// 	keepAlive[_socketArray[i].fd] = request->getConnection();
 		
-		Response *response = new Response(request);
-		response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd); 
-		_socketArray[i].events = POLLOUT; //switch to writing
-		std::cout << "Switched to POLLOUT\n";
+	// 	Response *response = new Response(request);
+	// 	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd); 
+	// 	_socketArray[i].events = POLLOUT; //switch to writing
+	// 	std::cout << "Switched to POLLOUT\n";
 
-		delete request;
-		delete response;
-		_requestCollector.erase(_socketArray[i].fd);
-		_socketBuffers.erase(_socketArray[i].fd);
-	}
-	else //still waiting for body data - wait for next read
-		return;
+	// 	delete request;
+	// 	delete response;
+	// 	_requestCollector.erase(_socketArray[i].fd);
+	// 	_socketBuffers.erase(_socketArray[i].fd);
+	// }
+	// else //still waiting for body data - wait for next read
+	// 	return;
 }
 
 
@@ -196,4 +200,51 @@ void	Server::close_erase(std::map<int, std::string> &response_collector, size_t 
 	keepAlive.erase(_socketArray[i].fd);
 	_socketArray.erase(_socketArray.begin() + i);
 	--i;
+	std::map<int, Request*>::iterator it = _requestCollector.find(_socketArray[i].fd);
+	if (it != _requestCollector.end())
+	{
+		delete it->second;
+		_requestCollector.erase(it);
+	}
+}
+
+void Server::initialize_request(int fd, const std::string &data, size_t header_end)
+{
+	std::string header_part = data.substr(0, header_end + 4);
+	std::cout << "Request from client fd " << fd << std::endl;
+		Request *request = new Request(this);
+		request->check_headers(header_part);
+		//keepAlive[_socketArray[i].fd] = request->getConnection();
+		_requestCollector[fd] = request;
+}
+
+void Server::handle_request(const std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i)
+{
+	Request *request = _requestCollector[_socketArray[i].fd];
+	int content_length = request->getContentLength();
+	if (content_length < 0)
+	{
+		std::cerr << "Missing or invalid Content-Length\n";
+		close_erase(response_collector, i, keepAlive);
+		return;
+	}
+	size_t total_required = header_end + 4 + content_length;
+	if (content_length == 0 || data.size() >= total_required)
+	{
+		std::string body_part;
+		if (content_length > 0)
+			body_part = data.substr(header_end + 4, content_length);
+		request->append_body(body_part);
+		keepAlive[_socketArray[i].fd] = request->getConnection();
+		
+		Response *response = new Response(request);
+		response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd); 
+		_socketArray[i].events = POLLOUT; //switch to writing
+		std::cout << "Switched to POLLOUT\n";
+
+		delete request;
+		delete response;
+		_requestCollector.erase(_socketArray[i].fd);
+		_socketBuffers.erase(_socketArray[i].fd);
+	}
 }

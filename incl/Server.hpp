@@ -49,6 +49,8 @@ public:
 
 	void	make_new_connections(time_t &now, int server_fd);
 	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+	void	initialize_request(int fd, const std::string &data, size_t header_end);
+	void	handle_request(const std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i);
 	void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
 	void	close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
 

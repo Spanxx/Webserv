@@ -19,10 +19,10 @@ class Request
 		Request& operator=(Request &other);
 
 		// int	parse_request(const std::string &request_raw);
-		void	parse_request(const std::string &request_raw);
+		void	check_headers(const std::string &headers_raw);
 		void	append_body(const std::string &body_part);
 		void	splitURI();
-		int		parse_headers(std::istringstream &rstream);
+		int		split_headers(std::istringstream &rstream);
 		int		checkURILength();
 		int		checkPathChars();
 		int		checkRequestedPath();
