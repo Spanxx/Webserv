@@ -46,6 +46,7 @@ int Response::getCode() { return _code; }
 
 std::string Response::process_request(int client_fd) // Every handler shoudl update _body, _code and the headers are built in the end
 {
+	(void)client_fd;
 	this->assign_status_phrase();
 	if (_code != 200)
 		handleERROR(this->_code);
@@ -54,7 +55,7 @@ std::string Response::process_request(int client_fd) // Every handler shoudl upd
 	else if (_request->getMethod() == "POST")
 		handlePOST();
 	else if (_request->getMethod() == "DELETE")
-		handleDELETE(client_fd);
+		handleDELETE();
 	std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	return responseBuilder();
@@ -144,9 +145,22 @@ void	Response::handlePOST()
 		// bodyBuilder();
 }
 
-void	Response::handleDELETE(int client_fd)
+void	Response::handleDELETE()
 {
-	(void)client_fd;
+	//Pending handle the files with space in the name
+	std::string uri = this->_request->getPath();
+	if (access(uri.c_str(), F_OK) != 0)
+	{
+		handleERROR(404); //Maybe we should handle this differently, like return 200 and just not delete the file?
+		return;
+	}
+	if (std::remove(uri.c_str()) != 0)
+	{
+		handleERROR(500); //Maybe we should handle this differently, like return 200 and just not delete the file?
+		return;
+	}
+	this->setCode(200);
+	this->_headers["Content-Length"] = "0";
 }
 
 std::string Response::responseBuilder()
@@ -169,7 +183,7 @@ std::string	Response::headersBuilder()
 	if (_headers.find("Content-Type") == _headers.end())
 		_headers["Content-Type"] = "text/html";	// should we change these to text/html for the error pages
 	// _headers["Content-Type"] = "text/plain";	// should we change these to text/html for the error pages
-	
+
 	header << this->_request->getVersion() << ' '
 			<< this->_code << ' '
 			<< this->_status["phrase"] << "\r\n"
@@ -190,7 +204,7 @@ std::string	Response::headersBuilder()
 void	Response::bodyBuilder()
 {
 	std::string 		line;
-	
+
 	std::string			path;
 	std::stringstream	ss;
 	//int					lineCount = 0;
