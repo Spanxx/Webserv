@@ -55,7 +55,7 @@ void	Server::serverLoop()
 			}
 		}
 	}
-	closeServer();
+	closeServer(); // call close_erase here as well?
 }
 
 
@@ -172,7 +172,7 @@ void Server::initialize_request(int fd, const std::string &data, size_t header_e
 	std::string header_part = data.substr(0, header_end + 4);
 	std::cout << "Request from client fd " << fd << std::endl;
 		Request *request = new Request(this);
-		request->check_headers(header_part);
+		request->check_headers(header_part); // add check for header size
 		//keepAlive[_socketArray[i].fd] = request->getConnection();
 		_requestCollector[fd] = request;
 }

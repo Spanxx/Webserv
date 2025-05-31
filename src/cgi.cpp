@@ -96,7 +96,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		close(outPipe[0]);
 	
 		int status;
-		waitpid(pid, &status, 0);
+		waitpid(pid, &status, 0);	// check for timeout in child 
 		if (WIFEXITED(status))
 		{
 			int exit_status = WEXITSTATUS(status);

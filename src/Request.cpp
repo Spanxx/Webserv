@@ -52,8 +52,10 @@ void	Request::check_headers(const std::string &headers_raw)
 		std::istringstream lstream(line); //splits with space as delimiter
 		std::string extra;
 		if (!(lstream >> _method >> _path >> _version) || lstream >> extra) // less than or more than 3 parts
-			// return 400;
+		{
 			this->_code = 400;
+			return;
+		}
 	}
 	// make extra check for header too long for buffer --> code 431
 	// URI to long
