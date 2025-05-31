@@ -106,6 +106,7 @@
 					select.querySelector(`option[value="${filename}"]`).remove();
 					select.value = '';
 					deleteBtn.style.display = 'none';
+					window.location.href = '/index.html';
 				} else {
 					alert('Failed to delete file.');
 				}
