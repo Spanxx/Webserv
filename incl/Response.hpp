@@ -41,6 +41,7 @@ class Response {
 		void 		parseCGIOutput(const std::string &output);
 		std::string getMimeType(const std::string &path);
 		bool 		isCGI(const std::string &path);
+		bool		isUploadsDir(const std::string &path);
 
 	private:
 		Request *_request;

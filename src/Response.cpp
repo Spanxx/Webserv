@@ -145,22 +145,31 @@ void	Response::handlePOST()
 		// bodyBuilder();
 }
 
-void	Response::handleDELETE()
+void	Response::handleDELETE() //Pending handle the files with space in the name
 {
-	//Pending handle the files with space in the name
 	std::string uri = this->_request->getPath();
-	if (access(uri.c_str(), F_OK) != 0)
+	if (isUploadsDir(uri))
 	{
-		handleERROR(404); //Maybe we should handle this differently, like return 200 and just not delete the file?
+		if (access(uri.c_str(), F_OK) != 0)
+		{
+			//this->setCode(404);
+			handleERROR(404);
+			return;
+		}
+		if (std::remove(uri.c_str()) != 0)
+		{
+			//this->setCode(500);
+			handleERROR(500);
+			return;
+		}
+		this->setCode(200);
+		this->_headers["Content-Length"] = "0";
+	}
+	else
+	{
+		handleERROR(404);
 		return;
 	}
-	if (std::remove(uri.c_str()) != 0)
-	{
-		handleERROR(500); //Maybe we should handle this differently, like return 200 and just not delete the file?
-		return;
-	}
-	this->setCode(200);
-	this->_headers["Content-Length"] = "0";
 }
 
 std::string Response::responseBuilder()
@@ -250,10 +259,15 @@ std::string Response::getMimeType(const std::string &path)
 	return "application/octet-stream";
 }
 
+bool Response::isUploadsDir(const std::string &path)
+{
+	if (path.find("/uploads/") != std::string::npos) { return true; }
+	return (false);
+}
+
 bool Response::isCGI(const std::string &path)
 {
 	if (path.find("/cgi-bin/") != std::string::npos) { return true; }
 	if (path.find(".cgi") != std::string::npos) { return true; }		//this would allow to execute scripts which are not in the cgi/bin folder? Maybe we add both conditions in one if?
-
 	return (false);
 }

@@ -55,7 +55,9 @@
 		<input type="file" name="file">
 		<button type="submit">Upload</button>
 	</form>
+
 	<br><br>
+
 	<h2>Delete Uploaded File</h2>
 	<label for="fileSelect">Choose a file:</label>
 	<select id="fileSelect">
@@ -83,36 +85,36 @@
 
 	<button id="deleteBtn" style="display: none;">Delete Selected File</button>
 	<script>
-	const select = document.getElementById('fileSelect');
-	const deleteBtn = document.getElementById('deleteBtn');
+		const select = document.getElementById('fileSelect');
+		const deleteBtn = document.getElementById('deleteBtn');
 
-	select.addEventListener('change', () => {
-		deleteBtn.style.display = select.value ? 'inline-block' : 'none';
-	});
-
-	deleteBtn.addEventListener('click', () => {
-		const filename = select.value;
-		if (!filename) return;
-
-		fetch(`/uploads/${filename}`, {
-			method: 'DELETE'
-		})
-		.then(response => {
-			if (response.ok) {
-				alert(`Deleted: ${filename}`);
-				// Optionally remove from dropdown
-				select.querySelector(`option[value="${filename}"]`).remove();
-				select.value = '';
-				deleteBtn.style.display = 'none';
-			} else {
-				alert('Failed to delete file.');
-			}
-		})
-		.catch(error => {
-			console.error('Error:', error);
-			alert('Error sending request.');
+		select.addEventListener('change', () => {
+			deleteBtn.style.display = select.value ? 'inline-block' : 'none';
 		});
-	});
+
+		deleteBtn.addEventListener('click', () => {
+			const filename = select.value;
+			if (!filename) return;
+
+			fetch(`/uploads/${filename}`, {
+				method: 'DELETE'
+			})
+			.then(response => {
+				if (response.ok) {
+					alert(`Deleted: ${filename}`);
+					// Optionally remove from dropdown
+					select.querySelector(`option[value="${filename}"]`).remove();
+					select.value = '';
+					deleteBtn.style.display = 'none';
+				} else {
+					alert('Failed to delete file.');
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert('Error sending request.');
+			});
+		});
 	</script>
 </body>
 </html>
