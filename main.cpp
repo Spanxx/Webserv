@@ -23,6 +23,7 @@ int main(int ac, char **av)
 	{
 		Server newServer(av[1]);
 		newServer.serverLoop();
+		// throw Server::ServerException("Server ERROR!\n");
 	}
 	catch (std::exception &e)
 	{

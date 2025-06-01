@@ -2,10 +2,6 @@
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
 
-void	Server::portHandler()
-{
-	
-}
 bool Server::isServerSocket(int fd)
 {
 	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
@@ -18,8 +14,8 @@ bool Server::isServerSocket(int fd)
 
 void	Server::serverLoop()
 {
-	int pollTimeout = 5000;		//timeout --> checks for new connections (milliseconds)
-	int clientTimeout = 50;		//timeout before a client gets disconnected (seconds)
+	int pollTimeout = 500;		//timeout --> checks for new connections (milliseconds)
+	int clientTimeout = 10;		//timeout before a client gets disconnected (seconds)
 	std::map<int, std::string> response_collector;
 	std::map<int, bool> keepAlive;
 

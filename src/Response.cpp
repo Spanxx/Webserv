@@ -56,6 +56,9 @@ std::string Response::process_request(int client_fd) // Every handler shoudl upd
 		handlePOST();
 	else if (_request->getMethod() == "DELETE")
 		handleDELETE();
+	else
+		this->handleERROR(405);
+
 	std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	return responseBuilder();
@@ -163,6 +166,8 @@ void	Response::handleDELETE() //Pending handle the files with space in the name
 			return;
 		}
 		this->setCode(200);
+		// this->setCode(301);
+		// this->_request->setPath("/index.html");
 		this->_headers["Content-Length"] = "0";
 	}
 	else

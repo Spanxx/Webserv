@@ -106,6 +106,9 @@
 					select.querySelector(`option[value="${filename}"]`).remove();
 					select.value = '';
 					deleteBtn.style.display = 'none';
+			fetch(`/index.html`, {
+				method: 'GET'
+			})
 				} else {
 					alert('Failed to delete file.');
 				}
@@ -114,6 +117,7 @@
 				console.error('Error:', error);
 				alert('Error sending request.');
 			});
+			// location.reload();
 		});
 	</script>
 </body>
