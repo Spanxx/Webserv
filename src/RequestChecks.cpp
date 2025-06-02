@@ -58,13 +58,6 @@ int	Request::checkPathChars()
 		if (std::isalnum(c) || allowedChars.find(c) != std::string::npos)
 			continue;
 
-		// // Handle percent-encoding: %XX (3 characters total)
-		// if (c == '%' && std::isxdigit(this->_path[i + 1]) && std::isxdigit(this->_path[i + 2]))
-		// {
-		// 	i += 2; // skip over the two hex digits
-		// 	continue;
-		// }
-
 		//Reserved raw chars - not encoded
 		if (reservedChars.find(c) != std::string::npos)
 			continue;
@@ -102,6 +95,7 @@ int	Request::checkRequestedPath()
 	std::string ext = this->_path.substr(dotPos + 1);
 
 	std::string newPath;
+
 	//check for cgi, favicon and html page and add directory
 	if (this->_path == "/favicon.ico")
 		newPath = "www/files" + this->_path;
