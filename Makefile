@@ -18,7 +18,7 @@ SRCS = main.cpp \
 		src/ConfigFile.cpp \
 		src/Server.cpp src/ServerSocket.cpp \
 		src/ServerLoop.cpp src/ServerUtils.cpp \
-		src/Request.cpp src/RequestChecks.cpp \
+		src/Request.cpp src/RequestChecks.cpp src/RequestParsing.cpp\
 		src/Response.cpp \
 		src/CGI.cpp \
 		src/Utils.cpp

@@ -1,0 +1,9 @@
+- [ ] handle piped requests? --> adjust server loop
+- [ ] handle chunked requests
+- [ ] handle chunked responses
+- [ ] inside config file:
+	- [ ] set up default error pages (what does this mean?)
+	- [ ] set max size of request body (+ implement inside read request function)
+	- [ ] configure where uploaded files should be saved (+adjust makefile rule to delete that specific file, if possible?)
+	- [ ] check or adjust routing to index.html when directory is requested, to serve directly with code 200 instead of 301 (list available directories or not?)
+- [ ] refactor logic with exceptions instead of return values

@@ -48,13 +48,15 @@ std::string urlDecode(const std::string &str)
 	{
         	if (str[i] == '%')
         	{
-			if (i + 2 < str.length() && std::isxdigit(str[i+1]) && std::isxdigit(str[i+2]))
+			if (i + 2 < str.length())
 			{
-                		char hex[3] = { str[i+1], str[i+2], '\0' };
-                		unsigned int val;
-                		sscanf(hex, "%x", &val); // converts hex string to integer
-                		result += static_cast<char>(val);
-                		i += 3;
+                		std::string hex = str.substr(i + 1, 2);
+                		int val;
+                		if (is_valid_hex(hex, val))
+                		{
+					result += static_cast<char>(val);
+                			i += 3;
+				}
             		}
             		else
             		{
@@ -72,4 +74,12 @@ std::string urlDecode(const std::string &str)
         		result += str[i++]; // Normal character, just append
     }
     return result;
+}
+
+bool is_valid_hex(const std::string& str, int& value)
+{
+	std::istringstream iss(str);
+	iss >> std::hex >> value;
+
+	return !iss.fail() && iss.eof();
 }

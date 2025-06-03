@@ -70,6 +70,8 @@ void	Server::extractPorts()
 				++portCounter;
 			}
 		}
+		if (it->first.find("maxbodysize") != std::string::npos)
+			_maxBodySize = atoi(it->second.c_str());
 		++it;
 	}
 

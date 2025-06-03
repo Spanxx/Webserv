@@ -79,7 +79,7 @@ int	Request::checkRequestedPath()
 	{
 		std::cout << "Client is trying to request a directory --> redirect to www/html/index.html\n";
 		this->_path = "/index.html";
-		this->_code = 301;
+		this->_code = 200;
 		return (1);
 	}
 

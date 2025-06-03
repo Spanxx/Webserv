@@ -78,3 +78,5 @@ void Server::closeServer()
 }
 
 Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
+
+size_t	Server::getMaxBodySize() { return _maxBodySize; }

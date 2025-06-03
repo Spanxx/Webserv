@@ -17,5 +17,6 @@ void replaceAll(std::string &str, const std::string &placeholder, const std::str
 
 std::string checkFilePath(char *av);
 std::string urlDecode(const std::string &str);
+bool is_valid_hex(const std::string& str, int& value);
 
 #endif
