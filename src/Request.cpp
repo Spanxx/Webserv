@@ -142,6 +142,7 @@ std::string Request::getPath() { return _path; }
 std::string Request::getVersion() { return _version; }
 std::string Request::getBody() { return _body; }
 std::string Request::getQuery() { return _query; }
+
 bool Request::getConnection()
 { 
 	if (_headers["Connection"] == "keep-alive")
@@ -178,4 +179,7 @@ void	Request::splitURI()
 	
 }
 
-
+void	Request::setPath(std::string path)
+{
+	this->_path = path;
+}

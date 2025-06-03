@@ -31,7 +31,7 @@ class Response {
 		void		handleERROR(int statusCode);
 		void		handleGET();
 		void		handlePOST();
-		void		handleDELETE(int client_fd);
+		void		handleDELETE();
 		void 		assign_status_phrase();
 		//std::string make_status_page_string();
 		//void make_status_page_string(unsigned int code);
@@ -41,6 +41,7 @@ class Response {
 		void 		parseCGIOutput(const std::string &output);
 		std::string getMimeType(const std::string &path);
 		bool 		isCGI(const std::string &path);
+		bool		isUploadsDir(const std::string &path);
 
 	private:
 		Request *_request;

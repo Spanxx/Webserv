@@ -20,6 +20,8 @@
 
 extern volatile sig_atomic_t stopSignal;
 
+#define TIMEOUT_SEC 5 //timeout for CGI
+
 class Request;
 
 class Server
@@ -37,15 +39,12 @@ public:
 	
 	int		createConfig(char *av);
 	int		checkConfigFile(std::ifstream &conFile);
-	void	countPortsInConfig(std::ifstream &configFile);
 	void	extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target);
 
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
-	//add exceptions?
 
 	void	extractPorts();
 	int		createServerSocket(int port);
-	void	portHandler();
 
 	void	make_new_connections(time_t &now, int server_fd);
 	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);

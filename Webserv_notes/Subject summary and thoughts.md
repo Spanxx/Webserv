@@ -27,27 +27,27 @@ Any external library and Boost libraries are forbidden
 
 # Requirements
 
-- [ ] take config file
-- [ ] cannot execve another web server
-- [ ] remain non-blocking at all times / handle client disconnect
-- [ ] non-blocking &  onlly 1 poll() (or equivalent) for all I/O (listen included)
-- [ ] poll() must monitor read and write simultaneously
-- [ ] NO read or write without poll()
+- [x] take config file
+- [x] cannot execve another web server
+- [ ] remain non-blocking at all times / handle client disconnect (check connection type)
+- [x] non-blocking &  onlly 1 poll() (or equivalent) for all I/O (listen included)
+- [x] poll() must monitor read and write simultaneously
+- [x] NO read or write without poll()
 - [ ] Checking `errno` is striclty forbidden after read and write ❗
-- [ ] not required to use poll() before reading config file
+- [x] not required to use poll() before reading config file
 - [ ] Every macro and define is allowd (like FD_SET, FD_CLR, FD_ISSET and, FD_ZERO)
 	- [ ] how do they work?
-- [ ] request should never hang indefinitely
-- [ ] compatible with standard web browser of our choice
+- [x] request should never hang indefinitely
+- [x] compatible with standard web browser of our choice
 - [ ] consider that NGINX is HTTP 1.1 compliant and may be used to compare headers and answer behaviors ❓
 - [ ] accurate HTTP response status code
-- [ ] default error pages (if not provided)
-- [ ] can't use fork for anything other than CGI (like PHP, Python...)
-- [ ] serve a fully static website
-- [ ] able to upload files
-- [ ] Methods: GET, POST and DELETE
-- [ ] Stress test successfull
-- [ ] able to listen to multiple ports (see config file)
+- [x] default error pages (if not provided)
+- [x] can't use fork for anything other than CGI (like PHP, Python...)
+- [x] serve a fully static website
+- [x] able to upload files
+- [x] Methods: GET, POST and DELETE
+- [ ] Stress test successfull (should siege cnotinue if there is a request pending)
+- [x] able to listen to multiple ports (see config file)
 # Executable Command
 
 #### `./webserv [configuration file`]
@@ -55,20 +55,20 @@ Any external library and Boost libraries are forbidden
 # Configuration file
 
 in file, you should be able to:
-- [ ] choose port and host
+- [x] choose port and host
 - [ ] set up server name
-- [ ] first server for host:port = default (responds to all requests)
-- [ ] default error pages
+- [ ] first server for host:port = default (responds to all requests) (localhost/index.html redirect to the first port in the config???)
+- [x] default error pages
 - [ ] max size for client request bodies
 - [ ] set up routes with one or multiple rules/configs (no regexp)
-	- [ ] list of accepted HTTP methods for route
+	- [x] list of accepted HTTP methods for route
 	- [ ] HTTP redirect
 	- [ ] directory or file where requested file shold be located
 		(e.g. if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet)
 	- [ ] enable or disable directory listening
 	- [ ] set default file to server if request is directory
-	- [ ] execute CGI based on file extension (e.g. .php)
-	- [ ] works with POST and GET
+	- [x] execute CGI based on file extension (e.g. .php)
+	- [x] works with POST and GET
 	- [ ] allow file upload and configure where they are saved
 - [ ] CGI
 	- [ ] use full path as PATH_INFO

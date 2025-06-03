@@ -39,6 +39,8 @@ class Request
 		std::string getHeader(const std::string &key);
 		int getContentLength();
 
+		void		setPath(std::string path);
+
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 
 	private:
