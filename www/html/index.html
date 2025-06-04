@@ -106,12 +106,10 @@
 					select.querySelector(`option[value="${filename}"]`).remove();
 					select.value = '';
 					deleteBtn.style.display = 'none';
-			fetch(`/index.html`, {
-				method: 'GET'
-			})
 				} else {
 					alert('Failed to delete file.');
 				}
+				window.location.href = '/index.html';
 			})
 			.catch(error => {
 				console.error('Error:', error);
