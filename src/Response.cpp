@@ -46,6 +46,7 @@ int Response::getCode() { return _code; }
 
 std::string Response::process_request(int client_fd) // Every handler shoudl update _body, _code and the headers are built in the end
 {
+	(void)client_fd;
 	this->assign_status_phrase();
 	if (_code != 200)
 		handleERROR(this->_code);
@@ -54,7 +55,10 @@ std::string Response::process_request(int client_fd) // Every handler shoudl upd
 	else if (_request->getMethod() == "POST")
 		handlePOST();
 	else if (_request->getMethod() == "DELETE")
-		handleDELETE(client_fd);
+		handleDELETE();
+	else
+		this->handleERROR(405);
+
 	std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	return responseBuilder();
@@ -144,9 +148,33 @@ void	Response::handlePOST()
 		// bodyBuilder();
 }
 
-void	Response::handleDELETE(int client_fd)
+void	Response::handleDELETE() //Pending handle the files with space in the name
 {
-	(void)client_fd;
+	std::string uri = this->_request->getPath();
+	if (isUploadsDir(uri))
+	{
+		if (access(uri.c_str(), F_OK) != 0)
+		{
+			//this->setCode(404);
+			handleERROR(404);
+			return;
+		}
+		if (std::remove(uri.c_str()) != 0)
+		{
+			//this->setCode(500);
+			handleERROR(500);
+			return;
+		}
+		this->setCode(200);
+		// this->setCode(301);
+		// this->_request->setPath("/index.html");
+		this->_headers["Content-Length"] = "0";
+	}
+	else
+	{
+		handleERROR(404);
+		return;
+	}
 }
 
 std::string Response::responseBuilder()
@@ -169,7 +197,7 @@ std::string	Response::headersBuilder()
 	if (_headers.find("Content-Type") == _headers.end())
 		_headers["Content-Type"] = "text/html";	// should we change these to text/html for the error pages
 	// _headers["Content-Type"] = "text/plain";	// should we change these to text/html for the error pages
-	
+
 	header << this->_request->getVersion() << ' '
 			<< this->_code << ' '
 			<< this->_status["phrase"] << "\r\n"
@@ -190,7 +218,7 @@ std::string	Response::headersBuilder()
 void	Response::bodyBuilder()
 {
 	std::string 		line;
-	
+
 	std::string			path;
 	std::stringstream	ss;
 	//int					lineCount = 0;
@@ -236,10 +264,15 @@ std::string Response::getMimeType(const std::string &path)
 	return "application/octet-stream";
 }
 
+bool Response::isUploadsDir(const std::string &path)
+{
+	if (path.find("/uploads/") != std::string::npos) { return true; }
+	return (false);
+}
+
 bool Response::isCGI(const std::string &path)
 {
 	if (path.find("/cgi-bin/") != std::string::npos) { return true; }
 	if (path.find(".cgi") != std::string::npos) { return true; }		//this would allow to execute scripts which are not in the cgi/bin folder? Maybe we add both conditions in one if?
-
 	return (false);
 }

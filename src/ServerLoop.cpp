@@ -2,10 +2,6 @@
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
 
-void	Server::portHandler()
-{
-	
-}
 bool Server::isServerSocket(int fd)
 {
 	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
@@ -18,14 +14,14 @@ bool Server::isServerSocket(int fd)
 
 void	Server::serverLoop()
 {
-	int pollTimeout = 5000;		//timeout --> checks for new connections (milliseconds)
-	int clientTimeout = 50;		//timeout before a client gets disconnected (seconds)
+	int pollTimeout = 500;		//timeout --> checks for new connections (milliseconds)
+	int clientTimeout = 10;		//timeout before a client gets disconnected (seconds)
 	std::map<int, std::string> response_collector;
 	std::map<int, bool> keepAlive;
 
 	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
 		fcntl(this->_serverSocket[i], F_SETFL, O_NONBLOCK);
-	
+	std::cout << "MAX BODY SIZE: " << _maxBodySize << std::endl;
 	while (!stopSignal)
 	{
 		int ret = poll(_socketArray.data(), _socketArray.size(), pollTimeout);
@@ -55,7 +51,7 @@ void	Server::serverLoop()
 			}
 		}
 	}
-	closeServer();
+	closeServer(); // call close_erase here as well?
 }
 
 
@@ -110,14 +106,15 @@ void Server::read_from_connection(time_t &now, std::map<int, std::string> &respo
 		return;
 	}		
 
+	std::cout << "Read " << n << " bytes from fd " << _socketArray[i].fd << std::endl;
 	_lastActive[_socketArray[i].fd] = now;
 	_socketBuffers[_socketArray[i].fd] += std::string(buffer, n);
-
 	std::string &data = _socketBuffers[_socketArray[i].fd];
 	size_t header_end = data.find("\r\n\r\n");
 	if (header_end == std::string::npos) //still no header end 
 		return;
-	// Extract headers and check Content-Length
+	//check if chunked or not, parse body either based on content length or chunks, then process
+
 	if (_requestCollector.find(_socketArray[i].fd) == _requestCollector.end()) //no entry made yet for this request
 		initialize_request(_socketArray[i].fd, data, header_end);
 	handle_request(data, header_end, response_collector, keepAlive, i);
@@ -157,53 +154,130 @@ void	Server::close_erase(std::map<int, std::string> &response_collector, size_t 
 	_lastActive.erase(_socketArray[i].fd);
 	response_collector.erase(_socketArray[i].fd);
 	keepAlive.erase(_socketArray[i].fd);
-	_socketArray.erase(_socketArray.begin() + i);
-	--i;
 	std::map<int, Request*>::iterator it = _requestCollector.find(_socketArray[i].fd);
 	if (it != _requestCollector.end())
 	{
 		delete it->second;
 		_requestCollector.erase(it);
 	}
+	_socketArray.erase(_socketArray.begin() + i);
+	--i;
+	
 }
 
 void Server::initialize_request(int fd, const std::string &data, size_t header_end)
 {
 	std::string header_part = data.substr(0, header_end + 4);
 	std::cout << "Request from client fd " << fd << std::endl;
-		Request *request = new Request(this);
-		request->check_headers(header_part);
-		//keepAlive[_socketArray[i].fd] = request->getConnection();
-		_requestCollector[fd] = request;
+	Request *request = new Request(this);
+	request->check_headers(header_part); // add check for header size
+	_requestCollector[fd] = request;
 }
 
-void Server::handle_request(const std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i)
+void Server::handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i)
 {
 	Request *request = _requestCollector[_socketArray[i].fd];
-	int content_length = request->getContentLength();
-	if (content_length < 0)
+	keepAlive[_socketArray[i].fd] = request->getConnection();
+	if (!request->isChunked())
 	{
-		std::cerr << "Missing or invalid Content-Length\n";
-		close_erase(response_collector, i, keepAlive);
-		return;
+		int content_length = request->getContentLength();
+		if (content_length < 0)
+		{
+			std::cerr << "Missing or invalid Content-Length\n";
+			request->setCode(400);
+			close_erase(response_collector, i, keepAlive);
+			return;
+		}
+		size_t total_required = header_end + 4 + content_length;
+		if (content_length == 0 || data.size() >= total_required)
+		{
+			std::string body_part;
+			if (content_length > 0)
+				body_part = data.substr(header_end + 4, content_length);
+			request->append_body(body_part);
+			if (request->getBodySize() > _maxBodySize)
+				request->setCode(413);
+			// keepAlive[_socketArray[i].fd] = request->getConnection();
+			prepare_response(request, response_collector, i);
+		}
 	}
-	size_t total_required = header_end + 4 + content_length;
-	if (content_length == 0 || data.size() >= total_required)
+	else
 	{
-		std::string body_part;
-		if (content_length > 0)
-			body_part = data.substr(header_end + 4, content_length);
-		request->append_body(body_part);
-		keepAlive[_socketArray[i].fd] = request->getConnection();
-		
-		Response *response = new Response(request);
-		response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd); 
-		_socketArray[i].events = POLLOUT; //switch to writing
-		std::cout << "Switched to POLLOUT\n";
+		size_t chunk_start = header_end + 4;
+		if (request->parse_chunks(data, chunk_start) || request->getCode() != 200)
+			prepare_response(request, response_collector, i);
+	}
+}
+void Server::prepare_response(Request *request, std::map<int, std::string> &response_collector, size_t &i)
+{
+	Response *response = new Response(request);
+	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd); 
+	_socketArray[i].events = POLLOUT; //switch to writing
+	std::cout << "Switched to POLLOUT\n";
 
-		delete request;
-		delete response;
-		_requestCollector.erase(_socketArray[i].fd);
-		_socketBuffers.erase(_socketArray[i].fd);
+	delete request;
+	delete response;
+	_requestCollector.erase(_socketArray[i].fd);
+	_socketBuffers.erase(_socketArray[i].fd);
+}
+
+bool	Request::parse_chunks(std::string &data, size_t start)
+{
+	size_t pos;
+	if (_parse_pos == 0)
+		pos = start;
+	else
+		pos = _parse_pos;
+	while (true)
+	{
+		size_t end = data.find("\r\n", pos);
+		if (end == std::string::npos)
+			break;
+		int chunk_size = 0;
+		if (!is_valid_hex(data.substr(pos, end - pos), chunk_size))
+		{
+			std::cerr << "Invalid chunk size\n";
+			_code = 400;
+			return false;
+		}
+		size_t chunk_start = end + 2;
+		size_t chunk_end = chunk_start + chunk_size;
+		if (chunk_size == 0)
+		{
+			if (data.size() < end + 4 || data.substr(end + 2, 2) != "\r\n")
+			{
+				std::cerr << "Missing CRLF after final 0 chunk\n";
+				_code = 400;
+				return false;
+			}
+			data.erase(0, end + 4);
+			_parse_pos = 0;
+			return true;
+
+		}
+		if (data.find("\r\n", chunk_start) != chunk_end)
+		{
+			std::cerr << "Chunk data smaller than indicated\n";
+			_code = 400;
+			return false;
+		}
+		if (data.size() < chunk_end + 2) // not enough data yet
+			break;
+		if (data.substr(chunk_end, 2) != "\r\n")
+		{
+			std::cerr << "Missing CRLF after chunk data\n";
+			_code = 400;
+			return false;
+		}
+		_body.append(data.substr(chunk_start, chunk_size));
+		if (_body.size() > _server->getMaxBodySize())
+		{
+			_code = 413;
+			return false;
+		}
+
+		pos = chunk_end + 2;
 	}
+	_parse_pos = pos;
+	return false;
 }

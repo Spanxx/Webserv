@@ -20,15 +20,17 @@ class Request
 
 		// int	parse_request(const std::string &request_raw);
 		void	check_headers(const std::string &headers_raw);
-		void	append_body(const std::string &body_part);
 		void	splitURI();
 		int		split_headers(std::istringstream &rstream);
+		bool	parse_chunks(std::string &data, size_t start);
 		int		checkURILength();
 		int		checkPathChars();
 		int		checkRequestedPath();
 		int		checkRequestedFiletype();
 		
-		void setCode(int code);
+		void	setCode(int code);
+		void	setPath(std::string path);
+		void	append_body(const std::string &body_part);
 		int getCode();
 		std::string getMethod();
 		std::string getPath();
@@ -38,6 +40,9 @@ class Request
 		bool getConnection();
 		std::string getHeader(const std::string &key);
 		int getContentLength();
+		size_t getBodySize();
+		bool isChunked();
+		
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 
@@ -50,6 +55,8 @@ class Request
 		int _content_length;
 		std::string _body;
 		int _code;
+		bool _chunked;
+		size_t _parse_pos;
 		Server 		*_server;
 };
 

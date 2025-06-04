@@ -57,13 +57,6 @@ int	Request::checkPathChars()
 		//alphanumeric and allowed chars
 		if (std::isalnum(c) || allowedChars.find(c) != std::string::npos)
 			continue;
-			
-		// // Handle percent-encoding: %XX (3 characters total)
-		// if (c == '%' && std::isxdigit(this->_path[i + 1]) && std::isxdigit(this->_path[i + 2]))
-		// {
-		// 	i += 2; // skip over the two hex digits
-		// 	continue;
-		// }
 
 		//Reserved raw chars - not encoded
 		if (reservedChars.find(c) != std::string::npos)
@@ -86,7 +79,7 @@ int	Request::checkRequestedPath()
 	{
 		std::cout << "Client is trying to request a directory --> redirect to www/html/index.html\n";
 		this->_path = "/index.html";
-		this->_code = 301;
+		this->_code = 200;
 		return (1);
 	}
 
@@ -102,6 +95,7 @@ int	Request::checkRequestedPath()
 	std::string ext = this->_path.substr(dotPos + 1);
 
 	std::string newPath;
+
 	//check for cgi, favicon and html page and add directory
 	if (this->_path == "/favicon.ico")
 		newPath = "www/files" + this->_path;
@@ -109,7 +103,7 @@ int	Request::checkRequestedPath()
 		newPath = "www/html" + this->_path;
 	else if (ext == "py" || ext == "js" || ext == "cgi")
 		newPath = "www/cgi-bin" + this->_path;
-	else if (ext == "png" || ext == "jpg")
+	else if (ext == "png" || ext == "jpg" || ext == "jpeg" || ext == "gif" || ext == "svg" || ext =="pdf" || ext == "HEIC")
 		newPath = "www/files" + this->_path;
 	else
 		newPath = "www" + this->_path;
@@ -125,7 +119,7 @@ int	Request::checkRequestedPath()
 	}
 
 	const size_t	lastSlash = this->_path.find_last_of("/");
-	
+
 	if (lastSlash == std::string::npos)
 	{
 		std::cerr << "Invalid path: no slash found!\n";
@@ -175,7 +169,7 @@ int	Request::checkRequestedFiletype()
 	}
 
 	std::string typeString = this->_path.substr(lastDot);
-	
+
 	std::cout << "Requested filetype: " << typeString << '\n';
 
 	while (it != fileTypes->end())
