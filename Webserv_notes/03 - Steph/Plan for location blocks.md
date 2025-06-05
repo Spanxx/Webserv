@@ -6,8 +6,8 @@
         
         ```
         server {
-            listen 8080;
-            host 127.0.0.1;
+            listen=8080
+            host=127.0.0.1
             server_name example.com; # See point 2
         
             # Global settings for this server
