@@ -78,7 +78,7 @@ int	Request::checkRequestedPath()
 	if (!this->_path.empty() && *(this->_path.end() - 1) == '/')
 	{
 		std::cout << "Client is trying to request a directory --> redirect to www/html/index.html\n";
-		this->_path = "/index.html";
+		this->_path = "www/html/index.html";
 		this->_code = 200;
 		return (1);
 	}
