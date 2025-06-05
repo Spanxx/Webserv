@@ -16,3 +16,4 @@
 - [ ] check if we need to handle piped requests? --> adjust server loop
 - [ ] check cgi with cgi tester --> does cgi routing work and miscellaneous scripts?
 	- [ ] make cgi extension check seperate from other file type checks
+

@@ -1,10 +1,11 @@
+#!/usr/bin/env python3
 import socket, time
 
 s = socket.socket()
 s.connect(("localhost", 8080))
 
 # Send headers slowly
-s.sendall(b"POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 11\r\n\r\n")
+s.sendall(b"POST / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 11\r\nContent-Type: text/html\r\n\r\n")
 time.sleep(2)
 
 # Send body in parts
