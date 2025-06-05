@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Webserv_notes/To DOs.md",
+                "file": "Webserv_notes/03 - Steph/Plan for location blocks.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "To DOs"
+              "title": "Plan for location blocks"
             }
           }
         ]
@@ -171,13 +171,14 @@
   },
   "active": "a8a648abaced861c",
   "lastOpenFiles": [
+    "Webserv_notes/03 - Steph/Links to check.md",
     "Webserv_notes/03 - Steph/Plan for location blocks.md",
+    "Webserv_notes/To DOs.md",
     "Webserv_notes/04 - Files/Excalidraw/Hello World!.md",
     "Webserv_notes/03 - Steph/Response notes/Some possible functions to use in the response.md",
     "Webserv_notes/03 - Steph/Response notes/HTTP responses.md",
     "Webserv_notes/03 - Steph/Delete notes/Sending DELETE request.md",
     "Webserv_notes/03 - Steph/Response notes",
-    "Webserv_notes/03 - Steph/Links to check.md",
     "Webserv_notes/03 - Steph/Delete notes",
     "Webserv_notes/03 - Steph",
     "obj/src/RequestChecks-9a8b0778.o.tmp",
