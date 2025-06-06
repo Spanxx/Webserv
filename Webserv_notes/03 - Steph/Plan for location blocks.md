@@ -1,3 +1,4 @@
+See [[#Final Structure to use for configuration file]] 
 ### General Configuration Structure
 
 1. **Introduce `location` blocks:** Your current `dir`, `pages`, `files`, `filetypes`, `config`, `cgi-bin`, and `redir` blocks are global but many of the requirements are path-specific. You need to define `location` blocks _inside_ your `server` block to apply rules to specific URL paths (e.g., `/`, `/uploads`, `/cgi-bin`).
@@ -101,3 +102,56 @@
         
         - **Status:** `uploads=www/files/uploads` is present, but not linked to a specific route.
         - **To Do:** Create a `location` block for uploads (e.g., `location /upload_data { ... }`). Inside this block, define an `upload_store` directive pointing to `www/files/uploads` and ensure `POST` method is allowed.
+
+# Final Structure to use for configuration file:
+
+server {
+    listen=8080,5555
+    host=127.0.0.1
+    server_name=webserv42
+    root=www/webserv42/
+    index=www/html/index.html
+    maxbodysize=5242880
+    limitRequestLine=4096
+    error_page_404=/www/private/status_page.html
+    location = / {  #root
+        methods=GET/POST
+    }
+    location = /html {
+        methods=GET
+    }
+    location = /files {
+        root=www/html/webserv42/index.html
+    }
+    location = /files/uploads {
+        methods=GET/POST/DELETE
+    }
+    location = /cgi-bin/ {
+        methods=GET/POST
+    }
+}
+server {
+    listen=8080,9090
+    host=127.0.0.2
+    server_name=backupServer
+    root=www/backupServer
+    index=www/html/index.html
+    maxbodysize=5242880
+    limitRequestLine=2048
+    error_page_404=/www/private/status_page.html
+    location = / {  #root
+        methods=GET/POST
+    }
+    location = /html {
+        methods=GET
+    }
+    location = /files {
+        root=www/html/backupServer/index.html
+    }
+    location = /files/uploads {
+        methods=GET/POST/DELETE
+    }
+    location = /cgi-bin/ {
+        methods=GET/POST
+    }
+}
