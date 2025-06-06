@@ -1,4 +1,5 @@
-See [[#Final Structure to use for configuration file]] 
+### See [[#Final Structure to use for configuration file]] 
+
 ### General Configuration Structure
 
 1. **Introduce `location` blocks:** Your current `dir`, `pages`, `files`, `filetypes`, `config`, `cgi-bin`, and `redir` blocks are global but many of the requirements are path-specific. You need to define `location` blocks _inside_ your `server` block to apply rules to specific URL paths (e.g., `/`, `/uploads`, `/cgi-bin`).
