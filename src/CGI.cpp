@@ -260,7 +260,6 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 
 }
 
-
 void Response::parseCGIOutput(const std::string &output)
 {
 	std::istringstream stream(output);

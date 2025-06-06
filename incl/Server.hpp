@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <map>
 #include <exception>
 #include <cstdlib>
@@ -28,7 +30,8 @@ class Server
 {
 public:
 
-	Server(char *av);
+	// Server(char *av);
+	Server(char *av, std::string &serverConfig);
 	~Server();
 
 	void	startListen(int socket);
@@ -37,9 +40,13 @@ public:
 	void	sendResponse(int client_fd);
 	void	closeServer();
 	
-	int		createConfig(char *av);
+	int		createConfig(char *av, std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
-	void	extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target);
+	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
+	
+	void	createDirStructure();
+	void	mkdir_p(const std::string fullPath, mode_t mode);
+	void	loadMimeTypes();
 
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
@@ -62,19 +69,20 @@ public:
 	size_t	getMaxBodySize();
 
 private:
-	int									_numPorts;
-	std::vector<int>					_ports;
-	std::vector<int>					_serverSocket;
-	size_t	_maxBodySize;
-	std::map<int, std::string> 		_socketBuffers;
-	std::map<int, Request*> 		_requestCollector;
-	std::vector<struct pollfd>			_socketArray;
-	std::map<int, time_t> 				_lastActive;
-	std::map<std::string, std::string>	_serverConfig;
-	std::map<std::string, std::string>	_dirConfig;
-	std::map<std::string, std::string>	_pageConfig;
-	std::map<std::string, std::string>	_fileConfig;
-	std::map<std::string, std::string>	_filetypeConfig;
+	int																					_numPorts;
+	std::vector<int>																	_ports;
+	std::vector<int>																	_serverSocket;
+	size_t																				_maxBodySize;
+	std::map<int, std::string> 															_socketBuffers;
+	std::map<int, Request*> 															_requestCollector;
+	std::vector<struct pollfd>															_socketArray;
+	std::map<int, time_t> 																_lastActive;
+	std::map<std::string, std::string>													_serverConfig;
+	std::map<std::string, std::string>													_dirConfig;
+	std::map<std::string, std::string>													_mimetypeConfig;
+	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
+	// std::map<std::string, std::string>	_pageConfig;
+	// std::map<std::string, std::string>	_fileConfig;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

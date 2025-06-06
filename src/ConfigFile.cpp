@@ -8,12 +8,12 @@ std::map<std::string, std::string>* Server::getConfigMap(const std::string &conf
 		return(&this->_serverConfig);
 	if (configName == "dirConfig")
 		return(&this->_dirConfig);
-	if (configName == "pageConfig")
-		return(&this->_pageConfig);
-	if (configName == "fileConfig")
-		return(&this->_fileConfig);
-	if (configName == "filetypeConfig")
-		return(&this->_filetypeConfig);
+	// if (configName == "pageConfig")
+	// 	return(&this->_pageConfig);
+	// if (configName == "fileConfig")
+	// 	return(&this->_fileConfig);
+	// if (configName == "filetypeConfig")
+	// 	return(&this->_filetypeConfig);
 	else
 		return (NULL);
 }
@@ -85,71 +85,116 @@ void	Server::extractPorts()
 	}
 }
 
-void	Server::extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target)
+void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap)
+{
+	size_t		equalPos = trimmed.find("=");
+
+	if (equalPos != std::string::npos)
+	{
+		std::string	key = trimmed.substr(0, equalPos - 1);
+		std::string value = trimmed.substr(equalPos + 1);
+		key = trim(key);
+		value = trim(value);
+		std::cout << "config key: " << key << " || value: " << value << '\n';	//debug for config values
+		//check for key duplicates
+		if (targetMap.find(key) != targetMap.end())
+		{
+			std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+					<< "new Value don't overwrites existing Value!\n";
+		}
+		else
+			targetMap[key] = value;
+	}
+}
+
+void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target)
 {
 	std::string	line;
+	std::string trimmed;
+	bool		inBlock = false;
 
-	while (std::getline(conFile, line))
+	std::istringstream iss(configFile);
+	if (!iss)
+		throw ServerException("Extracting config file failed!\n");
+
+	while (getline(iss, line))
 	{
-		if (line == target)
+		trimmed = line;
+		trimmed.erase(0, trimmed.find_first_not_of(" \t"));
+		if (trimmed.find(target) != std::string::npos)
 		{
-			while (std::getline(conFile, line))
+			//save dir before continue in dirblock
+			if (target == "location")
 			{
-				if (line == "}")
+				if (trimmed.find_first_of('{') != std::string::npos)
+					trimmed.erase(trimmed.find_first_of('{'));	//remove curly bracket at end of location
+				saveKeyValuePair(trimmed, targetMap);		//save location
+			}
+
+			while (getline(iss, line))
+			{
+				trimmed = line;
+				trimmed.erase(0, trimmed.find_first_not_of(" \t"));
+				// trimmed.erase(trimmed.find_last_not_of(" \t") + 1);
+
+				if (trimmed.empty() || trimmed[0] == '#')
+					continue;
+
+				if (trimmed == "}" && !inBlock)
 				{
-					conFile.clear();                // Clear any error flags
-					conFile.seekg(0, std::ios::beg); // Go back to the beginning	
+					iss.clear();                // Clear any error flags
+					iss.seekg(0, std::ios::beg); // Go back to the beginning	
 					return ;
 				}
 
-				if (line.empty() || line[0] == '#')
-					continue;
-				
-				size_t	equalPos = line.find('=');
-				if (equalPos != std::string::npos)
+				//skip location block if extracting server config
+				if (!inBlock && trimmed.find("location") == 0 && trimmed.find("{") != std::string::npos)
 				{
-					std::string	key = line.substr(0, equalPos);
-					std::string value = line.substr(equalPos + 1);
-					// std::cout << "config key: " << key << " || value: " << value << '\n';	debug for config values
-					//check for key duplicates
-					if (targetMap.find(key) != targetMap.end())
-					{
-						std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
-								<< "new Value don't overwrites existing Value!\n";
-					}
-					else
-						targetMap[key] = value;
+					inBlock = true;
+					continue; // skip this line too
 				}
+
+				// Check for end of block
+				if (inBlock && trimmed.find("}") == std::string::npos)
+					continue; // skip closing brace line
+				else if (inBlock && trimmed.find("}") != std::string::npos)
+				{
+					inBlock = false;
+					continue;
+				}
+				saveKeyValuePair(trimmed, targetMap);
 			}
 		}
 	}
 }
 
-int	Server::createConfig(char *av)
+void	Server::loadMimeTypes()
+{
+	std::string line;
+	std::string mimeConfig;
+
+	std::ifstream file("../www/config/mime.types");
+	if (!file)
+		throw ServerException("Loading mime.types failed!");
+	
+	while(getline(file, line))
+	{
+		if (line.empty() || line.find('#') != std::string::npos)
+			continue;
+		line += '\n';
+		mimeConfig.append(line);
+		
+	}
+	this->extractConfigMap(mimeConfig, _mimetypeConfig, "types");
+}
+
+// int	Server::createConfig(char *av)
+int	Server::createConfig(char *av, std::string &serverConfig)
 {
 	std::string filePath = checkFilePath(av);
 
-	// std::ifstream configFile(av);
-	std::ifstream configFile(filePath.c_str());
-	if (!configFile)
-	{
-		std::cout << "Reading config File failed!\n";
-		return (1);
-	}
-	if (configFile.peek() == std::ifstream::traits_type::eof())
-	{
-		std::cout << "The Config file is empty!\n";
-		return (1);
-	}
-
-	if (Server::checkConfigFile(configFile) == 1)
-		return (1);
-
-	this->extractConfigMap(configFile, _serverConfig, "server{");
-	this->extractConfigMap(configFile, _dirConfig, "dir{");
-	this->extractConfigMap(configFile, _pageConfig, "pages{");
-	this->extractConfigMap(configFile, _fileConfig, "files{");
-	this->extractConfigMap(configFile, _filetypeConfig, "filetypes{");
-
+	this->extractConfigMap(serverConfig, _serverConfig, "server");
+	this->extractConfigMap(serverConfig, _dirConfig, "location");
+	this->loadMimeTypes();
 	return (0);
 }
