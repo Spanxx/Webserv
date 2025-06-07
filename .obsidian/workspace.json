@@ -11,12 +11,14 @@
             "id": "a8a648abaced861c",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "markdown",
               "state": {
-                "file": "Webserv_notes/04 - Files/webserv.subject.pdf"
+                "file": "Webserv_notes/Obsidian Basics.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-file-text",
-              "title": "webserv.subject"
+              "icon": "lucide-file",
+              "title": "Obsidian Basics"
             }
           }
         ]
@@ -163,29 +165,35 @@
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
-      "command-palette:Open command palette": false
+      "command-palette:Open command palette": false,
+      "obsidian-git:Open Git source control": false
     }
   },
   "active": "a8a648abaced861c",
   "lastOpenFiles": [
+    "Webserv_notes/03 - Steph/Plan for location blocks.md",
+    "Webserv_notes/Obsidian Basics.md",
+    "Webserv_notes/03 - Steph/Response notes/Some possible functions to use in the response.md",
+    "Webserv_notes/03 - Steph/Response notes/HTTP responses.md",
+    "Webserv_notes/03 - Steph/Delete notes/Sending DELETE request.md",
+    "Webserv_notes/03 - Steph/Response notes",
+    "Webserv_notes/03 - Steph/Links to check.md",
+    "Webserv_notes/03 - Steph/Delete notes",
+    "Webserv_notes/03 - Steph",
+    "Webserv_notes/To DOs.md",
+    "Webserv_notes/04 - Files/Excalidraw/Hello World!.md",
+    "obj/src/RequestChecks-9a8b0778.o.tmp",
+    "Webserv_notes/04 - Files/webserv.subject.pdf",
     "webserv",
     "obj/src/cgi.o",
     "obj/src/cgi-34c1def2.o.tmp",
     "obj/src/ServerLoop.o",
     "obj/src/ServerLoop-48a4bfc7.o.tmp",
-    "obj/src/Utils.o",
-    "obj/src/Utils-79be3532.o.tmp",
-    "obj/src/RequestChecks.o",
-    "obj/src/RequestChecks-ab6fb7b0.o.tmp",
-    "obj/src/Request.o",
-    "obj/src/Request-911ee20b.o.tmp",
     "Webserv_notes/06 - Allowed functions/Explicitly named (C) functions.md",
     "Webserv_notes/03 - Steph/TODO.md",
-    "Webserv_notes/Obsidian Basics.md",
     "Webserv_notes/05 - Templates/std_notes.md",
     "Webserv_notes/01 - Chris/HTTP.md",
     "Webserv_notes/03 - Steph/Response/Some possible functions to use.md",
-    "Webserv_notes/03 - Steph/Response/HTTP responses.md",
     "Webserv_notes/🐙 02 - Henri/request parsing.md",
     "Webserv_notes/03 - Steph/HTTP Response.md",
     "Webserv_notes/04 - Files/Excalidraw/Procecss_drawing.md",
@@ -200,7 +208,6 @@
     "Webserv_notes/01 - Chris/Sources i found but not checked.md",
     "Webserv_notes/01 - Chris/Building a simple http server.md",
     "Webserv_notes/04 - Files/OSI-Model.png",
-    "Webserv_notes/04 - Files/Excalidraw/Hello World!.md",
     "Webserv_notes/Subject summary and thoughts.md",
     "Webserv_notes/01 - Chris/TCP_IP Sockets.md"
   ]
