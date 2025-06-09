@@ -40,7 +40,7 @@ void	createConfigList(char *av, std::vector<std::string> &configList)
 			configList.push_back(serverConfig);
 			serverConfig.clear();
 			continue;
-		}	
+		}
 		line += '\n';
 		serverConfig.append(line);
 	}
@@ -54,7 +54,7 @@ void	runAllServers(std::vector<Server> &serverList)
 int main(int ac, char **av)
 {
 	std::signal(SIGINT, signalHandler);
-	
+
 	if (ac != 2)
 	{
 		std::cout << "Please provide a config file [Usage: ./webserv *.conf]\n";
