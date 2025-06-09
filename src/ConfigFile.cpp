@@ -115,13 +115,13 @@ void	Server::extractName()
 	std::map<std::string, std::string>::iterator it = config->find("server_name");
 	if (it != config->end())
 	{
-		this->_Name = it->second;
-		std::cout << "Server Name: " << this->_Name << '\n';
+		this->_name = it->second;
+		std::cout << "Server Name: " << this->_name << '\n';
 	}
 	else
 	{
 		std::cout << "No host in config file, default set to bind to any local address\n";
-		this->_Name = "default_server"; // default server name
+		this->_name = "default_server"; // default server name
 	}
 }
 

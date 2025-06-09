@@ -73,19 +73,19 @@ public:
 	size_t	getMaxBodySize();
 
 private:
-	std::string 																	_Name;
-	int																					_numPorts;
-	std::vector<int>																	_ports;
-	std::string																			_IPHost;
-	std::vector<int>																	_serverSocket;
-	size_t																				_maxBodySize;
-	std::map<int, std::string> 															_socketBuffers;
-	std::map<int, Request*> 															_requestCollector;
-	std::vector<struct pollfd>															_socketArray;
+	std::string 														_name;
+	int																		_numPorts;
+	std::vector<int>												_ports;
+	std::string															_IPHost;
+	std::vector<int>												_serverSocket; // vector of fd of each server sockets
+	size_t																	_maxBodySize;
+	std::map<int, std::string> 								_socketBuffers;
+	std::map<int, Request*> 								_requestCollector;
+	std::vector<struct pollfd>								_socketArray; // pollfd array of each server socket
 	std::map<int, time_t> 																_lastActive;
-	std::map<std::string, std::string>													_serverConfig;
-	std::map<std::string, std::string>													_dirConfig;
-	std::map<std::string, std::string>													_mimetypeConfig;
+	std::map<std::string, std::string>											_serverConfig;
+	std::map<std::string, std::string>											_dirConfig;
+	std::map<std::string, std::string>											_mimetypeConfig;
 	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 	// std::map<std::string, std::string>	_pageConfig;
 	// std::map<std::string, std::string>	_fileConfig;

@@ -54,6 +54,7 @@ void	runAllServers(std::vector<Server> &serverList)
 	for(std::vector<Server>::iterator it = serverList.begin(); it != serverList.end(); ++it)
 	{
 
+
 	}
 }
 
