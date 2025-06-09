@@ -17,3 +17,8 @@
 - [ ] check cgi with cgi tester --> does cgi routing work and miscellaneous scripts?
 	- [ ] make cgi extension check seperate from other file type checks
 
+Chris:
+- [x] creating the mandatory folders if there is a new server
+- [x] create top map for the dir maps. with path as key and map as value == Should work, needs recheck tommorow
+- [ ] check autoindex, if on, provide a list with the files inside requested directory
+	- [ ] response with file links and code 301 for redirecting

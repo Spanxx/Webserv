@@ -5,14 +5,15 @@
 // #include	<sys/time.h>
 
 // Server::Server(char *av)
-Server::Server(char *av, std::string &serverConfig)
+Server::Server(std::string &serverConfig)
 {
 	try
 	{
-		if (this->createConfig(av, serverConfig) == 1)
+		if (this->createConfig(serverConfig) == 1)
 			throw ServerException("Creating Config failed!");
 
-		this->extractPorts();
+		this->storeServerConfig();
+		this->createDirStructure();
 
 		//set default port if none in config file
 		if (this->_numPorts == 0)
@@ -58,8 +59,6 @@ void	Server::startListen(int socket)
 	if (listen(socket, 10) < 0)	// was 1, 10 is to test / amount of connections
 	{
 		throw ServerException("Listen failed!");
-		// std::cerr << "Error listening on server socket!\n";
-		// exit(1);
 	}
 
 	std::cout << "Server starts listening for incomming connections on FD " << socket <<  "\n";
@@ -81,3 +80,5 @@ void Server::closeServer()
 Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
 
 size_t	Server::getMaxBodySize() { return _maxBodySize; }
+std::string	Server::getName() { return _name; }
+std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}

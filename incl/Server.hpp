@@ -31,7 +31,7 @@ class Server
 public:
 
 	// Server(char *av);
-	Server(char *av, std::string &serverConfig);
+	Server(std::string &serverConfig);
 	~Server();
 
 	void	startListen(int socket);
@@ -40,18 +40,24 @@ public:
 	void	sendResponse(int client_fd);
 	void	closeServer();
 	
-	int		createConfig(char *av, std::string &serverConfig);
+	int		createConfig(std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
 	
 	void	createDirStructure();
-	void	mkdir_p(const std::string fullPath, mode_t mode);
+	// void	mkdir_p(const std::string fullPath, mode_t mode);
 	void	loadMimeTypes();
 
-	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
-
-	void	extractPorts();
+	void	storeServerConfig();
+	void	extractPorts(std::map<std::string, std::string>::iterator &it);
+	void	checkPortDuplicates(int &port);
+	void	extractMaxBodySize();
+	void	printPorts();
 	int		createServerSocket(int port);
+
+	int	router();
+	
+	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
 	void	make_new_connections(time_t &now, int server_fd);
 	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
@@ -61,32 +67,39 @@ public:
 	void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
 	void	close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
 
+	size_t														getMaxBodySize();
+	std::string													getName();
+	std::map<std::string, std::map<std::string, std::string> >*	getLocationBlocks();
+
 	class ServerException : public std::runtime_error {
 	public:
 		ServerException(const std::string &error);
 	};
 
-	size_t	getMaxBodySize();
-
 private:
+	std::string																			_name;
+	std::string																			_host;
 	int																					_numPorts;
+	size_t																				_maxBodySize;
 	std::vector<int>																	_ports;
 	std::vector<int>																	_serverSocket;
-	size_t																				_maxBodySize;
+	std::vector<struct pollfd>															_socketArray;
 	std::map<int, std::string> 															_socketBuffers;
 	std::map<int, Request*> 															_requestCollector;
-	std::vector<struct pollfd>															_socketArray;
 	std::map<int, time_t> 																_lastActive;
 	std::map<std::string, std::string>													_serverConfig;
 	std::map<std::string, std::string>													_dirConfig;
+	std::map<std::string, std::map<std::string, std::string> >							_locationBlocks;
 	std::map<std::string, std::string>													_mimetypeConfig;
-	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
-	// std::map<std::string, std::string>	_pageConfig;
-	// std::map<std::string, std::string>	_fileConfig;
+	// std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 
 	Server(Server &other);
 	Server& operator=(Server &other);
 };
+
+void	createConfigList(char *av, std::vector<std::string> &configList);
+
+int		mkdir_p(const std::string fullPath, mode_t mode);
 
 
 #endif //SERVER_HPP
