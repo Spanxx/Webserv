@@ -63,6 +63,7 @@ public:
 	void	prepare_response(Request *request, std::map<int, std::string> &response_collector, size_t &i);
 	void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
 	void	close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+	const std::vector<struct pollfd>& getSocketArray() const;
 
 	class ServerException : public std::runtime_error {
 	public:

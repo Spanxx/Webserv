@@ -48,7 +48,13 @@ void	createConfigList(char *av, std::vector<std::string> &configList)
 
 void	runAllServers(std::vector<Server> &serverList)
 {
+	std::vector<struct pollfd>	globalPollFds;
+	std::map<int, Server*> socketToServerMap;
 
+	for(std::vector<Server>::iterator it = serverList.begin(); it != serverList.end(); ++it)
+	{
+
+	}
 }
 
 int main(int ac, char **av)
