@@ -48,13 +48,25 @@ void	createConfigList(char *av, std::vector<std::string> &configList)
 
 void	runAllServers(std::vector<Server> &serverList)
 {
+	int pollTimeout = 500;		//timeout --> checks for new connections (milliseconds)
+	int clientTimeout = 10;		//timeout before a client gets disconnected (seconds)
+	std::map<int, std::string> response_collector;
+	std::map<int, bool> keepAlive;
+
 	std::vector<struct pollfd>	globalPollFds;
 	std::map<int, Server*> socketToServerMap;
 
 	for(std::vector<Server>::iterator it = serverList.begin(); it != serverList.end(); ++it)
 	{
-
-
+		const std::vector<struct pollfd>& serverSockets = it->getSocketArray(); // get the pollfd array of each server
+		for (size_t i = 0; i < serverSockets.size(); ++i) // then for each server's pollfd array we are pushing it to the global array, and also mapping the fd to the server object
+		{
+			globalPollFds.push_back(serverSockets[i]);
+			socketToServerMap[serverSockets[i].fd] = &(*it);
+		}
+		const std::vector<int> &serverSockets = it->getServerSockets();
+		for (size_t i = 0; i < serverSockets.size(); ++i)
+			fcntl(serverSockets[i], F_SETFL, O_NONBLOCK);
 	}
 }
 
