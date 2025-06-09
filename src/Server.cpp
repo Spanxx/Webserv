@@ -11,8 +11,9 @@ Server::Server(char *av, std::string &serverConfig)
 	{
 		if (this->createConfig(av, serverConfig) == 1)
 			throw ServerException("Creating Config failed!");
-
+		this->extractName();
 		this->extractPorts();
+		this->extractHost();
 
 		//set default port if none in config file
 		if (this->_numPorts == 0)
@@ -25,9 +26,9 @@ Server::Server(char *av, std::string &serverConfig)
 
 		while (it != this->_ports.end())	// maybe change to for with index
 		{
-			int sock = this->createServerSocket(*it);
+			int sock = this->createServerSocket(*it); //create a server socket and bind it to the port
 			this->_serverSocket.push_back(sock);
-			startListen(sock);
+			startListen(sock); //start listening on the socket and push it to the pollfd array _socketArray
 			std::cout << "Server socket fd: " << sock << " created and bound\n";
 			++it;
 		}

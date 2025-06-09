@@ -52,7 +52,7 @@ void	Server::extractPorts()
 	std::string item;
 
 	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-	
+
 	if (!config)
 		throw ServerException("Extracting serverConfig map failed!");
 
@@ -60,7 +60,7 @@ void	Server::extractPorts()
 	while (it != config->end())
 	{
 		if (it->first.find("ports") != std::string::npos)
-		{	
+		{
 			std::stringstream ss(it->second);
 
 			while (std::getline(ss, item, ','))
@@ -76,12 +76,52 @@ void	Server::extractPorts()
 	}
 
 	this->_numPorts = portCounter;
-	
+
 	std::vector<int>::iterator iPorts = this->_ports.begin();
 	while (iPorts != this->_ports.end())
 	{
 		std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
 		++iPorts;
+	}
+}
+
+void	Server::extractHost()
+{
+	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
+
+	if (!config)
+		throw ServerException("Extracting serverConfig map failed!");
+
+	std::map<std::string, std::string>::iterator it = config->find("host");
+	if (it != config->end())
+	{
+		this->_IPHost = it->second;
+		std::cout << "Host: " << this->_IPHost << '\n';
+	}
+	else
+	{
+		std::cout << "No host in config file, default set to bind to any local address\n";
+		this->_IPHost = "0.0.0.0"; // bind to any local address
+	}
+}
+
+void	Server::extractName()
+{
+	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
+
+	if (!config)
+		throw ServerException("Extracting serverConfig map failed!");
+
+	std::map<std::string, std::string>::iterator it = config->find("server_name");
+	if (it != config->end())
+	{
+		this->_Name = it->second;
+		std::cout << "Server Name: " << this->_Name << '\n';
+	}
+	else
+	{
+		std::cout << "No host in config file, default set to bind to any local address\n";
+		this->_Name = "default_server"; // default server name
 	}
 }
 
@@ -143,7 +183,7 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 				if (trimmed == "}" && !inBlock)
 				{
 					iss.clear();                // Clear any error flags
-					iss.seekg(0, std::ios::beg); // Go back to the beginning	
+					iss.seekg(0, std::ios::beg); // Go back to the beginning
 					return ;
 				}
 
@@ -176,14 +216,14 @@ void	Server::loadMimeTypes()
 	std::ifstream file("../www/config/mime.types");
 	if (!file)
 		throw ServerException("Loading mime.types failed!");
-	
+
 	while(getline(file, line))
 	{
 		if (line.empty() || line.find('#') != std::string::npos)
 			continue;
 		line += '\n';
 		mimeConfig.append(line);
-		
+
 	}
 	this->extractConfigMap(mimeConfig, _mimetypeConfig, "types");
 }

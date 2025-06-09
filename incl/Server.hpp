@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <sstream>
 #include <csignal>
+#include	<arpa/inet.h> // need for inet_aton
 #include "Utils.hpp"
 
 extern volatile sig_atomic_t stopSignal;
@@ -39,11 +40,11 @@ public:
 	bool	isServerSocket(int fd);
 	void	sendResponse(int client_fd);
 	void	closeServer();
-	
+
 	int		createConfig(char *av, std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
-	
+
 	void	createDirStructure();
 	void	mkdir_p(const std::string fullPath, mode_t mode);
 	void	loadMimeTypes();
@@ -51,6 +52,8 @@ public:
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
 	void	extractPorts();
+	void	extractHost();
+	void	extractName();
 	int		createServerSocket(int port);
 
 	void	make_new_connections(time_t &now, int server_fd);
@@ -69,8 +72,10 @@ public:
 	size_t	getMaxBodySize();
 
 private:
+	std::string 																	_Name;
 	int																					_numPorts;
 	std::vector<int>																	_ports;
+	std::string																			_IPHost;
 	std::vector<int>																	_serverSocket;
 	size_t																				_maxBodySize;
 	std::map<int, std::string> 															_socketBuffers;
