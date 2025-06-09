@@ -19,7 +19,7 @@ std::string checkFilePath(char *av)
 	if (f3.good())
 		return ("www/" + filePath);
 
-	std::string fallback = "www/config/server.conf";
+	std::string fallback = "www/config/default.conf";
 	std::ifstream f4(fallback.c_str());
 	if (f4.good())
 		return fallback;

@@ -4,11 +4,12 @@
 #include	"../incl/Response.hpp"
 // #include	<sys/time.h>
 
-Server::Server(char *av)
+// Server::Server(char *av)
+Server::Server(char *av, std::string &serverConfig)
 {
 	try
 	{
-		if (this->createConfig(av) == 1)
+		if (this->createConfig(av, serverConfig) == 1)
 			throw ServerException("Creating Config failed!");
 
 		this->extractPorts();

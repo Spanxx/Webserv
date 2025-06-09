@@ -213,8 +213,8 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 				close(outPipe[0]);
 				return;
 			}
-			time_t currentTime = time(NULL);
-			std::cerr << "Time: " << currentTime << '\n'; 
+			// time_t currentTime = time(NULL);
+			// std::cerr << "Time: " << currentTime << '\n'; 
 			usleep(1000); // 1ms
 			continue;
 		}
@@ -259,7 +259,6 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 	}
 
 }
-
 
 void Response::parseCGIOutput(const std::string &output)
 {

@@ -1,0 +1,89 @@
+##############################################################################################
+#MM'""""'YMM                   .8888b oo          MM"""""""`MM          dP                   #
+#M' .mmm. `M                   88   "             MM  mmmm,  M          88                   #
+#M  MMMMMooM .d8888b. 88d888b. 88aaa  dP .d8888b. M'        .M dP    dP 88 .d8888b. .d8888b. #
+#M  MMMMMMMM 88'  `88 88'  `88 88     88 88'  `88 MM  MMMb. "M 88    88 88 88ooood8 Y8ooooo. #
+#M. `MMM' .M 88.  .88 88    88 88     88 88.  .88 MM  MMMMM  M 88.  .88 88 88.  ...       88 #
+#MM.     .dM `88888P' dP    dP dP     dP `8888P88 MM  MMMMM  M `88888P' dP `88888P' `88888P' #
+#MMMMMMMMMMM                                  .88 MMMMMMMMMMMM                               #
+#                                         d8888P                                             #
+##############################################################################################
+
+# No spaces (except in comments)
+# Hashtag "#" marks a line as comment --> will be ignored
+# Empty lines will be ignored
+# Each section starts with a keyword and {}, containing key=value pairs
+# Example:
+#server{
+#port=8080
+#root=www/
+#...
+#}
+# To listen to multiple Ports, split them with a comma (no spaces between) e.g. ports=8080,5050,7070
+# Directories in the "dir" section will be created if they don't exist
+# Subdirectories inside the dir{} block must be relative to the root directory defined in the server{} block (e.g., images/ → www/images/)
+# Allowed top-level keywords: server, dir, files
+
+server{
+ports=8080,5555
+host=127.0.0.1
+root=www/
+index=www/html/index.html
+methods=GET/POST/DELETE
+limitRequestLine=4096
+maxbodysize=5242880
+}
+
+dir{
+# root=www
+# config=www/config
+html=www/html
+files=www/files
+uploads=www/files/uploads
+cgi=www/cgi-bin
+}
+
+pages{
+index=www/html/index.html
+error=www/data/status_page.html
+}
+
+files{
+favicon=www/files/favicon.ico
+config=www/config/server.conf
+}
+
+filetypes{
+#webpages
+html=.html
+#pictures
+png=.png
+jpg=.jpg
+jpeg=.jpeg
+HEIC=.HEIC
+#textfiles
+txt=.txt
+pdf=.pdf
+#favicon
+ico=.ico
+#application
+python=.py
+#php=.php
+php=.php
+#javascript
+javascript=.js
+json=.json
+}
+
+config{
+redirect=index.html
+}
+
+cgi-bin{
+localhost:8080/cgi-bin
+}
+
+redir{
+standard=index.html
+save=mystuff
+}
