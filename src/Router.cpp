@@ -8,7 +8,7 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	this->_requestedPath = this->_request->getPath();
 	this->_serverName = this->_server->getName();
 	this->_locationBlocks = this->_server->getLocationBlocks();
-	
+
 	extractPathAndFile();
 	findDirConfig();
 	checkDirPermission();
@@ -84,10 +84,8 @@ void	Router::extractPathAndFile()
 	if (lastSlashPos == -1)
 	{
 		std::cout << "Invalid Request (no dot or slash), redirect to index.html\n";
-		newPath = checkCwd();
-		newPath += "/html/index.html";
-		this->_request->setPath(newPath);
-		this->_request->setCode(301);
+
+		this->_request->setCode(404);
 		
 		dotPos = this->_requestedPath.find_last_of('.');
 		lastSlashPos = this->_requestedPath.find_last_of('/');
@@ -135,7 +133,7 @@ void	Router::checkForDirRequest()
 		else
 		{
 			std::cout << "Directory request (autoindex: off) --> redirect to www/" << this->_serverName << "/html/index.html\n";
-			this->_request->setPath("www/" + _serverName + "/html/index.html");
+			this->_request->setPath("www/" + _serverName + "/html/index.html");	//change it to index from serverblock
 			// this->_request->setCode(200);
 		}
 	}
