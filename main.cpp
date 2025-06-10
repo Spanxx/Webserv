@@ -64,9 +64,42 @@ void	runAllServers(std::vector<Server> &serverList)
 			globalPollFds.push_back(serverSockets[i]);
 			socketToServerMap[serverSockets[i].fd] = &(*it);
 		}
-		const std::vector<int> &serverSockets = it->getServerSockets();
-		for (size_t i = 0; i < serverSockets.size(); ++i)
-			fcntl(serverSockets[i], F_SETFL, O_NONBLOCK);
+		const std::vector<int> &serverSocketsfd = it->getServerSockets();
+		for (size_t i = 0; i < serverSockets.size(); ++i) // Set server sockets to non-blocking
+			fcntl(serverSocketsfd[i], F_SETFL, O_NONBLOCK);
+	}
+	while(!stopSignal)
+	{
+		int ret = poll(globalPollFds.data(), globalPollFds.size(), pollTimeout);
+		if (ret < 0) // in case of poll error then we just continue the loop
+		{
+			std::cerr << "Poll error: " << strerror(errno) << std::endl;
+			continue;
+		}
+		time_t now = time(NULL);
+		for (size_t i = 0; i < globalPollFds.size(); ++i)
+		{
+			int fd = globalPollFds[i].fd;
+			Server *server = socketToServerMap[fd];
+
+			// Skip inactive client fds due to timeout
+			if (!server->isServerSocket(fd) && now - server->lastActive[fd] > clientTimeout)
+			{
+				std::cout << "Timeout --> client fd " << fd << " is closed!" << std::endl;
+				server->close_erase(response_collector, i, keepAlive);
+				continue;
+			}
+			if (globalPollFds[i].revents & POLLIN)   //return a non-zero value if the POLLIN bit is set	//handles the client connection
+				server->read_from_connection(now, response_collector, fd, keepAlive, server->lastActive);
+			else if (globalPollFds[i].revents & POLLOUT)
+				server->write_to_connection(response_collector, i, keepAlive);
+			else if (globalPollFds[i].revents & POLLERR || globalPollFds[i].revents & POLLHUP || globalPollFds[i].revents & POLLNVAL) //closed connection / EOF / error
+			{
+				std::cout << "REVENTS: client fd " << fd << " is closed!" << std::endl;
+				server->close_erase(response_collector, i, keepAlive);
+				continue;
+			}
+		}
 	}
 }
 

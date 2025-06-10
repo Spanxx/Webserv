@@ -79,8 +79,8 @@ void Server::closeServer()
 	}
 }
 
-const std::vector<struct pollfd>& Server::getSocketArray() const { return _socketArray; }
-const std::vector<int>& Server::getServerSocket() const { return _serverSocket; }
+const std::vector<struct pollfd>& Server::getSocketArray() const { return this->_socketArray; }
+const std::vector<int>& Server::getServerSockets() const { return this->_serverSocket; }
 
 Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
 

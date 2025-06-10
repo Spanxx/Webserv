@@ -56,15 +56,17 @@ public:
 	void	extractName();
 	int		createServerSocket(int port);
 
-	void	make_new_connections(time_t &now, int server_fd);
-	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+	//void	make_new_connections(time_t &now, int server_fd);
+	std::vector<int>	make_new_connections(int server_fd);
+	//void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+	void Server::read_from_connection(time_t &now, std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::map<int, time_t> &lastActive);
 	void	initialize_request(int fd, const std::string &data, size_t header_end);
 	void	handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i);
 	void	prepare_response(Request *request, std::map<int, std::string> &response_collector, size_t &i);
 	void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
 	void	close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
 	const std::vector<struct pollfd>& getSocketArray() const;
-	const std::vector<int>& getServerSocket() const;
+	const std::vector<int>& getServerSockets() const;
 
 	class ServerException : public std::runtime_error {
 	public:
@@ -72,18 +74,19 @@ public:
 	};
 
 	size_t	getMaxBodySize();
+	std::map<int, time_t> 																lastActive; //getter?
 
 private:
 	std::string 														_name;
 	int																		_numPorts;
 	std::vector<int>												_ports;
 	std::string															_IPHost;
-	std::vector<int>												_serverSocket; // vector of fd of each server sockets
+	std::vector<int>												_serverSocket; // vector of fd of each socket of the server
 	size_t																	_maxBodySize;
 	std::map<int, std::string> 								_socketBuffers;
 	std::map<int, Request*> 								_requestCollector;
 	std::vector<struct pollfd>								_socketArray; // pollfd array of each server socket
-	std::map<int, time_t> 																_lastActive;
+
 	std::map<std::string, std::string>											_serverConfig;
 	std::map<std::string, std::string>											_dirConfig;
 	std::map<std::string, std::string>											_mimetypeConfig;

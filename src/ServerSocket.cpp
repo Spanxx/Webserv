@@ -23,7 +23,7 @@ int	Server::createServerSocket(int port)
 	{
 		if (inet_aton(this->_IPHost.c_str(), &serverAddr.sin_addr) == 0)
 		{
-			std::cerr << "Error: Invalid IP address " << this->_IPHost << " for " << this->_Name << std::endl;
+			std::cerr << "Error: Invalid IP address " << this->_IPHost << " for " << this->_name << std::endl;
 			close(sock);
 			return -1;
 		}

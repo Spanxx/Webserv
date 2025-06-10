@@ -26,13 +26,13 @@ void	Server::serverLoop()
 	{
 		int ret = poll(_socketArray.data(), _socketArray.size(), pollTimeout);
 		(void)ret;
-		
+
 		time_t now = time(NULL);
 
 		for (size_t i = 0; i < _socketArray.size(); ++i)
 		{
 			//Timeout check for each client
-			if (!isServerSocket(_socketArray[i].fd) && now - _lastActive[_socketArray[i].fd] > clientTimeout)
+			if (!isServerSocket(_socketArray[i].fd) && now - lastActive[_socketArray[i].fd] > clientTimeout)
 			{
 				std::cout << "Timeout --> client fd " << _socketArray[i].fd << " is closed!" << std::endl;
 				close_erase(response_collector, i, keepAlive);
@@ -55,14 +55,14 @@ void	Server::serverLoop()
 }
 
 
-void Server::make_new_connections(time_t &now, int server_fd)
+/*void Server::make_new_connections(time_t &now, int server_fd)
 {
 	while (true) //loops over all pending connections and accepts them until there are no more (EAGAIN or EWOULDBLOCK)
 	{
 		struct sockaddr_in	clientAddr;
 		socklen_t			clientLen = sizeof(clientAddr);
 		int					clientSocket = accept(server_fd, (struct sockaddr *)&clientAddr, &clientLen);
-		
+
 		if (clientSocket < 0)
 		{
 			if (errno == EAGAIN || errno == EWOULDBLOCK) //there are no more connections to accept right now
@@ -80,13 +80,40 @@ void Server::make_new_connections(time_t &now, int server_fd)
 		clientFd.events = POLLIN;	// wait for input
 		clientFd.revents = 0; // initializing this but poll() will handle it
 		_socketArray.push_back(clientFd);
-		_lastActive[clientSocket] = now;
+		lastActive[clientSocket] = now;
 		std::cout << "New connection accepted: fd = " << clientFd.fd << std::endl;
 	}
+}*/
+
+std::vector<int> Server::make_new_connections(int server_fd)
+{
+	std::vector<int> newClients;
+
+	while (true)
+	{
+		struct sockaddr_in clientAddr;
+		socklen_t clientLen = sizeof(clientAddr);
+		int clientSocket = accept(server_fd, (struct sockaddr *)&clientAddr, &clientLen);
+
+		if (clientSocket < 0)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				break;
+			else
+			{
+				std::cerr << "Error accepting client connection\n";
+				break;
+			}
+		}
+		fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+		std::cout << "New connection accepted: fd = " << clientSocket << std::endl;
+		newClients.push_back(clientSocket);
+	}
+	return newClients;
 }
 
 
-void Server::read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
+/*void Server::read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
 {
 	if (isServerSocket(_socketArray[i].fd))
 	{
@@ -104,22 +131,58 @@ void Server::read_from_connection(time_t &now, std::map<int, std::string> &respo
 			std::cout << "[Browser closed] Client fd " << _socketArray[i].fd << " is closed!" << std::endl;
 		close_erase(response_collector, i, keepAlive);
 		return;
-	}		
+	}
 
 	std::cout << "Read " << n << " bytes from fd " << _socketArray[i].fd << std::endl;
-	_lastActive[_socketArray[i].fd] = now;
+	lastActive[_socketArray[i].fd] = now;
 	_socketBuffers[_socketArray[i].fd] += std::string(buffer, n);
 	std::string &data = _socketBuffers[_socketArray[i].fd];
 	size_t header_end = data.find("\r\n\r\n");
-	if (header_end == std::string::npos) //still no header end 
+	if (header_end == std::string::npos) //still no header end
 		return;
 	//check if chunked or not, parse body either based on content length or chunks, then process
 
 	if (_requestCollector.find(_socketArray[i].fd) == _requestCollector.end()) //no entry made yet for this request
 		initialize_request(_socketArray[i].fd, data, header_end);
 	handle_request(data, header_end, response_collector, keepAlive, i);
-}
+}*/
 
+void Server::read_from_connection(
+	time_t &now,
+	std::map<int, std::string> &response_collector,
+	int fd,
+	std::map<int, bool> &keepAlive,
+	std::map<int, time_t> &lastActive
+)
+{
+	char buffer[1024] = {0};
+	int n = read(fd, buffer, sizeof(buffer));
+
+	if (n <= 0)
+	{
+		if (n < 0)
+			std::cerr << "Error reading from socket " << fd << "\n";
+		else
+			std::cout << "[Browser closed] Client fd " << fd << " is closed!" << std::endl;
+		// Caller should handle closing/removing fd from poll vector
+		throw std::runtime_error("client disconnect or read error");
+	}
+
+	std::cout << "Read " << n << " bytes from fd " << fd << std::endl;
+	lastActive[fd] = now;
+
+	_socketBuffers[fd] += std::string(buffer, n);
+	std::string &data = _socketBuffers[fd];
+
+	size_t header_end = data.find("\r\n\r\n");
+	if (header_end == std::string::npos) // header not complete yet
+		return;
+
+	if (_requestCollector.find(fd) == _requestCollector.end())
+		initialize_request(fd, data, header_end); //TODO
+
+	handle_request(data, header_end, response_collector, keepAlive, fd); //TODO
+}
 
 void Server::write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
 {
@@ -136,7 +199,7 @@ void Server::write_to_connection(std::map<int, std::string> &response_collector,
 		response_collector[_socketArray[i].fd] = resp.substr(sent); //cuts off first sent amount of bytes and updates response string
 	else
 	{
-		
+
 		if (keepAlive[_socketArray[i].fd])
 		{
 			response_collector.erase(_socketArray[i].fd);
@@ -151,7 +214,7 @@ void Server::write_to_connection(std::map<int, std::string> &response_collector,
 void	Server::close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
 {
 	close(_socketArray[i].fd);
-	_lastActive.erase(_socketArray[i].fd);
+	lastActive.erase(_socketArray[i].fd);
 	response_collector.erase(_socketArray[i].fd);
 	keepAlive.erase(_socketArray[i].fd);
 	std::map<int, Request*>::iterator it = _requestCollector.find(_socketArray[i].fd);
@@ -162,7 +225,7 @@ void	Server::close_erase(std::map<int, std::string> &response_collector, size_t 
 	}
 	_socketArray.erase(_socketArray.begin() + i);
 	--i;
-	
+
 }
 
 void Server::initialize_request(int fd, const std::string &data, size_t header_end)
@@ -211,7 +274,7 @@ void Server::handle_request(std::string &data, size_t header_end, std::map<int, 
 void Server::prepare_response(Request *request, std::map<int, std::string> &response_collector, size_t &i)
 {
 	Response *response = new Response(request);
-	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd); 
+	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd);
 	_socketArray[i].events = POLLOUT; //switch to writing
 	std::cout << "Switched to POLLOUT\n";
 
