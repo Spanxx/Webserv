@@ -1,1 +1,4 @@
 - [ ] POST method dynamic for the upload location
+- [ ] cluster or managerServer class
+- [ ] Check that requests and responses are handled correctly
+- [ ] Decide: What to do if one of the servers failed to be configured

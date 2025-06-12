@@ -12,7 +12,7 @@ bool Server::isServerSocket(int fd)
 	return false;
 }
 
-void	Server::serverLoop()
+/*void	Server::serverLoop()
 {
 	int pollTimeout = 500;		//timeout --> checks for new connections (milliseconds)
 	int clientTimeout = 10;		//timeout before a client gets disconnected (seconds)
@@ -52,7 +52,7 @@ void	Server::serverLoop()
 		}
 	}
 	closeServer(); // call close_erase here as well?
-}
+}*/
 
 
 /*void Server::make_new_connections(time_t &now, int server_fd)
@@ -85,7 +85,7 @@ void	Server::serverLoop()
 	}
 }*/
 
-std::vector<int> Server::make_new_connections(int server_fd)
+std::vector<int>	Server::make_new_connections(time_t &now, int server_fd, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive)
 {
 	std::vector<int> newClients;
 
@@ -105,13 +105,25 @@ std::vector<int> Server::make_new_connections(int server_fd)
 				break;
 			}
 		}
+
 		fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-		std::cout << "New connection accepted: fd = " << clientSocket << std::endl;
+
+		struct pollfd clientFd;
+		clientFd.fd = clientSocket;
+		clientFd.events = POLLIN;
+		clientFd.revents = 0;
+
+		globalPollFds.push_back(clientFd);
+		_socketArray.push_back(clientFd);
+		lastActive[clientSocket] = now;
+
 		newClients.push_back(clientSocket);
+
+		std::cout << "New connection accepted: fd = " << clientSocket << std::endl;
 	}
+
 	return newClients;
 }
-
 
 /*void Server::read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
 {
@@ -147,44 +159,49 @@ std::vector<int> Server::make_new_connections(int server_fd)
 	handle_request(data, header_end, response_collector, keepAlive, i);
 }*/
 
-void Server::read_from_connection(
-	time_t &now,
-	std::map<int, std::string> &response_collector,
-	int fd,
-	std::map<int, bool> &keepAlive,
-	std::map<int, time_t> &lastActive
-)
+void	Server::read_from_connection(time_t &now,
+																std::map<int, std::string> &response_collector,
+																int fd,
+																std::map<int, bool> &keepAlive,
+																std::vector<struct pollfd> &globalPollFds,
+																std::map<int, time_t> &lastActive)
 {
+	if (isServerSocket(fd))
+	{
+		make_new_connections(now, fd, globalPollFds, lastActive);
+		return;
+	}
+
 	char buffer[1024] = {0};
 	int n = read(fd, buffer, sizeof(buffer));
 
 	if (n <= 0)
 	{
 		if (n < 0)
-			std::cerr << "Error reading from socket " << fd << "\n";
+			std::cerr << "Error reading from socket!\n";
 		else
 			std::cout << "[Browser closed] Client fd " << fd << " is closed!" << std::endl;
-		// Caller should handle closing/removing fd from poll vector
-		throw std::runtime_error("client disconnect or read error");
+
+		close_erase(response_collector, fd, keepAlive, globalPollFds, lastActive);
+		return;
 	}
 
 	std::cout << "Read " << n << " bytes from fd " << fd << std::endl;
 	lastActive[fd] = now;
+	 _socketBuffers[fd] += std::string(buffer, n);
 
-	_socketBuffers[fd] += std::string(buffer, n);
 	std::string &data = _socketBuffers[fd];
-
 	size_t header_end = data.find("\r\n\r\n");
-	if (header_end == std::string::npos) // header not complete yet
+	if (header_end == std::string::npos)
 		return;
 
 	if (_requestCollector.find(fd) == _requestCollector.end())
-		initialize_request(fd, data, header_end); //TODO
-
-	handle_request(data, header_end, response_collector, keepAlive, fd); //TODO
+		initialize_request(fd, data, header_end);
+	handle_request(data, header_end, response_collector, keepAlive, fd, globalPollFds, lastActive);
 }
 
-void Server::write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
+
+/*void Server::write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
 {
 	std::string resp = response_collector[_socketArray[i].fd];
 
@@ -209,9 +226,48 @@ void Server::write_to_connection(std::map<int, std::string> &response_collector,
 		else
 			close_erase(response_collector, i, keepAlive);
 	}
+}*/
+
+void	Server::write_to_connection(std::map<int, std::string> &response_collector,
+															int fd,
+															std::map<int, bool> &keepAlive,
+															std::vector<struct pollfd> &globalPollFds,
+															std::map<int, time_t> &lastActive)
+{
+	std::string &resp = response_collector[fd];
+
+	ssize_t sent = send(fd, resp.c_str(), resp.size(), 0);
+	if (sent < 0)
+	{
+		std::cerr << "Send error on fd " << fd << std::endl;
+		close_erase(response_collector, fd, keepAlive, globalPollFds, lastActive);
+		return;
+	}
+
+	if ((size_t)sent < resp.size())
+		resp = resp.substr(sent); // not all sent; store remainder
+	else
+	{
+		if (keepAlive[fd])
+		{
+			response_collector.erase(fd);
+			// Switch to POLLIN
+			for (size_t i = 0; i < globalPollFds.size(); ++i)
+			{
+				if (globalPollFds[i].fd == fd)
+				{
+					globalPollFds[i].events = POLLIN;
+					std::cout << "Switched fd " << fd << " to POLLIN\n";
+					break;
+				}
+			}
+		}
+		else
+			close_erase(response_collector, fd, keepAlive, globalPollFds, lastActive);
+    }
 }
 
-void	Server::close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
+/*void	Server::close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive)
 {
 	close(_socketArray[i].fd);
 	lastActive.erase(_socketArray[i].fd);
@@ -226,6 +282,66 @@ void	Server::close_erase(std::map<int, std::string> &response_collector, size_t 
 	_socketArray.erase(_socketArray.begin() + i);
 	--i;
 
+}*/
+
+void	Server::close_erase(std::map<int, std::string> &response_collector,
+												int fd,
+												std::map<int, bool> &keepAlive,
+												std::vector<struct pollfd> &globalPollFds,
+												std::map<int, time_t> &lastActive)
+{
+	close(fd);
+	lastActive.erase(fd);
+	response_collector.erase(fd);
+	keepAlive.erase(fd);
+
+	std::map<int, Request*>::iterator it = _requestCollector.find(fd);
+	if (it != _requestCollector.end())
+	{
+		delete it->second;
+		_requestCollector.erase(it);
+	}
+
+	// Remove from globalPollFds
+	for (size_t i = 0; i < globalPollFds.size(); ++i)
+	{
+		if (globalPollFds[i].fd == fd)
+		{
+			globalPollFds.erase(globalPollFds.begin() + i);
+			break;
+		}
+	}
+}
+
+void Server::close_erase_fd(int fd,
+	std::map<int, std::string> &response_collector,
+	std::map<int, bool> &keepAlive,
+	std::vector<struct pollfd> &globalPollFds,
+	std::map<int, time_t> &lastActive)
+{
+	close(fd);
+	// Remove from _socketArray
+	for (std::vector<struct pollfd>::iterator it = _socketArray.begin(); it != _socketArray.end(); ++it)
+	{
+		if (it->fd == fd)
+		{
+			_socketArray.erase(it);
+			break;
+		}
+	}
+	for (std::vector<struct pollfd>::iterator it = globalPollFds.begin(); it != globalPollFds.end(); ++it)
+	{
+		if (it->fd == fd)
+		{
+			globalPollFds.erase(it);
+			break;
+		}
+	}
+	response_collector.erase(fd);
+	keepAlive.erase(fd);
+	lastActive.erase(fd);
+
+	std::cout << "[CLOSE] Closed client fd = " << fd << std::endl;
 }
 
 void Server::initialize_request(int fd, const std::string &data, size_t header_end)
@@ -237,7 +353,7 @@ void Server::initialize_request(int fd, const std::string &data, size_t header_e
 	_requestCollector[fd] = request;
 }
 
-void Server::handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i)
+/*void Server::handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i)
 {
 	Request *request = _requestCollector[_socketArray[i].fd];
 	keepAlive[_socketArray[i].fd] = request->getConnection();
@@ -270,8 +386,73 @@ void Server::handle_request(std::string &data, size_t header_end, std::map<int, 
 		if (request->parse_chunks(data, chunk_start) || request->getCode() != 200)
 			prepare_response(request, response_collector, i);
 	}
+}*/
+
+void	Server::handle_request(std::string &data, size_t header_end,
+													std::map<int, std::string> &response_collector,
+													std::map<int, bool> &keepAlive,
+													int fd,
+													std::vector<struct pollfd> &globalPollFds,
+													std::map<int, time_t> &lastActive)
+{
+	Request *request = _requestCollector[fd];
+	keepAlive[fd] = request->getConnection();
+
+	if (!request->isChunked())
+	{
+		int content_length = request->getContentLength();
+		if (content_length < 0)
+		{
+			std::cerr << "Missing or invalid Content-Length\n";
+			request->setCode(400);
+			close_erase_fd(fd, response_collector, keepAlive, globalPollFds, lastActive);
+			return;
+		}
+		size_t total_required = header_end + 4 + content_length;
+		if (content_length == 0 || data.size() >= total_required)
+		{
+			std::string body_part;
+			if (content_length > 0)
+				body_part = data.substr(header_end + 4, content_length);
+			request->append_body(body_part);
+			if (request->getBodySize() > _maxBodySize)
+				request->setCode(413);
+
+			prepare_response(fd, response_collector);
+
+			// Switch to POLLOUT
+			for (size_t j = 0; j < globalPollFds.size(); ++j)
+			{
+				if (globalPollFds[j].fd == fd)
+				{
+					globalPollFds[j].events = POLLOUT;
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		size_t chunk_start = header_end + 4;
+		if (request->parse_chunks(data, chunk_start) || request->getCode() != 200)
+		{
+			prepare_response(fd, response_collector);
+
+			// Switch to POLLOUT
+			for (size_t j = 0; j < globalPollFds.size(); ++j)
+			{
+				if (globalPollFds[j].fd == fd)
+				{
+					globalPollFds[j].events = POLLOUT;
+					break;
+				}
+			}
+		}
+	}
 }
-void Server::prepare_response(Request *request, std::map<int, std::string> &response_collector, size_t &i)
+
+
+/*void Server::prepare_response(Request *request, std::map<int, std::string> &response_collector, size_t &i)
 {
 	Response *response = new Response(request);
 	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd);
@@ -282,6 +463,30 @@ void Server::prepare_response(Request *request, std::map<int, std::string> &resp
 	delete response;
 	_requestCollector.erase(_socketArray[i].fd);
 	_socketBuffers.erase(_socketArray[i].fd);
+}*/
+
+void Server::prepare_response(int fd, std::map<int, std::string> &response_collector)
+{
+	Request *request = _requestCollector[fd];
+	Response *response = new Response(request);
+
+	response_collector[fd] = response->process_request(fd);
+
+	// Switch to POLLOUT on this fd
+	for (size_t j = 0; j < _socketArray.size(); ++j)
+	{
+		if (_socketArray[j].fd == fd)
+		{
+			_socketArray[j].events = POLLOUT;
+			break;
+		}
+	}
+	std::cout << "Switched to POLLOUT for fd = " << fd << "\n";
+
+	delete request;
+	delete response;
+	_requestCollector.erase(fd);
+	_socketBuffers.erase(fd);
 }
 
 bool	Request::parse_chunks(std::string &data, size_t start)

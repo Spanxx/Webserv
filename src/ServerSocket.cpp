@@ -7,9 +7,7 @@ int	Server::createServerSocket(int port)
 {
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock < 0)
-	{
 		throw ServerException("Creating server socket failed!");
-	}
 
 	//prepare server adress structure
 	struct sockaddr_in serverAddr;
@@ -17,7 +15,7 @@ int	Server::createServerSocket(int port)
 	serverAddr.sin_family = AF_INET;				//IPv4
 	//serverAddr.sin_addr.s_addr = INADDR_ANY;		//bind to any local adress
 	serverAddr.sin_port = htons(port);				//port in network byte order
-	if (this->_IPHost == "0.0.0.0")
+	if (this->_IPHost == "0.0.0.0") // Dynamic IP address
 		serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); // Listen on all available interfaces
 	else
 	{
@@ -34,6 +32,8 @@ int	Server::createServerSocket(int port)
 
 	if (bind(sock, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
 	{
+		 std::cerr << "Error binding socket to port " << ntohs(serverAddr.sin_port)
+						<< ": " << strerror(errno) << " (errno: " << errno << ")" << std::endl;
 		throw ServerException("Bind failed!");
 		// std::cerr << "Error binding server socket!\n";
 		// exit(1);

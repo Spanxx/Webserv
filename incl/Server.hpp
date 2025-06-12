@@ -57,14 +57,19 @@ public:
 	int		createServerSocket(int port);
 
 	//void	make_new_connections(time_t &now, int server_fd);
-	std::vector<int>	make_new_connections(int server_fd);
+std::vector<int>	make_new_connections(time_t &now, int server_fd, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
 	//void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
-	void Server::read_from_connection(time_t &now, std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::map<int, time_t> &lastActive);
+	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
 	void	initialize_request(int fd, const std::string &data, size_t header_end);
-	void	handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i);
-	void	prepare_response(Request *request, std::map<int, std::string> &response_collector, size_t &i);
-	void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
-	void	close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+	//void	handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i);
+	void	handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, int fd, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
+	//void	prepare_response(Request *request, std::map<int, std::string> &response_collector, int &i);
+	void prepare_response(int fd, std::map<int, std::string> &response_collector);
+	//void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+	void write_to_connection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
+	//void	close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
+	void	close_erase(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
+	void close_erase_fd(int fd, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
 	const std::vector<struct pollfd>& getSocketArray() const;
 	const std::vector<int>& getServerSockets() const;
 
@@ -74,7 +79,6 @@ public:
 	};
 
 	size_t	getMaxBodySize();
-	std::map<int, time_t> 																lastActive; //getter?
 
 private:
 	std::string 														_name;

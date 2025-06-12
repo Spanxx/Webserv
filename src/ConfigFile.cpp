@@ -59,7 +59,7 @@ void	Server::extractPorts()
 	std::map<std::string, std::string>::iterator it = config->begin();
 	while (it != config->end())
 	{
-		if (it->first.find("ports") != std::string::npos)
+		if (it->first.find("listen") != std::string::npos)
 		{
 			std::stringstream ss(it->second);
 
@@ -135,12 +135,12 @@ void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &
 		std::string value = trimmed.substr(equalPos + 1);
 		key = trim(key);
 		value = trim(value);
-		std::cout << "config key: " << key << " || value: " << value << '\n';	//debug for config values
+		//std::cout << "config key: " << key << " || value: " << value << '\n';	//debug for config values
 		//check for key duplicates
 		if (targetMap.find(key) != targetMap.end())
 		{
-			std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
-					<< "new Value don't overwrites existing Value!\n";
+			//std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+					//<< "new Value don't overwrites existing Value!\n";
 		}
 		else
 			targetMap[key] = value;
@@ -213,7 +213,7 @@ void	Server::loadMimeTypes()
 	std::string line;
 	std::string mimeConfig;
 
-	std::ifstream file("../www/config/mime.types");
+	std::ifstream file("www/config/mime.types");
 	if (!file)
 		throw ServerException("Loading mime.types failed!");
 
