@@ -19,10 +19,17 @@ int main(int ac, char **av)
 		return (1);
 	}
 
-	checkFilePath(av[1]);
-
+	std::string configPath = checkFilePath(av[1]);
+	if (configPath.empty())
+	{
+		std::cerr << "Invalid path for config file!\n";
+		return (1);
+	}
+	
 	std::vector<std::string>	configList;
-	createConfigList(av[1], configList);
+	createConfigList(configPath, configList);
+
+	// createConfigList(av[1], configList);
 
 	if (configList.size() < 1)
 	{

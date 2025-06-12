@@ -42,7 +42,7 @@ void	Server::createDirStructure()
 {
 	if (this->_name == "")
 		this->_name = "defaultServer";
-	
+
 	std::string	serverPath;
 	std::string cwd = getcwd(NULL, 0);
 

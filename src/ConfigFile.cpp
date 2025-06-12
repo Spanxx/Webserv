@@ -2,14 +2,14 @@
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
 
-void	createConfigList(char *av, std::vector<std::string> &configList)
+void	createConfigList(std::string configPath, std::vector<std::string> &configList)
 {
 	bool			inServerBlock = false;
 	bool			inLocationBlock = false;
 
 	std::string		line;
 	std::string		serverConfig;
-	std::ifstream	iss(av);
+	std::ifstream	iss(configPath.c_str());
 	if (!iss)
 	{
 		std::cerr << "Creating config list failed!\n";

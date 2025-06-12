@@ -97,7 +97,7 @@ private:
 	Server& operator=(Server &other);
 };
 
-void	createConfigList(char *av, std::vector<std::string> &configList);
+void	createConfigList(std::string configPath, std::vector<std::string> &configList);
 
 int		mkdir_p(const std::string fullPath, mode_t mode);
 
