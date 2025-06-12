@@ -32,7 +32,7 @@ class Server
 public:
 
 	// Server(char *av);
-	Server(char *av, std::string &serverConfig);
+	Server(std::string &serverConfig);
 	~Server();
 
 	void	startListen(int socket);
@@ -40,15 +40,23 @@ public:
 	bool	isServerSocket(int fd);
 	void	sendResponse(int client_fd);
 	void	closeServer();
-
-	int		createConfig(char *av, std::string &serverConfig);
+	
+	int		createConfig(std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
 
 	void	createDirStructure();
-	void	mkdir_p(const std::string fullPath, mode_t mode);
+	// void	mkdir_p(const std::string fullPath, mode_t mode);
 	void	loadMimeTypes();
 
+	void	storeServerConfig();
+	void	extractPorts(std::map<std::string, std::string>::iterator &it);
+	void	checkPortDuplicates(int &port);
+	void	extractMaxBodySize();
+	void	printPorts();
+
+	int	router();
+	
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
 	void	extractPorts();
@@ -73,34 +81,42 @@ std::vector<int>	make_new_connections(time_t &now, int server_fd, std::vector<st
 	const std::vector<struct pollfd>& getSocketArray() const;
 	const std::vector<int>& getServerSockets() const;
 
+	size_t														getMaxBodySize();
+	std::string													getName();
+	std::map<std::string, std::map<std::string, std::string> >*	getLocationBlocks();
+
 	class ServerException : public std::runtime_error {
 	public:
 		ServerException(const std::string &error);
 	};
 
-	size_t	getMaxBodySize();
-
 private:
-	std::string 														_name;
-	int																		_numPorts;
-	std::vector<int>												_ports;
-	std::string															_IPHost;
-	std::vector<int>												_serverSocket; // vector of fd of each socket of the server
-	size_t																	_maxBodySize;
+	std::string 											_name;
+	int														_numPorts;
+	std::vector<int>										_ports;
+	std::string												_IPHost;
+	std::vector<int>										_serverSocket; // vector of fd of each socket of the server
+	size_t													_maxBodySize;
 	std::map<int, std::string> 								_socketBuffers;
 	std::map<int, Request*> 								_requestCollector;
 	std::vector<struct pollfd>								_socketArray; // pollfd array of each server socket
 
-	std::map<std::string, std::string>											_serverConfig;
-	std::map<std::string, std::string>											_dirConfig;
-	std::map<std::string, std::string>											_mimetypeConfig;
+	std::string																			_host;
+	std::map<int, time_t> 																_lastActive;
+	std::map<std::string, std::string>													_serverConfig;
+	std::map<std::string, std::string>													_dirConfig;
+	std::map<std::string, std::map<std::string, std::string> >							_locationBlocks;
+	std::map<std::string, std::string>													_mimetypeConfig;
 	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
-	// std::map<std::string, std::string>	_pageConfig;
-	// std::map<std::string, std::string>	_fileConfig;
+	// std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 
 	Server(Server &other);
 	Server& operator=(Server &other);
 };
+
+void	createConfigList(std::string configPath, std::vector<std::string> &configList);
+
+int		mkdir_p(const std::string fullPath, mode_t mode);
 
 
 #endif //SERVER_HPP

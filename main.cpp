@@ -152,10 +152,17 @@ int main(int ac, char **av)
 		return (1);
 	}
 
+	std::string configPath = checkFilePath(av[1]);
+	if (configPath.empty())
+	{
+		std::cerr << "Invalid path for config file!\n";
+		return (1);
+	}
+
 	std::vector<std::string>	configList;
 	std::vector<Server*>			serverList;
 
-	createConfigList(av[1], configList);
+	createConfigList(configPath, configList);
 
 	if (configList.size() < 1)
 	{
@@ -167,7 +174,7 @@ int main(int ac, char **av)
 	{
 		for (size_t i = 0; i < configList.size(); ++i)
 		{
-			Server*newServer = new Server(av[1], configList[i]);
+			Server*newServer = new Server(configList[i]);
 			serverList.push_back(newServer);
 			// newServer.serverLoop();
 		}

@@ -16,7 +16,7 @@
 
 class Response {
 	public:
-		Response(Request *request);
+		Response(Request *request, std::string &hostName);
 		Response(Response &other);
 		~Response();
 		Response& operator=(Response &other);

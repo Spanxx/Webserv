@@ -1,7 +1,6 @@
+#include "../incl/Router.hpp"
 #include "../incl/Request.hpp"
 #include "../incl/Utils.hpp"
-
-
 
 void	Request::check_headers(const std::string &headers_raw)
 {
@@ -35,10 +34,10 @@ void	Request::check_headers(const std::string &headers_raw)
 		return ;
 	if (checkPathChars() == 1)
 		return;
-	if (checkRequestedPath() == 1)
-		return ;
-	if (checkRequestedFiletype() == 1)
-		return ;
+	// if (checkRequestedFiletype() == 1)
+	// 	return ;
+	
+	Router Router(this->_server, this);
 	//this->_code = 200;
 }
 

@@ -2,20 +2,53 @@
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
 
+void	createConfigList(std::string configPath, std::vector<std::string> &configList)
+{
+	bool			inServerBlock = false;
+	bool			inLocationBlock = false;
+
+	std::string		line;
+	std::string		serverConfig;
+	std::ifstream	iss(configPath.c_str());
+	if (!iss)
+	{
+		std::cerr << "Creating config list failed!\n";
+		return;
+	}
+
+	while (getline(iss, line))
+	{
+		if (line.find("#") != std::string::npos || line.empty())
+			continue;
+		if (!inServerBlock && line.find("server") != std::string::npos)
+			inServerBlock = true;
+		else if (inServerBlock && line.find("{") != std::string::npos)
+			inLocationBlock = true;
+		else if (inServerBlock && inLocationBlock && line.find("}") != std::string::npos)
+			inLocationBlock = false;
+		else if (inServerBlock && !inLocationBlock && line.find("}") != std::string::npos)
+		{
+			serverConfig.append(line);
+			inServerBlock = false;
+			configList.push_back(serverConfig);
+			serverConfig.clear();
+			continue;
+		}	
+		line += '\n';
+		serverConfig.append(line);
+	}
+}
+
 std::map<std::string, std::string>* Server::getConfigMap(const std::string &configName)
 {
 	if (configName == "serverConfig")
 		return(&this->_serverConfig);
 	if (configName == "dirConfig")
 		return(&this->_dirConfig);
-	// if (configName == "pageConfig")
-	// 	return(&this->_pageConfig);
-	// if (configName == "fileConfig")
-	// 	return(&this->_fileConfig);
-	// if (configName == "filetypeConfig")
-	// 	return(&this->_filetypeConfig);
-	else
-		return (NULL);
+	if (configName == "mimeConfig")
+		return(&this->_mimetypeConfig);
+	
+	return (NULL);
 }
 
 int	Server::checkConfigFile(std::ifstream &conFile)
@@ -112,7 +145,7 @@ void	Server::extractName()
 	if (!config)
 		throw ServerException("Extracting serverConfig map failed!");
 
-	std::map<std::string, std::string>::iterator it = config->find("server_name");
+	std::map<std::string, std::string>::iterator it = config->find("name");
 	if (it != config->end())
 	{
 		this->_name = it->second;
@@ -120,12 +153,12 @@ void	Server::extractName()
 	}
 	else
 	{
-		std::cout << "No host in config file, default set to bind to any local address\n";
+		std::cout << "No name in config file, default set to defaultServer!\n";
 		this->_name = "default_server"; // default server name
 	}
 }
 
-void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap)
+void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *_host, std::string *locationPath)
 {
 	size_t		equalPos = trimmed.find("=");
 
@@ -135,7 +168,13 @@ void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &
 		std::string value = trimmed.substr(equalPos + 1);
 		key = trim(key);
 		value = trim(value);
-		//std::cout << "config key: " << key << " || value: " << value << '\n';	//debug for config values
+
+		if (key == "host" && value != "")
+			*_host = value;
+		if (key == "location" && value != "")
+			*locationPath = value;
+
+		// std::cout << "config key: " << key << " || value: " << value << '\n';	//debug for config values
 		//check for key duplicates
 		if (targetMap.find(key) != targetMap.end())
 		{
@@ -147,10 +186,32 @@ void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &
 	}
 }
 
+int	handleLocationBlocks(bool *inBlock, std::string &trimmed)
+{
+	if (!(*inBlock) && trimmed.find("location") == 0 && trimmed.find("{") != std::string::npos)
+	{
+		*inBlock = true;
+		return (1);
+	}
+	// Check for end of block
+	if (*inBlock && trimmed.find("}") == std::string::npos)
+		return (1);
+	
+	if (*inBlock && trimmed.find("}") != std::string::npos)
+	{
+		*inBlock = false;
+		return (1);
+	}
+
+	return (0);
+}
+
+
 void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target)
 {
 	std::string	line;
 	std::string trimmed;
+	std::string locationPath;
 	bool		inBlock = false;
 
 	std::istringstream iss(configFile);
@@ -159,8 +220,7 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 
 	while (getline(iss, line))
 	{
-		trimmed = line;
-		trimmed.erase(0, trimmed.find_first_not_of(" \t"));
+		trimmed = trim(line);
 		if (trimmed.find(target) != std::string::npos)
 		{
 			//save dir before continue in dirblock
@@ -168,42 +228,32 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 			{
 				if (trimmed.find_first_of('{') != std::string::npos)
 					trimmed.erase(trimmed.find_first_of('{'));	//remove curly bracket at end of location
-				saveKeyValuePair(trimmed, targetMap);		//save location
+				saveKeyValuePair(trimmed, targetMap, &this->_host, &locationPath);		//save location
 			}
 
 			while (getline(iss, line))
 			{
-				trimmed = line;
-				trimmed.erase(0, trimmed.find_first_not_of(" \t"));
-				// trimmed.erase(trimmed.find_last_not_of(" \t") + 1);
+				trimmed = trim(line);
 
 				if (trimmed.empty() || trimmed[0] == '#')
 					continue;
 
 				if (trimmed == "}" && !inBlock)
 				{
-					iss.clear();                // Clear any error flags
-					iss.seekg(0, std::ios::beg); // Go back to the beginning
-					return ;
+					if (target == "location" && !targetMap.empty())
+					{
+						this->_locationBlocks[locationPath] = targetMap;
+						targetMap.clear();
+						break;
+					}
 				}
-
-				//skip location block if extracting server config
-				if (!inBlock && trimmed.find("location") == 0 && trimmed.find("{") != std::string::npos)
-				{
-					inBlock = true;
-					continue; // skip this line too
-				}
-
-				// Check for end of block
-				if (inBlock && trimmed.find("}") == std::string::npos)
-					continue; // skip closing brace line
-				else if (inBlock && trimmed.find("}") != std::string::npos)
-				{
-					inBlock = false;
+				
+				if (handleLocationBlocks(&inBlock, trimmed) == 1)
 					continue;
-				}
-				saveKeyValuePair(trimmed, targetMap);
+
+				saveKeyValuePair(trimmed, targetMap, &this->_host, &locationPath);
 			}
+
 		}
 	}
 }
@@ -212,8 +262,15 @@ void	Server::loadMimeTypes()
 {
 	std::string line;
 	std::string mimeConfig;
+	std::string cwd = getcwd(NULL, 0);
+	std::string fullPath;
 
-	std::ifstream file("www/config/mime.types");
+	if (cwd.find("/src") == std::string::npos)
+		fullPath = "www/config/mime.types";
+	else
+		fullPath = "../www/config/mime.types";
+
+	std::ifstream file(fullPath.c_str());
 	if (!file)
 		throw ServerException("Loading mime.types failed!");
 
@@ -228,10 +285,12 @@ void	Server::loadMimeTypes()
 	this->extractConfigMap(mimeConfig, _mimetypeConfig, "types");
 }
 
-// int	Server::createConfig(char *av)
-int	Server::createConfig(char *av, std::string &serverConfig)
+// int	Server::createConfig(char *av, std::string &serverConfig)
+int	Server::createConfig(std::string &serverConfig)
 {
-	std::string filePath = checkFilePath(av);
+	// std::string filePath = checkFilePath(av);
+
+	std::map<std::string, std::string>	_dirConfig;
 
 	this->extractConfigMap(serverConfig, _serverConfig, "server");
 	this->extractConfigMap(serverConfig, _dirConfig, "location");

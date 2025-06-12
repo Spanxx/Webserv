@@ -9,7 +9,6 @@ Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(fal
 
 Request::Request(Request &other)
 {
-
 	this->_method = other._method;
 	this->_path = other._path;
 	this->_version = other._version;

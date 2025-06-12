@@ -15,7 +15,7 @@ bool Server::isServerSocket(int fd)
 /*void	Server::serverLoop()
 {
 	int pollTimeout = 500;		//timeout --> checks for new connections (milliseconds)
-	int clientTimeout = 10;		//timeout before a client gets disconnected (seconds)
+	int clientTimeout = 1200;		//timeout before a client gets disconnected (seconds)
 	std::map<int, std::string> response_collector;
 	std::map<int, bool> keepAlive;
 
@@ -455,7 +455,7 @@ void	Server::handle_request(std::string &data, size_t header_end,
 /*void Server::prepare_response(Request *request, std::map<int, std::string> &response_collector, size_t &i)
 {
 	Response *response = new Response(request);
-	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd);
+	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd); 
 	_socketArray[i].events = POLLOUT; //switch to writing
 	std::cout << "Switched to POLLOUT\n";
 
@@ -468,7 +468,7 @@ void	Server::handle_request(std::string &data, size_t header_end,
 void Server::prepare_response(int fd, std::map<int, std::string> &response_collector)
 {
 	Request *request = _requestCollector[fd];
-	Response *response = new Response(request);
+	Response *response = new Response(request, this->_name);
 
 	response_collector[fd] = response->process_request(fd);
 
