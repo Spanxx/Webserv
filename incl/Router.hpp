@@ -16,9 +16,9 @@ public:
 	void		extractPathAndFile();
 	void		findDirConfig();
 	void		checkForDirRequest();
+	void		handleFavicon();
 	void		setDirForType();
 	void		checkDirPermission();
-	void		handleFavicon();
 	void		handleRedir();
 	void		handleAutoIndex();
 

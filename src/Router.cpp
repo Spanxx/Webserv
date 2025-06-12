@@ -13,8 +13,9 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	findDirConfig();
 	checkDirPermission();
 	checkForDirRequest();
-	handleAutoIndex();
+	setDirForType();
 	handleFavicon();
+	handleAutoIndex();
 	handleRedir();
 }
 
@@ -83,7 +84,7 @@ void	Router::extractPathAndFile()
 
 	if (lastSlashPos == -1)
 	{
-		std::cout << "Invalid Request (no dot or slash), redirect to index.html\n";
+		std::cout << "Invalid Request (no slash), redirect to index.html\n";
 
 		this->_request->setCode(404);
 		
@@ -109,7 +110,7 @@ void	Router::findDirConfig()
 		{
 			_dirConfig = it->second;
 			std::cout << "Locationblock for routing found!\n";
-			break ;
+			return ;
 		}
 		++it;
 	}
@@ -156,9 +157,9 @@ void	Router::setDirForType()
 
 	fullPath = checkCwd();
 
-	if (type == "html" || this->_requestedFile != "status_page.html")
+	if (type == ".html" && this->_requestedFile != "status_page.html")
 		fullPath += "/html" + this->_requestedPath;
-	if (type == "py" || type == "php")
+	if (type == ".py" || type == ".php")
 		fullPath += "/cgi-bin" + this->_requestedPath;
 	
 	this->_request->setPath(fullPath);
@@ -171,7 +172,7 @@ void	Router::handleFavicon()
 	if (this->_requestedFile == "favicon.ico")
 		newPath += "/files/favicon.ico";
 
-	this->_request->setPath(newPath);
+	// this->_request->setPath(newPath);
 }
 
 void	Router::handleRedir()

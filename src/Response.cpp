@@ -2,9 +2,10 @@
 #include "../incl/Response.hpp"
 #include "../incl/Utils.hpp"
 
-Response::Response(Request *request): _request(request), _code(request->getCode())
+Response::Response(Request *request, std::string &hostName): _request(request), _code(request->getCode())
 {
 	std::cout << "Response constructed\n";
+	this->_headers["hostname"] = hostName;
 	//status phrase + code here? or set to which default?
 }
 
@@ -196,13 +197,12 @@ std::string	Response::headersBuilder()
 
 	if (_headers.find("Content-Type") == _headers.end())
 		_headers["Content-Type"] = "text/html";	// should we change these to text/html for the error pages
-	// _headers["Content-Type"] = "text/plain";	// should we change these to text/html for the error pages
 
 	header << this->_request->getVersion() << ' '
 			<< this->_code << ' '
 			<< this->_status["phrase"] << "\r\n"
 			// << this->_request->getPath() << "\r\n"							// needed?
-			<< "Host: webServ42" << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
+			<< "Host: " << this->_headers["hostname"] << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
 			<< "Connection: " << this->_request->getHeader("Connection") << "\r\n"
 			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
 			<< "Content-Length: " << strToInt(this->_headers["Content-Length"]) << "\r\n";
