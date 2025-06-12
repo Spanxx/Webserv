@@ -13,7 +13,7 @@ Server::Server(std::string &serverConfig)
 			throw ServerException("Creating Config failed!");
 
 		this->storeServerConfig();
-		this->createDirStructure();
+		// this->createDirStructure();
 
 		//set default port if none in config file
 		if (this->_numPorts == 0)

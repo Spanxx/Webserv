@@ -4,6 +4,9 @@ std::string checkFilePath(char *av)
 {
 	std::string filePath;
 	std::string tryPath;
+	std::string cwd = getcwd(NULL, 0);
+
+	std::cout << "CWD: " << cwd << '\n';
 
 	if (av != NULL)
 		filePath = av;
@@ -12,7 +15,7 @@ std::string checkFilePath(char *av)
 	if (f1.good())
 		return (filePath);
 
-	tryPath = "www/config/" + filePath;
+	tryPath = "../www/config/" + filePath;
 	std::ifstream f2(tryPath.c_str());
 	if (f2.good())
 		return (tryPath);

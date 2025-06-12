@@ -11,12 +11,12 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 
 	extractPathAndFile();
 	findDirConfig();
-	checkDirPermission();
+	// checkDirPermission();
 	checkForDirRequest();
 	setDirForType();
 	handleFavicon();
-	handleAutoIndex();
-	handleRedir();
+	// handleAutoIndex();
+	// handleRedir();
 }
 
 Router::Router(Router &other)
@@ -153,7 +153,6 @@ void	Router::setDirForType()
 	std::string	fullPath;
 	size_t 		dotPos = this->_requestedFile.find_last_of(".");
 	std::string	type = this->_requestedFile.substr(dotPos);
-	std::string cwd = getcwd(NULL, 0);
 
 	fullPath = checkCwd();
 
@@ -161,7 +160,12 @@ void	Router::setDirForType()
 		fullPath += "/html" + this->_requestedPath;
 	if (type == ".py" || type == ".php")
 		fullPath += "/cgi-bin" + this->_requestedPath;
+	if (type == ".png" || type == ".jpg" || type == ".jpeg")
+		fullPath += "/files" + this->_requestedPath;
+
 	
+
+	std::cout << "FullPath = " << fullPath << '\n';
 	this->_request->setPath(fullPath);
 }
 
@@ -170,9 +174,10 @@ void	Router::handleFavicon()
 	std::string newPath = checkCwd();
 
 	if (this->_requestedFile == "favicon.ico")
+	{
 		newPath += "/files/favicon.ico";
-
-	// this->_request->setPath(newPath);
+		this->_request->setPath(newPath);
+	}
 }
 
 void	Router::handleRedir()

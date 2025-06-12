@@ -210,7 +210,7 @@ std::string	Response::headersBuilder()
 				header << "Location: " << this->_request->getPath() << "\r\n";
 			header << "\r\n";	//empty newline to seperate header and body
 
-	std::cout << "Location for redir: " << this->_request->getPath() << '\n';
+	// std::cout << "Location for redir: " << this->_request->getPath() << '\n';
 
 	return (header.str());
 }

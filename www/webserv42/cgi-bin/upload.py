@@ -44,7 +44,7 @@ def main():
         filename, file_data = parse_multipart(raw_data, boundary)
 
         if file_data:
-            upload_dir = "www/files/uploads"
+            upload_dir = "www/webserv42/files/uploads"
             os.makedirs(upload_dir, exist_ok=True)
             filename = sanitize_filename(filename)
             unique_filename = get_unique_filename(upload_dir, filename)
@@ -53,7 +53,7 @@ def main():
             with open(full_path, "wb") as f:
                 f.write(file_data)
 
-            index_path = "www/html/index.html"
+            index_path = "www/webserv42/html/index.html"
             with open(index_path, "r", encoding="utf-8") as f:
                 html_content = f.read()
 

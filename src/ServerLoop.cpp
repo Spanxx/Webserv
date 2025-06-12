@@ -15,7 +15,7 @@ bool Server::isServerSocket(int fd)
 void	Server::serverLoop()
 {
 	int pollTimeout = 500;		//timeout --> checks for new connections (milliseconds)
-	int clientTimeout = 120;		//timeout before a client gets disconnected (seconds)
+	int clientTimeout = 1200;		//timeout before a client gets disconnected (seconds)
 	std::map<int, std::string> response_collector;
 	std::map<int, bool> keepAlive;
 
