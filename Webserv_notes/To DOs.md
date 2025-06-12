@@ -5,7 +5,7 @@
 	- [ ] set up server names
 	- [ ] set up routes with different configurations
 	- [ ] set up default error pages (what does this mean?)
-	- [ ] define location blocks + implement autoindex on/off 
+	- [ ] define location blocks + implement autoindex on/off
 	- [ ] list available directories or not (is this autoindex?)
 	- [ ] configure where uploaded files should be saved (+adjust makefile rule to delete that specific file, if possible?)
 	- [x] set max size of request body (+ implement inside read request function)
@@ -22,3 +22,9 @@ Chris:
 - [x] create top map for the dir maps. with path as key and map as value == Should work, needs recheck tommorow
 - [ ] check autoindex, if on, provide a list with the files inside requested directory
 	- [ ] response with file links and code 301 for redirecting
+
+Chris:
+change host to iphost for config logic
+check for range of host
+
+Steph:

@@ -78,6 +78,86 @@ int	Server::checkConfigFile(std::ifstream &conFile)
 	return (0);
 }
 
+void	Server::extractPorts()
+{
+	int			port = 0;
+	int			portCounter = 0;
+	std::string item;
+
+	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
+
+	if (!config)
+		throw ServerException("Extracting serverConfig map failed!");
+
+	std::map<std::string, std::string>::iterator it = config->begin();
+	while (it != config->end())
+	{
+		if (it->first.find("listen") != std::string::npos)
+		{
+			std::stringstream ss(it->second);
+
+			while (std::getline(ss, item, ','))
+			{
+				port = strToInt(item);
+				this->_ports.push_back(port);
+				++portCounter;
+			}
+		}
+		if (it->first.find("maxbodysize") != std::string::npos)
+			_maxBodySize = atoi(it->second.c_str());
+		++it;
+	}
+
+	this->_numPorts = portCounter;
+
+	std::vector<int>::iterator iPorts = this->_ports.begin();
+	while (iPorts != this->_ports.end())
+	{
+		std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
+		++iPorts;
+	}
+}
+
+void	Server::extractHost()
+{
+	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
+
+	if (!config)
+		throw ServerException("Extracting serverConfig map failed!");
+
+	std::map<std::string, std::string>::iterator it = config->find("host");
+	if (it != config->end())
+	{
+		this->_IPHost = it->second;
+		std::cout << "Host: " << this->_IPHost << '\n';
+	}
+	else
+	{
+		std::cout << "No host in config file, default set to bind to any local address\n";
+		this->_IPHost = "0.0.0.0"; // bind to any local address
+	}
+}
+
+void	Server::extractName()
+{
+	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
+
+	if (!config)
+		throw ServerException("Extracting serverConfig map failed!");
+
+	std::map<std::string, std::string>::iterator it = config->find("name");
+	if (it != config->end())
+	{
+		this->_name = it->second;
+		std::cout << "Server Name: " << this->_name << '\n';
+	}
+	else
+	{
+		std::cout << "No name in config file, default set to defaultServer!\n";
+		this->_name = "default_server"; // default server name
+	}
+}
+
 void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *_host, std::string *locationPath)
 {
 	size_t		equalPos = trimmed.find("=");
@@ -98,8 +178,8 @@ void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &
 		//check for key duplicates
 		if (targetMap.find(key) != targetMap.end())
 		{
-			std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
-					<< "new Value don't overwrites existing Value!\n";
+			//std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+					//<< "new Value don't overwrites existing Value!\n";
 		}
 		else
 			targetMap[key] = value;
@@ -193,14 +273,14 @@ void	Server::loadMimeTypes()
 	std::ifstream file(fullPath.c_str());
 	if (!file)
 		throw ServerException("Loading mime.types failed!");
-	
+
 	while(getline(file, line))
 	{
 		if (line.empty() || line.find('#') != std::string::npos)
 			continue;
 		line += '\n';
 		mimeConfig.append(line);
-		
+
 	}
 	this->extractConfigMap(mimeConfig, _mimetypeConfig, "types");
 }

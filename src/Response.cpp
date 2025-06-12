@@ -68,7 +68,7 @@ std::string Response::process_request(int client_fd) // Every handler shoudl upd
 void Response::assign_status_phrase()
 {
 	std::string line;
-	std::ifstream file("www/private/status_codes.txt");
+	std::ifstream file("www/error/status_codes.txt");
 	if (!file.is_open())
 	{
 		std::cerr << "Error extracting status phrase: error opening file\n";
@@ -92,7 +92,8 @@ void	Response::handleERROR(int statusCode)
 	this->_code = statusCode;
 	assign_status_phrase();
 	// read file into string
-	std::ifstream file("www/private/status_page.html");
+
+	std::ifstream file("www/error/status_page.html");
 	if (!file)
 	{
 		std::cerr << "Error opening status code file\n";
