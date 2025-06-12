@@ -116,16 +116,16 @@ void runAllServers(std::vector<Server*> &serverList)
 			else if (revents & POLLIN)
 			{
 				try {
-					server->read_from_connection(now, responseCollector, fd, keepAlive, globalPollFds, lastActive);
+					server->read_from_connection(now, responseCollector, fd, keepAlive, globalPollFds, lastActive, socketToServerMap);
 				}
 				catch (const std::exception &e) {
 					std::cout << "[READ ERROR] Closing fd " << fd << ": " << e.what() << "\n";
-					server->close_erase(responseCollector, i, keepAlive, globalPollFds, lastActive);
+					server->close_erase(responseCollector, fd, keepAlive, globalPollFds, lastActive);
 				}
 			}
 			else if (revents & POLLOUT)
 			{
-				server->write_to_connection(responseCollector, i, keepAlive, globalPollFds, lastActive);
+				server->write_to_connection(responseCollector, fd, keepAlive, globalPollFds, lastActive);
 			}
 			else if (revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
@@ -134,11 +134,11 @@ void runAllServers(std::vector<Server*> &serverList)
 			}
 		}
 	}
-	for (size_t i = 0; i < serverList.size(); ++i)
-	{
-		serverList[i]->closeServer();
-		std::cout << "Server " << i << " closed.\n";
-	}
+	// for (size_t i = 0; i < serverList.size(); ++i)
+	// {
+	// 	serverList[i]->closeServer();
+	// 	std::cout << "Server " << i << " closed.\n";
+	// }
 }
 
 

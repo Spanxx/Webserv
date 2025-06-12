@@ -75,7 +75,7 @@ void	Server::startListen(int socket)
 void Server::closeServer()
 {
 	for (size_t i = 0; i < _socketArray.size(); ++i) {
-		std::cout << "Closing socket fd " << _socketArray[i].fd << std::endl;
+		std::cout << "Closing socket fd " << _socketArray[i].fd <<std::endl;
 		close(_socketArray[i].fd);
 	}
 }

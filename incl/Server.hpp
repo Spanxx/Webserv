@@ -40,7 +40,7 @@ public:
 	bool	isServerSocket(int fd);
 	void	sendResponse(int client_fd);
 	void	closeServer();
-	
+
 	int		createConfig(std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
@@ -56,7 +56,7 @@ public:
 	void	printPorts();
 
 	int	router();
-	
+
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
 	void	extractPorts();
@@ -67,7 +67,7 @@ public:
 	//void	make_new_connections(time_t &now, int server_fd);
 std::vector<int>	make_new_connections(time_t &now, int server_fd, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
 	//void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
-	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
+	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive, std::map<int, Server*> socketToServerMap);
 	void	initialize_request(int fd, const std::string &data, size_t header_end);
 	//void	handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i);
 	void	handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, int fd, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);

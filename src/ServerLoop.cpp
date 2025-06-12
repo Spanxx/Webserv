@@ -121,7 +121,6 @@ std::vector<int>	Server::make_new_connections(time_t &now, int server_fd, std::v
 
 		std::cout << "New connection accepted: fd = " << clientSocket << std::endl;
 	}
-
 	return newClients;
 }
 
@@ -164,11 +163,14 @@ void	Server::read_from_connection(time_t &now,
 																int fd,
 																std::map<int, bool> &keepAlive,
 																std::vector<struct pollfd> &globalPollFds,
-																std::map<int, time_t> &lastActive)
+																std::map<int, time_t> &lastActive,
+																std::map<int, Server*> socketToServerMap)
 {
 	if (isServerSocket(fd))
 	{
-		make_new_connections(now, fd, globalPollFds, lastActive);
+		std::vector<int> newClients = make_new_connections(now, fd, globalPollFds, lastActive);
+		for (size_t j = 0; j < newClients.size(); ++j)
+			socketToServerMap[newClients[j]] = this;
 		return;
 	}
 
@@ -236,6 +238,7 @@ void	Server::write_to_connection(std::map<int, std::string> &response_collector,
 {
 	std::string &resp = response_collector[fd];
 
+	std::cout << "Writing response to fd " << fd << ": " << resp.size() << " bytes\n";
 	ssize_t sent = send(fd, resp.c_str(), resp.size(), 0);
 	if (sent < 0)
 	{
@@ -455,7 +458,7 @@ void	Server::handle_request(std::string &data, size_t header_end,
 /*void Server::prepare_response(Request *request, std::map<int, std::string> &response_collector, size_t &i)
 {
 	Response *response = new Response(request);
-	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd); 
+	response_collector[_socketArray[i].fd] = response->process_request(_socketArray[i].fd);
 	_socketArray[i].events = POLLOUT; //switch to writing
 	std::cout << "Switched to POLLOUT\n";
 
