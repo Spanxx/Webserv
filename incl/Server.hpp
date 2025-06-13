@@ -64,21 +64,16 @@ public:
 	void	extractName();
 	int		createServerSocket(int port);
 
-	//void	make_new_connections(time_t &now, int server_fd);
-std::vector<int>	make_new_connections(time_t &now, int server_fd, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
-	//void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
-	void	read_from_connection(time_t &now, std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive, std::map<int, Server*> socketToServerMap);
-	void	initialize_request(int fd, const std::string &data, size_t header_end);
-	//void	handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, size_t &i);
-	void	handle_request(std::string &data, size_t header_end, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, int fd, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
-	//void	prepare_response(Request *request, std::map<int, std::string> &response_collector, int &i);
+	std::vector<int>	makeNewConnections(int server_fd);
+	bool readFromConnection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds);
+	void initialize_request(int fd, const std::string &data, size_t header_end);
+	bool handleRequest(std::string &data, size_t header_end, std::map<int, bool> &keepAlive, int fd);
 	void prepare_response(int fd, std::map<int, std::string> &response_collector);
-	//void	write_to_connection(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
 	void write_to_connection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
-	//void	close_erase(std::map<int, std::string> &response_collector, size_t &i, std::map<int, bool> &keepAlive);
-	void	close_erase(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
+	void close_erase(int fd);
+	void cleanupConnection(int fd);
 	void close_erase_fd(int fd, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
-	const std::vector<struct pollfd>& getSocketArray() const;
+	const std::vector<struct pollfd>& getpollFdArray() const;
 	const std::vector<int>& getServerSockets() const;
 
 	size_t														getMaxBodySize();
@@ -95,11 +90,11 @@ private:
 	int														_numPorts;
 	std::vector<int>										_ports;
 	std::string												_IPHost;
-	std::vector<int>										_serverSocket; // vector of fd of each socket of the server
+	std::vector<int>										_serverSockets; // vector of fd of each socket of the server
 	size_t													_maxBodySize;
 	std::map<int, std::string> 								_socketBuffers;
 	std::map<int, Request*> 								_requestCollector;
-	std::vector<struct pollfd>								_socketArray; // pollfd array of each server socket
+	std::vector<struct pollfd>								_pollFdArray; // (_socketArray) pollfd array of each server socket Maybe not necessary anymore
 
 	std::string																			_host;
 	std::map<int, time_t> 																_lastActive;

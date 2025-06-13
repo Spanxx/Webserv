@@ -66,7 +66,6 @@ void	Server::storeServerConfig()
 
 		++it;
 	}
-
 	printPorts();
 }
 
@@ -80,7 +79,6 @@ int	Server::createServerSocket(int port)
 	struct sockaddr_in serverAddr;
 	memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;				//IPv4
-	//serverAddr.sin_addr.s_addr = INADDR_ANY;		//bind to any local adress
 	serverAddr.sin_port = htons(port);				//port in network byte order
 	if (this->_IPHost == "0.0.0.0") // Dynamic IP address
 		serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); // Listen on all available interfaces
@@ -96,7 +94,7 @@ int	Server::createServerSocket(int port)
 
 	int yes = 1;
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));	// reuse port
-
+	fcntl(sock, F_SETFL, O_NONBLOCK);	// set socket to non-blocking mode
 	if (bind(sock, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
 	{
 		 std::cerr << "Error binding socket to port " << ntohs(serverAddr.sin_port)
