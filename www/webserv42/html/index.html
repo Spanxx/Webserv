@@ -58,6 +58,13 @@
 
 	<br><br>
 
+	<form method="POST" action="/files/uploads" enctype="multipart/form-data">
+		<input type="file" name="file" />
+		<button type="submit">Upload to disc without CGI</button>
+	</form>
+
+	<br><br>
+
 	<h2>Delete Uploaded File</h2>
 	<label for="fileSelect">Choose a file:</label>
 	<select id="fileSelect">

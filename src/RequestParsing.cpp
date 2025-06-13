@@ -38,7 +38,6 @@ void	Request::check_headers(const std::string &headers_raw)
 	// 	return ;
 	
 	Router Router(this->_server, this);
-	//this->_code = 200;
 }
 
 int Request::split_headers(std::istringstream &rstream)

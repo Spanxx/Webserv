@@ -121,3 +121,65 @@ bool safeAtoi(const std::string& s, int& result)
 	result = static_cast<int>(val);
 	return true;
 }
+std::vector<std::string> parseMultipartBody(std::string& body, const std::string& boundary)
+{
+	std::vector<std::string> parts;
+	std::string delimiter = "--" + boundary;
+	size_t start = 0;
+	while (true)
+	{
+		size_t pos = body.find(delimiter, start);
+		if (pos == std::string::npos)
+			break;
+		pos += delimiter.size();
+		// Skip trailing CRLF after boundary
+		if (body.compare(pos, 2, "\r\n") == 0) pos += 2;
+
+		// Find next boundary
+		size_t nextPos = body.find(delimiter, pos);
+		if (nextPos == std::string::npos)
+			break;
+
+		std::string part = body.substr(pos, nextPos - pos);
+		parts.push_back(part);
+		start = nextPos;
+	}
+	return parts;
+}
+
+// Extract filename from Content-Disposition header of a part
+std::string extractFilenameFromPart(std::string& part)
+{
+	std::istringstream stream(part);
+	std::string line;
+	while (std::getline(stream, line) && line != "\r")
+	{
+		// Normalize line endings
+		if (!line.empty() && line.back() == '\r')
+			line.pop_back();
+
+		std::string headerName = "Content-Disposition:";
+		if (line.compare(0, headerName.size(), headerName) == 0)
+		{
+			// look for filename="..."
+			size_t filenamePos = line.find("filename=\"");
+			if (filenamePos != std::string::npos)
+			{
+				filenamePos += 10; // length of 'filename="'
+				size_t endPos = line.find("\"", filenamePos);
+				if (endPos != std::string::npos)
+					return line.substr(filenamePos, endPos - filenamePos);
+			}
+		}
+	}
+	return "";
+}
+
+// Extract file content from part (after headers and blank line)
+std::string extractFileContentFromPart(std::string& part)
+{
+	size_t headerEnd = part.find("\r\n\r\n");
+	if (headerEnd == std::string::npos)
+		return "";
+	return part.substr(headerEnd + 4); // +4 to skip \r\n\r\n
+}

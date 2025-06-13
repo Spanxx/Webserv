@@ -51,10 +51,11 @@ std::ostream &operator<<(std::ostream &os, Request &request)
 {
 	os << "Method: " << request._method << ", URI: " << request._path << ", VERSION: " << request._version << std::endl;
 	os << "Headers:\n";
-	for (std::map<std::string, std::string>::const_iterator it = request._headers.begin(); it != request._headers.end(); ++it) {
+	for (std::map<std::string, std::string>::const_iterator it = request._headers.begin(); it != request._headers.end(); ++it)
+	{
 		os << "  " << it->first << ": " << it->second << "\n";
-	    }
-	    os << "Body:\n" << request._body << "\n";
+	}
+	//os << "Body:\n" << request._body << "\n";
 	//os << "CODE: " << request._code << std::endl;
 	return os;
 }

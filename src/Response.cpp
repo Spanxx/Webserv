@@ -146,8 +146,8 @@ void	Response::handlePOST()
 		cgiExecuter(exec_path, query_string);
 		return;
 	}
-	// else
-		// bodyBuilder();
+	else
+		POSTBodyBuilder();
 }
 
 void	Response::handleDELETE() //Pending handle the files with space in the name
@@ -276,4 +276,63 @@ bool Response::isCGI(const std::string &path)
 	if (path.find("/cgi-bin/") != std::string::npos) { return true; }
 	if (path.find(".cgi") != std::string::npos) { return true; }		//this would allow to execute scripts which are not in the cgi/bin folder? Maybe we add both conditions in one if?
 	return (false);
+}
+
+void Response::POSTBodyBuilder()
+{
+	std::string boundary;
+	std::string content_type = _request->getHeader("Content-Type");
+
+	if (content_type.find("multipart/form-data") != std::string::npos)
+	{
+		size_t boundPos = content_type.find("boundary=");
+		if (boundPos == std::string::npos) // no boundary
+		{
+			handleERROR(400);
+			return;
+		}
+		boundary = content_type.substr(boundPos + 9);
+		std::string body = _request->getBody();
+		std::vector<std::string> parts = parseMultipartBody(body, boundary);
+
+		std::string filePart;
+		bool foundFilePart = false;
+
+		for (size_t i = 0; i < parts.size(); ++i)
+		{
+			if (parts[i].find("Content-Disposition: form-data;") != std::string::npos &&
+				parts[i].find("filename=\"") != std::string::npos)
+			{
+				filePart = parts[i];
+				foundFilePart = true;
+				break;
+			}
+		}
+		if (!foundFilePart)
+		{
+			handleERROR(400);
+			return;
+		}
+		std::string filename = extractFilenameFromPart(filePart);
+		std::string fileContent = extractFileContentFromPart(filePart);
+
+		std::string saveTo = "www/files/uploads/" + filename; // COMMENT FOR LATER: make folder dynamic according to config file 
+		std::ofstream outFile(saveTo.c_str(), std::ios::binary);
+		if (!outFile)
+		{
+			handleERROR(500);
+			return;
+		}
+		outFile.write(fileContent.data(), fileContent.size());
+		outFile.close();
+
+		// or make other response / reaction for succesful upload 
+		this->_headers["Content-Type"] = "text/html";
+		std::stringstream ss;
+		ss << "<html><body><h1>File uploaded successfully!</h1><p>Saved as: " << filename << "</p></body></html>";
+		this->_body = ss.str();
+		this->_headers["Content-Length"] = std::to_string(this->_body.size());
+	}
+	else 	// if not image, then handle how else
+		handleERROR(415);
 }
