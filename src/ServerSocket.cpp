@@ -20,7 +20,7 @@ void	Server::checkPortDuplicates(int &port)
 	while (it != this->_ports.end())
 	{
 		if (port == *it)
-			throw ServerException("Port dupblicate found!");
+			throw ServerException("Port duplicate found!");
 
 		++it;
 	}
@@ -29,7 +29,7 @@ void	Server::checkPortDuplicates(int &port)
 void	Server::extractPorts(std::map<std::string, std::string>::iterator &it)
 {
 	int			port = 0;
-	int			portCounter;
+	int			portCounter = 0;
 	std::string item;
 	std::string	trimmedItem;
 	
@@ -37,7 +37,8 @@ void	Server::extractPorts(std::map<std::string, std::string>::iterator &it)
 	while (getline(iss, item, ','))
 	{
 		trimmedItem = trim(item);
-		port = strToInt(trimmedItem);
+		if (!safeAtoi(trimmedItem, port) || port < 1024 || port > 65535) //below 1024 only with sudo rights
+			throw ServerException("Ports need to be between 1024 and 65535");
 		checkPortDuplicates(port);
 		this->_ports.push_back(port);
 		++portCounter;
@@ -62,7 +63,12 @@ void	Server::storeServerConfig()
 		// 	this->_name = it->second;
 		
 		if (it->first.find("maxbodysize") != std::string::npos)
-			_maxBodySize = atoi(it->second.c_str());
+		{
+			int size;
+			if (!safeAtoi(it->second, size) || size < 0 || size > 10485760)
+				throw ServerException("Max body size needs to be between 0 and 10MB");
+			_maxBodySize = static_cast<size_t>(size);
+		}
 
 		++it;
 	}

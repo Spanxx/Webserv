@@ -9,7 +9,7 @@ std::string trim(const std::string &str);
 
 const std::string intToString(int num);
 
-int strToInt(std::string &value);
+//int strToInt(std::string &value);
 
 void replaceAll(std::string &str, const std::string &placeholder, const std::string &goal);
 
@@ -17,6 +17,7 @@ void replaceAll(std::string &str, const std::string &placeholder, const std::str
 
 std::string checkFilePath(char *av);
 std::string urlDecode(const std::string &str);
-bool is_valid_hex(const std::string& str, int& value);
+bool isValidHex(const std::string& str, int& value);
+bool safeAtoi(const std::string& s, int& result);
 
 #endif

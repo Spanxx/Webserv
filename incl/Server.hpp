@@ -101,7 +101,7 @@ private:
 	std::map<int, Request*> 								_requestCollector;
 	std::vector<struct pollfd>								_socketArray; // pollfd array of each server socket
 
-	std::string																			_host;
+	//std::string																			_host;
 	std::map<int, time_t> 																_lastActive;
 	std::map<std::string, std::string>													_serverConfig;
 	std::map<std::string, std::string>													_dirConfig;

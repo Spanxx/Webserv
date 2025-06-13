@@ -502,7 +502,7 @@ bool	Request::parse_chunks(std::string &data, size_t start)
 		if (end == std::string::npos)
 			break;
 		int chunk_size = 0;
-		if (!is_valid_hex(data.substr(pos, end - pos), chunk_size))
+		if (!isValidHex(data.substr(pos, end - pos), chunk_size))
 		{
 			std::cerr << "Invalid chunk size\n";
 			_code = 400;

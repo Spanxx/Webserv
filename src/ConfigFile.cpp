@@ -1,6 +1,7 @@
 #include	"../incl/Server.hpp"
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
+#include	"../incl/Utils.hpp"
 
 void	createConfigList(std::string configPath, std::vector<std::string> &configList)
 {
@@ -98,13 +99,19 @@ void	Server::extractPorts()
 
 			while (std::getline(ss, item, ','))
 			{
-				port = strToInt(item);
+				if (!safeAtoi(item, port) || port < 1024 || port > 65535) //below 1024 only with sudo rights
+					throw ServerException("Ports need to be between 1024 and 65535");
 				this->_ports.push_back(port);
 				++portCounter;
 			}
 		}
 		if (it->first.find("maxbodysize") != std::string::npos)
-			_maxBodySize = atoi(it->second.c_str());
+		{
+			int size;
+			if (!safeAtoi(it->second, size) || size < 0 || size > 10485760)
+				throw ServerException("Max body size needs to be between 0 and 10MB");
+			_maxBodySize = static_cast<size_t>(size);
+		}
 		++it;
 	}
 
@@ -158,7 +165,7 @@ void	Server::extractName()
 	}
 }
 
-void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *_host, std::string *locationPath)
+void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *host, std::string *locationPath)
 {
 	size_t		equalPos = trimmed.find("=");
 
@@ -170,7 +177,7 @@ void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &
 		value = trim(value);
 
 		if (key == "host" && value != "")
-			*_host = value;
+			*host = value;
 		if (key == "location" && value != "")
 			*locationPath = value;
 
@@ -228,7 +235,7 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 			{
 				if (trimmed.find_first_of('{') != std::string::npos)
 					trimmed.erase(trimmed.find_first_of('{'));	//remove curly bracket at end of location
-				saveKeyValuePair(trimmed, targetMap, &this->_host, &locationPath);		//save location
+				saveKeyValuePair(trimmed, targetMap, &this->_IPHost, &locationPath);		//save location
 			}
 
 			while (getline(iss, line))
@@ -251,7 +258,7 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 				if (handleLocationBlocks(&inBlock, trimmed) == 1)
 					continue;
 
-				saveKeyValuePair(trimmed, targetMap, &this->_host, &locationPath);
+				saveKeyValuePair(trimmed, targetMap, &this->_IPHost, &locationPath);
 			}
 
 		}

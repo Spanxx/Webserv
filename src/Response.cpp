@@ -206,7 +206,7 @@ std::string	Response::headersBuilder()
 			<< "Host: " << this->_headers["hostname"] << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
 			<< "Connection: " << this->_request->getHeader("Connection") << "\r\n"
 			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
-			<< "Content-Length: " << strToInt(this->_headers["Content-Length"]) << "\r\n";
+			<< "Content-Length: " << atoi(this->_headers["Content-Length"].c_str()) << "\r\n";
 			if (this->_code >= 300 && this->_code < 400)
 				header << "Location: " << this->_request->getPath() << "\r\n";
 			header << "\r\n";	//empty newline to seperate header and body

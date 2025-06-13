@@ -23,8 +23,16 @@ Chris:
 - [ ] check autoindex, if on, provide a list with the files inside requested directory
 	- [ ] response with file links and code 301 for redirecting
 
-Chris:
-change host to iphost for config logic
-check for range of host
+Henri:
+- [x] change host to iphost for config logic
+- [x] check for range of host
+- [x] port range
+- [ ] upload dir dynamic
+- [ ] index dynamic? 
+- [x] maxbodysize range check
+- [ ] default 404 error page
+- [ ] query string? 
+- [ ] script types check 
+- [ ] method check 
 
 Steph:

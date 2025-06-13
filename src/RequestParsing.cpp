@@ -68,7 +68,10 @@ int Request::split_headers(std::istringstream &rstream)
 			return 0;
 		_headers[key] = value;
 		if (key == "Content-Length")
-			_content_length = std::atoi(value.c_str());
+		{
+			if (!safeAtoi(value, _content_length) || _content_length < 0 || _content_length > 11000000)
+				return (std::cout << "Content length should be between 0 and 11000000 bytes\n", 0);
+		}
 		if (key == "Transfer-Encoding" && value == "chunked")
 			_chunked = true;
 	}
