@@ -18,6 +18,7 @@ void replaceAll(std::string &str, const std::string &placeholder, const std::str
 std::string checkFilePath(char *av);
 std::string urlDecode(const std::string &str);
 bool isValidHex(const std::string& str, int& value);
+bool isValidIP(std::string &host);
 bool safeAtoi(const std::string& s, int& result);
 
 #endif

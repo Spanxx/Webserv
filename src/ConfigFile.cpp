@@ -135,6 +135,8 @@ void	Server::extractHost()
 	std::map<std::string, std::string>::iterator it = config->find("host");
 	if (it != config->end())
 	{
+		if (!isValidIP(it->second))
+			throw ServerException("Host IP needs to be within a private or loopback range");
 		this->_IPHost = it->second;
 		std::cout << "Host: " << this->_IPHost << '\n';
 	}
