@@ -306,3 +306,34 @@ int	Server::createConfig(std::string &serverConfig)
 	this->loadMimeTypes();
 	return (0);
 }
+
+void Server::assignUploadDir()
+{
+	for (std::map<std::string, std::map<std::string, std::string> >::iterator it = _locationBlocks.begin(); it != _locationBlocks.end(); ++it)
+	{
+		std::string location = it->first;
+
+		if (location == "/" || location == "/cgi-bin/" || location == "/files/" ||location.find("html") != std::string::npos)
+			continue;
+		bool allowPOST = checkPOST(it->second); //COMMENT FOR LATER: should we add more checks if the config block is ok?
+		if (allowPOST)
+		{
+			if (_uploadDir.empty() || location.find("upload") != std::string::npos)
+			{
+				_uploadDir = location;
+				std::cout << "Assigned upload dir: " << _uploadDir << std::endl;
+				if (location.find("upload") != std::string::npos)
+					return;
+			}
+		}
+	}
+	throw ServerException("Config file needs to assign uploads directory (required to allow POST method), cannot be root, files, cgi-bin or name containing html");
+}
+
+bool Server::checkPOST(std::map<std::string, std::string> configblock)
+{
+	std::map<std::string, std::string>::iterator it = configblock.find("methods");
+	if (it != configblock.end() && it->second.find("POST") != std::string::npos)
+		return true;
+	return false;
+}

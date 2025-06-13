@@ -4,6 +4,7 @@
 #include <cstdio>  // for sscanf
 #include <cerrno>
 #include <climits>
+#include <iostream>
 
 std::string trim(const std::string &str)
 {
@@ -95,25 +96,26 @@ bool isValidIP(std::string &host)
 	while (std::getline(iss, token, '.'))
 	{
 		int num;
-		if (!safeAtoi(token, num) || (num < 0 || num > 255 || (num == 0 && token != "0")))
+		if (!safeAtoi(token, num) || (num < 0 || num > 255))
+		{
+			
 			return false;
+		}
 		parts.push_back(num);
 	}
 	if (parts.size() != 4)
 		return false;
-	
 	//10.0.0.0 /8 and 172.0.0.0 /8 and 192.168.0.0 /16
-	if (parts[0] == 10 || parts[0] == 172 || (parts[0] == 192 && parts[1] == 168))
+	if (parts[0] == 10 || parts[0] == 127 || (parts[0] == 192 && parts[1] == 168))
 		return true;
-	
 	return false;
 }
 
-bool safeAtoi(const std::string& s, int& result)
+bool safeAtoi(const std::string& str, int& result)
 {
 	errno = 0;
 	char* end;
-	long val = std::strtol(s.c_str(), &end, 10);
+	long val = std::strtol(str.c_str(), &end, 10);
 
 	if (errno == ERANGE || val > INT_MAX || val < INT_MIN || *end != '\0')
 		return false;
@@ -133,7 +135,8 @@ std::vector<std::string> parseMultipartBody(std::string& body, const std::string
 			break;
 		pos += delimiter.size();
 		// Skip trailing CRLF after boundary
-		if (body.compare(pos, 2, "\r\n") == 0) pos += 2;
+		if (body.compare(pos, 2, "\r\n") == 0)
+			pos += 2;
 
 		// Find next boundary
 		size_t nextPos = body.find(delimiter, pos);

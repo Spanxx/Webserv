@@ -7,6 +7,7 @@
 // Server::Server(char *av)
 Server::Server(std::string &serverConfig)
 {
+	std::cout << "Server created\n";
 	try
 	{
 		if (this->createConfig(serverConfig) == 1)
@@ -35,11 +36,12 @@ Server::Server(std::string &serverConfig)
 			std::cout << "Server socket fd: " << sock << " created and bound\n";
 			++it;
 		}
+		assignUploadDir();
 	}
 	catch (std::exception &e)
 	{
 		std::cout << "Server exception: " << e.what() << std::endl;
-		return ;
+		exit(1) ; // COMMENT FOR LATER: should we exit when exception is caught?
 	}
 }
 

@@ -43,3 +43,4 @@ Steph:
 QUESTIONS COLLECTION: 
 - should we support folder style requests like "localhost:8080/files" and then serve an index? or is this already related to autoindex
 - should we accept files that have no extension (so no dot)? or is "checkRequestedFiletype()" already commented out for that reason 
+- should we exit the program when an exception is caught upon server building/config reading?
