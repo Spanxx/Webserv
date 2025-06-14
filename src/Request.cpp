@@ -2,7 +2,7 @@
 #include "../incl/Request.hpp"
 #include "../incl/Utils.hpp"
 
-Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), _server(server)
+Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), _uploadDir(server->getUploadDir()), _server(server)
 {
 	std::cout << "Request constructed\n";
 }
@@ -71,6 +71,7 @@ std::string Request::getVersion() { return _version; }
 std::string Request::getBody() { return _body; }
 std::string Request::getQuery() { return _query; }
 int 	Request::getContentLength() { return _content_length; }
+std::map<std::string, std::string> Request::getUploadDir() { return _uploadDir; }
 bool 	Request::getConnection()
 { 
 	if (_headers["Connection"] == "keep-alive")

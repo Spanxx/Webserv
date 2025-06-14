@@ -237,6 +237,7 @@ void	Response::bodyBuilder()
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	std::string body = buffer.str();
+	replaceAll(body, "{{UPLOAD_BLOCK}}", _request->getUploadDir()["location"]); // COMMENT FOR LATER: check if this works also for other than index.html or which other methods need to have this 
 	ss << body.size();
 
 	std::cout << "Bytes read: " << ss.str() << std::endl;
@@ -267,7 +268,9 @@ std::string Response::getMimeType(const std::string &path)
 
 bool Response::isUploadsDir(const std::string &path)
 {
-	if (path.find("/uploads/") != std::string::npos) { return true; }
+	//if (path.find("/uploads/") != std::string::npos) { return true; }
+	if (path == _request->getUploadDir()["root"]) //COMMENT FOR LATER: double check here if this works / or if it has to be compared to location only
+		return true;
 	return (false);
 }
 
@@ -316,7 +319,8 @@ void Response::POSTBodyBuilder()
 		std::string filename = extractFilenameFromPart(filePart);
 		std::string fileContent = extractFileContentFromPart(filePart);
 
-		std::string saveTo = "www/files/uploads/" + filename; // COMMENT FOR LATER: make folder dynamic according to config file 
+		//std::string saveTo = "www/files/uploads/" + filename; // COMMENT FOR LATER: make folder dynamic according to config file 
+		std::string saveTo = _request->getUploadDir()["root"] + filename; 
 		std::ofstream outFile(saveTo.c_str(), std::ios::binary);
 		if (!outFile)
 		{

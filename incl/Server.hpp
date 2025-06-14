@@ -59,10 +59,13 @@ public:
 	
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
+	std::map<std::string, std::string> getUploadDir();
+
 	void	extractPorts();
 	void	extractHost();
 	void	extractName();
 	int		createServerSocket(int port);
+
 
 	//void	make_new_connections(time_t &now, int server_fd);
 std::vector<int>	make_new_connections(time_t &now, int server_fd, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
@@ -86,6 +89,7 @@ std::vector<int>	make_new_connections(time_t &now, int server_fd, std::vector<st
 	std::map<std::string, std::map<std::string, std::string> >*	getLocationBlocks();
 	void assignUploadDir();
 	bool checkPOST(std::map<std::string, std::string> configblock);
+	std::string findRoot(std::map<std::string, std::string> configblock);
 
 	class ServerException : public std::runtime_error {
 	public:
@@ -111,7 +115,7 @@ private:
 	std::map<std::string, std::string>													_mimetypeConfig;
 	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 	// std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
-	std::string	_uploadDir;
+	std::map<std::string, std::string>	_uploadDir;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

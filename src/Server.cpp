@@ -90,3 +90,5 @@ Server::ServerException::ServerException(const std::string &error) : std::runtim
 size_t	Server::getMaxBodySize() { return _maxBodySize; }
 std::string	Server::getName() { return _name; }
 std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}
+
+std::map<std::string, std::string> Server::getUploadDir() { return _uploadDir; }

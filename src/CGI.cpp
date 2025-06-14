@@ -142,16 +142,20 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 
 	if (pid == 0)	//child
 	{
-		std::string methodSTR      = "REQUEST_METHOD=" + method;
-		std::string querySTR       = "QUERY_STRING=" + query;
-		std::string contentTypeSTR = "CONTENT_TYPE=" + _request->getHeader("Content-Type");
-		std::string contentLenSTR  = "CONTENT_LENGTH=" + _request->getHeader("Content-Length");
+		std::string methodSTR		= "REQUEST_METHOD=" + method;
+		std::string querySTR		= "QUERY_STRING=" + query;
+		std::string contentTypeSTR	= "CONTENT_TYPE=" + _request->getHeader("Content-Type");
+		std::string contentLenSTR	= "CONTENT_LENGTH=" + _request->getHeader("Content-Length");
+		std::string uploadDirSTR	= "UPLOAD_DIR=" + _request->getUploadDir()["root"];
+		std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + _request->getUploadDir()["location"];
 
 		char *env[] = {
 			const_cast<char *>(methodSTR.c_str()),
 			const_cast<char *>(querySTR.c_str()),
 			const_cast<char *>(contentTypeSTR.c_str()),
 			const_cast<char *>(contentLenSTR.c_str()),
+			const_cast<char *>(uploadDirSTR.c_str()),
+			const_cast<char *>(uploadBlockSTR.c_str()),
 			NULL
 		};
 

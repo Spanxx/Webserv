@@ -320,8 +320,9 @@ void Server::assignUploadDir()
 		{
 			if (_uploadDir.empty() || location.find("upload") != std::string::npos)
 			{
-				_uploadDir = location;
-				std::cout << "Assigned upload dir: " << _uploadDir << std::endl;
+				_uploadDir["location"] = location;
+				_uploadDir["root"] = findRoot(it->second);
+				std::cout << "Assigned upload dir location: " << _uploadDir["location"] << std::endl;
 				if (location.find("upload") != std::string::npos)
 					return;
 			}
@@ -336,4 +337,12 @@ bool Server::checkPOST(std::map<std::string, std::string> configblock)
 	if (it != configblock.end() && it->second.find("POST") != std::string::npos)
 		return true;
 	return false;
+}
+
+std::string Server::findRoot(std::map<std::string, std::string> configblock)
+{
+	std::map<std::string, std::string>::iterator it = configblock.find("root");
+	if (it != configblock.end())
+		return it->second;
+	return "";
 }
