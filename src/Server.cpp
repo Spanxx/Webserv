@@ -30,7 +30,7 @@ Server::Server(std::string &serverConfig)
 			int sock = this->createServerSocket(*it); //create a server socket and bind it to the port
 			this->_serverSockets.push_back(sock);
 			startListen(sock); //start listening on the socket and push it to the pollfd array _socketArray
-			std::cout << "Server socket fd: " << sock << " created and bound\n";
+			std::cout << "From constructor Server socket fd: " << sock << " created and bound\n";
 			++it;
 		}
 	}
@@ -50,7 +50,7 @@ Server::~Server()
 	for (size_t i = 0; i < this->_serverSockets.size(); ++i)
 	{
 		close(this->_serverSockets[i]);
-		std::cout << "Server socket fd: " << this->_serverSockets[i] << " closed\n";
+		std::cout << "From destructor Server socket fd: " << this->_serverSockets[i] << " closed\n";
 	}
 }
 
@@ -62,7 +62,7 @@ void	Server::startListen(int socket)
 		throw ServerException("Listen failed!");
 	}
 
-	std::cout << "Server starts listening for incomming connections on FD " << socket <<  "\n";
+	//std::cout << "Server starts listening for incomming connections on FD " << socket <<  "\n";
 
 	/* Now this is done by cluster class
 	struct pollfd serverFd;

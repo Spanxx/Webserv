@@ -189,6 +189,7 @@ std::string Response::responseBuilder()
 
 	// if (this->_request->getPath() != "www/files/favicon.ico")
 	// 	std::cout << " --> Response:\n" << response << std::endl;
+	//std::cout << "Response body: "<< std::endl << this->_body << "-- End of body --"<<std::endl;
 	return (response);
 }
 

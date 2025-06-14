@@ -4,3 +4,6 @@
 - [ ] Decide: What to do if one of the servers failed to be configured
 - [ ] Check that the request path check for directories from the config file
 - [ ] Assigning FD to the _socketArray? or passing the FDs?
+
+Current problems
+- [ ] Browser closed ?

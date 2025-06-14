@@ -18,8 +18,9 @@
 #include <fcntl.h>
 #include <sstream>
 #include <csignal>
-#include	<arpa/inet.h> // need for inet_aton
+#include <arpa/inet.h> // need for inet_aton
 #include "Utils.hpp"
+#include "libraries.hpp"
 
 extern volatile sig_atomic_t stopSignal;
 
@@ -64,12 +65,13 @@ public:
 	void	extractName();
 	int		createServerSocket(int port);
 
+
 	std::vector<int>	makeNewConnections(int server_fd);
 	bool readFromConnection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds);
 	void initialize_request(int fd, const std::string &data, size_t header_end);
-	bool handleRequest(std::string &data, size_t header_end, std::map<int, bool> &keepAlive, int fd);
+	RequestState handleRequest(std::string &data, size_t header_end, std::map<int, bool> &keepAlive, int fd);
 	void prepare_response(int fd, std::map<int, std::string> &response_collector);
-	void write_to_connection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
+	void write_to_connection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds);
 	void close_erase(int fd);
 	void cleanupConnection(int fd);
 	void close_erase_fd(int fd, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);

@@ -62,39 +62,65 @@ bool	Server::readFromConnection(std::map<int, std::string> &response_collector,
 	 _socketBuffers[fd] += std::string(buffer, n);
 
 	std::string &data = _socketBuffers[fd];
+
 	size_t header_end = data.find("\r\n\r\n");
 	if (header_end == std::string::npos)
 		return true;
 
 	if (_requestCollector.find(fd) == _requestCollector.end())
 		initialize_request(fd, data, header_end);
-	if (handleRequest(data, header_end, keepAlive, fd))
-	{
-		prepare_response(fd, response_collector);
-		for (size_t i = 0; i < globalPollFds.size(); ++i)
-		{
-			if (globalPollFds[i].fd == fd)
-			{
-				globalPollFds[i].events = POLLOUT; // switch to write mode
-				std::cout << "Switched fd " << fd << " to POLLOUT\n";
-				break;
-			}
-		}
-		return true;
-	}
-	else
-	{
-		std::cout << "[REQUEST ERROR] Invalid request from fd " << fd << ". Closing connection." << std::endl;
-		cleanupConnection(fd); // Server cleans its own state
-		return false; // Signal to Cluster to remove this fd
-	}
+	RequestState state = handleRequest(data, header_end, keepAlive, fd);
+
+    if (state == REQUEST_INCOMPLETE) {
+        // Request is not fully received yet (waiting for more body/chunks)
+        // Do NOT prepare response or switch to POLLOUT.
+        return true; // Keep connection open, continue polling for read events
+    }
+    else if (state == REQUEST_COMPLETE || state == REQUEST_ERROR_RESPOND) {
+        // Request is fully processed (either successfully, or with an error that warrants a response)
+
+        // *** IMPORTANT ***
+        // After processing a complete request, you MUST consume the bytes
+        // from _socketBuffers[fd] that belong to this request.
+        // Otherwise, they will remain in the buffer and potentially be
+        // re-processed or interfere with subsequent requests (pipelining).
+        size_t total_consumed_bytes = header_end + 4; // At least headers + CRLFCRLF
+        if (!_requestCollector[fd]->isChunked()) {
+             total_consumed_bytes += _requestCollector[fd]->getContentLength();
+        } else {
+            // For chunked, you need to know how many bytes parse_chunks consumed from 'data'
+            // This needs to be tracked within your Request object or parse_chunks function
+            // For now, let's assume parse_chunks consumed all necessary data for a COMPLETE state
+            // If parse_chunks modified 'data' directly (by removing parsed chunks),
+            // this part might be different.
+        }
+        _socketBuffers[fd] = data.substr(total_consumed_bytes); // Consume the processed part
+
+        prepare_response(fd, response_collector); // Prepare the HTTP response (and trigger CGI if needed)
+
+        // Switch socket to POLLOUT to allow sending the response
+        for (size_t i = 0; i < globalPollFds.size(); ++i)
+        {
+            if (globalPollFds[i].fd == fd)
+            {
+                globalPollFds[i].events = POLLOUT;
+                std::cout << "Switched fd " << fd << " to POLLOUT\n";
+                break;
+            }
+        }
+        return true; // Indicate that this connection is still alive (now for writing)
+    }
+    else { // state == REQUEST_ERROR_CLOSE_CONN (e.g., severe parsing error)
+        std::cout << "[FATAL REQUEST ERROR] Closing connection for fd " << fd << "." << std::endl;
+        cleanupConnection(fd); // Server cleans its own state
+        return false; // Signal to Cluster to remove this fd
+    }
 }
 
 void	Server::write_to_connection(std::map<int, std::string> &response_collector,
 															int fd,
 															std::map<int, bool> &keepAlive,
-															std::vector<struct pollfd> &globalPollFds,
-															std::map<int, time_t> &lastActive)
+															std::vector<struct pollfd> &globalPollFds)
 {
 	std::string &resp = response_collector[fd];
 
@@ -182,7 +208,7 @@ void Server::initialize_request(int fd, const std::string &data, size_t header_e
 	_requestCollector[fd] = request;
 }
 
-bool Server::handleRequest(std::string &data, size_t header_end, std::map<int, bool> &keepAlive, int fd)
+RequestState Server::handleRequest(std::string &data, size_t header_end, std::map<int, bool> &keepAlive, int fd)
 {
 	Request *request = _requestCollector[fd];
 	keepAlive[fd] = request->getConnection();
@@ -195,21 +221,24 @@ bool Server::handleRequest(std::string &data, size_t header_end, std::map<int, b
 			std::cerr << "Missing or invalid Content-Length for fd " << fd << "\n";
 			request->setCode(400); // Bad Request
 			// close connection!?
-			return true; // Return true so prepare_response can set 400 response
+			return REQUEST_ERROR_RESPOND; // Return true so prepare_response can set 400 response
 		}
 
 		size_t total_required = header_end + 4 + content_length; // +4 for "\r\n\r\n"
 		if (data.size() < total_required)
-			return true; // Keep connection open, still waiting for data
-
+		{
+			std::cout << "Not enough data yet for fd " << fd << ", waiting for more...\n";
+			return REQUEST_INCOMPLETE; // Keep connection open, still waiting for data
+		}
 		std::string body_part;
 		if (content_length > 0)
 			body_part = data.substr(header_end + 4, content_length);
+
 		request->append_body(body_part);
 
 		if (request->getBodySize() > _maxBodySize)
 			request->setCode(413);
-		return true; // Request complete, response can be prepared (even if it's an error response)
+		return REQUEST_COMPLETE; // Request complete, response can be prepared (even if it's an error response)
 	}
 	else // It's a chunked request
 	{
@@ -218,9 +247,11 @@ bool Server::handleRequest(std::string &data, size_t header_end, std::map<int, b
 		{
 			if (request->getBodySize() > _maxBodySize)
 				request->setCode(413); // Payload Too Large, even if chunk parsing was successful
-			return true; // Request complete, response can be prepared
+			return REQUEST_COMPLETE; // Request complete, response can be prepared
 		}
-		return true; // Keep connection open, still waiting for more chunks
+		else if (request->getCode() != 200) // Error during chunk parsing
+			return REQUEST_ERROR_RESPOND; // e.g., 400 Bad Request due to chunking error
+		return REQUEST_INCOMPLETE; // Still waiting for more chunks
 	}
 }
 

@@ -36,7 +36,7 @@ void	Request::check_headers(const std::string &headers_raw)
 		return;
 	// if (checkRequestedFiletype() == 1)
 	// 	return ;
-	
+
 	Router Router(this->_server, this);
 	//this->_code = 200;
 }
@@ -49,7 +49,7 @@ int Request::split_headers(std::istringstream &rstream)
 	// _chunked = false;
 	while (std::getline(rstream, line))
 	{
-		if (!line.empty() && line[line.size() - 1] == '\r') //getline removes \n but not \r 
+		if (!line.empty() && line[line.size() - 1] == '\r') //getline removes \n but not \r
 			line.erase(line.size() - 1); //remove last char (trailing carriage return '\r')
 		if (line.empty())	//if there is no body, then there is maybe no empty line
 		{
@@ -68,7 +68,10 @@ int Request::split_headers(std::istringstream &rstream)
 			return 0;
 		_headers[key] = value;
 		if (key == "Content-Length")
+		{
 			_content_length = std::atoi(value.c_str());
+			std::cout << "Content-Length: " << _content_length << "*****" << std::endl;
+		}
 		if (key == "Transfer-Encoding" && value == "chunked")
 			_chunked = true;
 	}
@@ -78,7 +81,7 @@ int Request::split_headers(std::istringstream &rstream)
 		this->_code = 400;
 		return (1); //no empty line after header
 	}
-	if (_content_length == -1 && _method != "POST") //check if only in GET and DELETE it's ok not to have content_length set 
+	if (_content_length == -1 && _method != "POST") //check if only in GET and DELETE it's ok not to have content_length set
 		_content_length = 0;
 	return 0;
 }

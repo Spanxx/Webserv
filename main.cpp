@@ -47,102 +47,6 @@ void	createConfigList(char *av, std::vector<std::string> &configList)
 	}
 }
 
-void runAllServers(std::vector<Server*> &serverList)
-{
-	int pollTimeout = 500;		// milliseconds //
-	int clientTimeout = 10;		// seconds //
-
-	std::map<int, std::string> responseCollector; //
-	std::map<int, bool> keepAlive; //
-	std::map<int, time_t> lastActive; //
-
-	std::vector<struct pollfd> globalPollFds; //
-	std::map<int, Server*> socketToServerMap; //
-
-	// Initialize globalPollFds and fd -> server map
-	for (std::vector<Server*>::iterator it = serverList.begin(); it != serverList.end(); ++it)
-	{
-		const std::vector<struct pollfd>& serverSockets = (*it)->getpollFdArray();
-		const std::vector<int>& serverSocketsFd = (*it)->getServerSockets();
-
-		for (size_t i = 0; i < serverSockets.size(); ++i)
-		{
-			globalPollFds.push_back(serverSockets[i]);
-			socketToServerMap[serverSockets[i].fd] = *it;
-			fcntl(serverSocketsFd[i], F_SETFL, O_NONBLOCK); // it's better to do this before binding the socket, nos is done in the server constructor
-		}
-	}
-
-	while (!stopSignal)
-	{
-		int ret = poll(globalPollFds.data(), globalPollFds.size(), pollTimeout);
-		if (ret < 0)
-		{
-			std::cerr << "Poll error: " << strerror(errno) << std::endl;
-			continue;
-		}
-
-		time_t now = time(NULL);
-
-		for (size_t i = 0; i < globalPollFds.size(); ++i)
-		{
-			int fd = globalPollFds[i].fd;
-			short revents = globalPollFds[i].revents;
-
-			if (revents == 0)
-				continue;
-
-			Server *server = socketToServerMap[fd];
-			if (!server)
-			{
-				std::cerr << "Unknown server for fd " << fd << "\n";
-				continue;
-			}
-
-			// Timeout handling for clients
-			if (!server->isServerSocket(fd) && now - lastActive[fd] > clientTimeout)
-			{
-				std::cout << "[TIMEOUT] Closing inactive fd " << fd << "\n";
-				server->close_erase(fd);
-				continue;
-			}
-
-			// Accept new connections
-			if (server->isServerSocket(fd) && (revents & POLLIN))
-			{
-				std::vector<int> newClients = server->makeNewConnections(fd);
-				for (size_t j = 0; j < newClients.size(); ++j)
-					socketToServerMap[newClients[j]] = server;
-			}
-			else if (revents & POLLIN)
-			{
-				try {
-					server->read_from_connection(now, responseCollector, fd, keepAlive, globalPollFds, lastActive, socketToServerMap);
-				}
-				catch (const std::exception &e) {
-					std::cout << "[READ ERROR] Closing fd " << fd << ": " << e.what() << "\n";
-					server->close_erase(fd);
-				}
-			}
-			else if (revents & POLLOUT)
-			{
-				server->write_to_connection(responseCollector, fd, keepAlive, globalPollFds, lastActive);
-			}
-			else if (revents & (POLLERR | POLLHUP | POLLNVAL))
-			{
-				std::cout << "[FD ERROR] Closing fd " << fd << "\n";
-				server->close_erase(fd);
-			}
-		}
-	}
-	// for (size_t i = 0; i < serverList.size(); ++i)
-	// {
-	// 	serverList[i]->closeServer();
-	// 	std::cout << "Server " << i << " closed.\n";
-	// }
-}
-
-
 int main(int ac, char **av)
 {
 	std::signal(SIGINT, signalHandler);
@@ -176,16 +80,10 @@ int main(int ac, char **av)
 	{
 		cluster.initializeServers(configList);
 		cluster.run();
-		// for (size_t i = 0; i < configList.size(); ++i)
-		// {
-		// 	Server*newServer = new Server(configList[i]);
-		// 	serverList.push_back(newServer);
-		// 	// newServer.serverLoop();
-		// }
-		// runAllServers(serverList);
 	}
 	catch (std::exception &e)
 	{
+		std::cerr << "Error during server initialization or execution: ";
 		std::cerr << e.what() << std::endl;
 	}
 	for (size_t i = 0; i < serverList.size(); ++i)

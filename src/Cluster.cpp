@@ -97,7 +97,7 @@ void Cluster::run()
 			}
 			else if (revents & POLLOUT)
 			{
-				server->write_to_connection(_responseCollector, fd, _keepAlive, _pollfds, _lastActive);
+				server->write_to_connection(_responseCollector, fd, _keepAlive, _pollfds);
 			}
 			else if (revents & (POLLERR | POLLHUP | POLLNVAL))
 			{

@@ -33,7 +33,7 @@ void	createConfigList(std::string configPath, std::vector<std::string> &configLi
 			configList.push_back(serverConfig);
 			serverConfig.clear();
 			continue;
-		}	
+		}
 		line += '\n';
 		serverConfig.append(line);
 	}
@@ -47,7 +47,7 @@ std::map<std::string, std::string>* Server::getConfigMap(const std::string &conf
 		return(&this->_dirConfig);
 	if (configName == "mimeConfig")
 		return(&this->_mimetypeConfig);
-	
+
 	return (NULL);
 }
 
@@ -113,7 +113,7 @@ void	Server::extractPorts()
 	std::vector<int>::iterator iPorts = this->_ports.begin();
 	while (iPorts != this->_ports.end())
 	{
-		std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
+		//std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
 		++iPorts;
 	}
 }
@@ -196,7 +196,7 @@ int	handleLocationBlocks(bool *inBlock, std::string &trimmed)
 	// Check for end of block
 	if (*inBlock && trimmed.find("}") == std::string::npos)
 		return (1);
-	
+
 	if (*inBlock && trimmed.find("}") != std::string::npos)
 	{
 		*inBlock = false;
@@ -247,7 +247,7 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 						break;
 					}
 				}
-				
+
 				if (handleLocationBlocks(&inBlock, trimmed) == 1)
 					continue;
 

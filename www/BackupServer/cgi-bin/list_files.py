@@ -2,7 +2,7 @@
 import os
 import json
 
-UPLOAD_DIR = "www/files/uploads/"
+UPLOAD_DIR = "www/BackupServer/files/uploads/"
 
 print("Content-Type: application/json\n")
 

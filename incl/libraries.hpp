@@ -30,4 +30,11 @@
 #define CLIENT_TIMEOUT 10
 #define BUFFER_SIZE 1024
 
+enum RequestState {
+		REQUEST_COMPLETE,           // Request fully received and parsed
+		REQUEST_INCOMPLETE,         // Waiting for more data (e.g., full body/chunks)
+		REQUEST_ERROR_RESPOND,      // Request had an error (e.g., 400, 413) but needs a response
+		REQUEST_ERROR_CLOSE_CONN    // Fatal error requiring immediate connection close
+	};
+
 #endif
