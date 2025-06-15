@@ -40,81 +40,65 @@ std::vector<int>	Server::makeNewConnections(int server_fd)
 	return newClients;
 }
 
-bool	Server::readFromConnection(std::map<int, std::string> &response_collector,
-																int fd,
-																std::map<int, bool> &keepAlive,
-																std::vector<struct pollfd> &globalPollFds)
+bool Server::readFromConnection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds)
 {
-	char buffer[BUFFER_SIZE] = {0};
-	ssize_t n = recv(fd, buffer, sizeof(buffer), 0); // recv it's better for sockets
+	char buffer[BUFFER_SIZE];
+	ssize_t bytes_read = recv(fd, buffer, sizeof(buffer), 0);
 
-	if (n <= 0)
-	{
-		if (n < 0)
-			std::cerr << "Error reading from socket!\n";
+	// --- Connection closed or error ---
+	if (bytes_read <= 0) {
+		if (bytes_read < 0)
+			std::cerr << "[recv error] fd " << fd << "\n";
 		else
-			std::cout << "[Browser closed] Client fd " << fd << " is closed!" << std::endl;
-		cleanupConnection(fd);
+			std::cout << "[client closed] fd " << fd << "\n";
+
+		close_erase(fd); // cleans buffers + requestCollector
 		return false;
 	}
 
-	std::cout << "Read " << n << " bytes from fd " << fd << std::endl;
-	 _socketBuffers[fd] += std::string(buffer, n);
+	std::cout << "Read " << bytes_read << " bytes from fd " << fd << "\n";
+	_socketBuffers[fd].append(buffer, bytes_read);
 
 	std::string &data = _socketBuffers[fd];
 
 	size_t header_end = data.find("\r\n\r\n");
 	if (header_end == std::string::npos)
-		return true;
+		return true; // Wait for more header data
 
+	// --- Initialize Request object if it's the first time ---
 	if (_requestCollector.find(fd) == _requestCollector.end())
 		initialize_request(fd, data, header_end);
+
+	Request *request = _requestCollector[fd];
+	keepAlive[fd] = request->getConnection();
+
 	RequestState state = handleRequest(data, header_end, keepAlive, fd);
 
-    if (state == REQUEST_INCOMPLETE) {
-        // Request is not fully received yet (waiting for more body/chunks)
-        // Do NOT prepare response or switch to POLLOUT.
-        return true; // Keep connection open, continue polling for read events
-    }
-    else if (state == REQUEST_COMPLETE || state == REQUEST_ERROR_RESPOND) {
-        // Request is fully processed (either successfully, or with an error that warrants a response)
+	if (state == REQUEST_INCOMPLETE)
+		return true; // Still waiting for body/chunks
 
-        // *** IMPORTANT ***
-        // After processing a complete request, you MUST consume the bytes
-        // from _socketBuffers[fd] that belong to this request.
-        // Otherwise, they will remain in the buffer and potentially be
-        // re-processed or interfere with subsequent requests (pipelining).
-        size_t total_consumed_bytes = header_end + 4; // At least headers + CRLFCRLF
-        if (!_requestCollector[fd]->isChunked()) {
-             total_consumed_bytes += _requestCollector[fd]->getContentLength();
-        } else {
-            // For chunked, you need to know how many bytes parse_chunks consumed from 'data'
-            // This needs to be tracked within your Request object or parse_chunks function
-            // For now, let's assume parse_chunks consumed all necessary data for a COMPLETE state
-            // If parse_chunks modified 'data' directly (by removing parsed chunks),
-            // this part might be different.
-        }
-        _socketBuffers[fd] = data.substr(total_consumed_bytes); // Consume the processed part
+	// --- Clean body from socket buffer ---
+	size_t consumed = header_end + 4; // header + \r\n\r\n
+	if (request->isChunked()) {
+		consumed = request->getParsePos(); // parse_chunks sets it
+	} else {
+		consumed += request->getContentLength();
+	}
+	_socketBuffers[fd] = data.substr(consumed); // remove consumed part
 
-        prepare_response(fd, response_collector); // Prepare the HTTP response (and trigger CGI if needed)
+	// --- Prepare response ---
+	prepare_response(fd, response_collector); // sets to POLLOUT
 
-        // Switch socket to POLLOUT to allow sending the response
-        for (size_t i = 0; i < globalPollFds.size(); ++i)
-        {
-            if (globalPollFds[i].fd == fd)
-            {
-                globalPollFds[i].events = POLLOUT;
-                std::cout << "Switched fd " << fd << " to POLLOUT\n";
-                break;
-            }
-        }
-        return true; // Indicate that this connection is still alive (now for writing)
-    }
-    else { // state == REQUEST_ERROR_CLOSE_CONN (e.g., severe parsing error)
-        std::cout << "[FATAL REQUEST ERROR] Closing connection for fd " << fd << "." << std::endl;
-        cleanupConnection(fd); // Server cleans its own state
-        return false; // Signal to Cluster to remove this fd
-    }
+	// --- Switch to POLLOUT mode ---
+	for (size_t i = 0; i < globalPollFds.size(); ++i) {
+		if (globalPollFds[i].fd == fd)
+		{
+			globalPollFds[i].events = POLLOUT;
+			std::cout << "Switched fd " << fd << " to POLLOUT\n";
+			break;
+		}
+	}
+	return true;
 }
 
 void	Server::write_to_connection(std::map<int, std::string> &response_collector,
@@ -141,12 +125,16 @@ void	Server::write_to_connection(std::map<int, std::string> &response_collector,
 		{
 			response_collector.erase(fd);
 			// Switch to POLLIN
+			_requestCollector.erase(fd);
+			_socketBuffers[fd].clear(); // Optional: clear to prepare for pipelined request
+
+			// Switch fd back to POLLIN to receive more requests
 			for (size_t i = 0; i < globalPollFds.size(); ++i)
 			{
 				if (globalPollFds[i].fd == fd)
 				{
 					globalPollFds[i].events = POLLIN;
-					std::cout << "Switched fd " << fd << " to POLLIN\n";
+					std::cout << "Switched fd " << fd << " to POLLIN (keep-alive)\n";
 					break;
 				}
 			}
@@ -158,7 +146,11 @@ void	Server::write_to_connection(std::map<int, std::string> &response_collector,
 
 void	Server::close_erase(int fd)
 {
-	close(fd);
+
+	if (isServerSocket(fd))
+		return;
+
+	_socketBuffers.erase(fd);
 
 	std::map<int, Request*>::iterator it = _requestCollector.find(fd);
 	if (it != _requestCollector.end())
@@ -210,6 +202,11 @@ void Server::initialize_request(int fd, const std::string &data, size_t header_e
 
 RequestState Server::handleRequest(std::string &data, size_t header_end, std::map<int, bool> &keepAlive, int fd)
 {
+if (_requestCollector.find(fd) == _requestCollector.end())
+{
+    std::cerr << "Missing request for fd " << fd << "!\n";
+}
+
 	Request *request = _requestCollector[fd];
 	keepAlive[fd] = request->getConnection();
 
@@ -275,7 +272,7 @@ void Server::prepare_response(int fd, std::map<int, std::string> &response_colle
 
 	delete request;
 	delete response;
-	cleanupConnection(fd);
+	_requestCollector.erase(fd);
 }
 
 bool	Request::parse_chunks(std::string &data, size_t start)

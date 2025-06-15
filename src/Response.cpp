@@ -117,7 +117,7 @@ void	Response::handleGET()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "File type: " << fileType << std::endl;
+	std::cout << "Response File type: " << fileType << std::endl;
 	if (isCGI(uri))
 	{
 		// std::string exec_path = "./" + uri;
@@ -136,7 +136,7 @@ void	Response::handlePOST()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "File type: " << fileType << std::endl;
+	std::cout << "Response File type: " << fileType << std::endl;
 	if (isCGI(uri))
 	{
 		std::string exec_path = "./" + uri;

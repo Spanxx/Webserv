@@ -27,7 +27,7 @@ class Request
 		int		checkPathChars();
 		int		checkRequestedPath();
 		int		checkRequestedFiletype();
-		
+
 		void	setCode(int code);
 		void	setPath(std::string path);
 		void	append_body(const std::string &body_part);
@@ -41,8 +41,9 @@ class Request
 		std::string getHeader(const std::string &key);
 		int getContentLength();
 		size_t getBodySize();
+		size_t getParsePos() const;
 		bool isChunked();
-		
+
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 

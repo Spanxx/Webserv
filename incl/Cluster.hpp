@@ -20,7 +20,7 @@ public:
 	void run(); // Main event loop using poll
 	void setupPollFds();
 	void handleNewConnection(int serverSocketFd, Server* server); // Handles new client connections
-	void removeFdArrays(int fd); // Removes fd from _pollfds, _responseCollector, _keepAlive, _lastActive and _fdToServerMap
+	void removeConnection(int fd); // Removes fd from _pollfds, _responseCollector, _keepAlive, _lastActive and _fdToServerMap
 	void removePollFd(int fd); // Removes fd from _pollfds and _fdToServerMap
 };
 

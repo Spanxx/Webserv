@@ -59,11 +59,11 @@ void Cluster::run()
 		int ret = poll(_pollfds.data(), _pollfds.size(), POLL_TIME_OUT);
 		if (ret < 0)
 		{
-			std::cerr << "Poll error: " << strerror(errno) << std::endl;
+			std::cerr << "Poll error " << std::endl;
 			continue;
 		}
 		time_t now = time(NULL);
-		for (size_t i = 0; i < _pollfds.size(); ++i)
+		for (int i = _pollfds.size() - 1; i >= 0; --i)
 		{
 			int fd = _pollfds[i].fd;
 			short revents = _pollfds[i].revents;
@@ -79,8 +79,7 @@ void Cluster::run()
 			if(!server->isServerSocket(fd) && now - _lastActive[fd] > CLIENT_TIMEOUT)
 			{
 				std::cout << "[TIMEOUT] Closing inactive fd " << fd << "\n";
-				server->close_erase(fd);
-				removeFdArrays(fd);
+				removeConnection(fd);
 				continue;
 			}
 			//Handle new connections
@@ -89,21 +88,19 @@ void Cluster::run()
 			else if (revents & POLLIN)
 			{
 					if (!server->readFromConnection(_responseCollector, fd, _keepAlive, _pollfds))
-						removeFdArrays(fd);
+						removeConnection(fd);
 					else
-					{
 						_lastActive[fd] = now; // Update last active time for the client
-					}
 			}
 			else if (revents & POLLOUT)
 			{
 				server->write_to_connection(_responseCollector, fd, _keepAlive, _pollfds);
+				_lastActive[fd] = now;
 			}
 			else if (revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
 				std::cout << "[FD ERROR] Closing fd " << fd << "\n";
-				server->close_erase(fd);
-				removeFdArrays(fd);
+				removeConnection(fd);
 			}
 		}
 	}
@@ -119,7 +116,7 @@ void Cluster::handleNewConnection(int serverSocketFd, Server* server)
 		pollfd pfd;
 		pfd.fd = newClients[i];
 		pfd.events = POLLIN; // Monitor for incoming data
-		//pfd.revents = 0; // Initialize revents to 0, poll will update it
+		pfd.revents = 0; // Initialize revents to 0, poll will update it
 		_pollfds.push_back(pfd); // Add the new client fd to the poll array
 		_fdToServerMap[newClients[i]] = server; // Map the new client fd to its server
 		_responseCollector[newClients[i]] = ""; // Initialize response collector for the new client
@@ -128,13 +125,26 @@ void Cluster::handleNewConnection(int serverSocketFd, Server* server)
 	}
 }
 
-void Cluster::removeFdArrays(int fd)
+void Cluster::removeConnection(int fd)
 {
 	close(fd);
+	if (_fdToServerMap.count(fd))
+		_fdToServerMap[fd]->close_erase(fd);
+
+	_fdToServerMap.erase(fd);
 	_responseCollector.erase(fd);
 	_keepAlive.erase(fd);
 	_lastActive.erase(fd);
-	removePollFd(fd);
+
+	for (size_t i = 0; i < _pollfds.size(); ++i)
+	{
+		if (_pollfds[i].fd == fd)
+		{
+			_pollfds.erase(_pollfds.begin() + i);
+			std::cout << "Removed fd " << fd << " from poll array." << std::endl;
+			return;
+		}
+	}
 }
 
 void Cluster::removePollFd(int fd)
