@@ -43,7 +43,7 @@ std::vector<int>	Server::makeNewConnections(int server_fd)
 bool Server::readFromConnection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds)
 {
 	char buffer[BUFFER_SIZE];
-	ssize_t bytes_read = recv(fd, buffer, sizeof(buffer), 0);
+	ssize_t bytes_read = recv(fd, buffer, sizeof(buffer), 0); // Check why 0
 
 	// --- Connection closed or error ---
 	if (bytes_read <= 0) {

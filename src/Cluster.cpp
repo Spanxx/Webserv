@@ -30,9 +30,6 @@ void Cluster::initializeServers(std::vector<std::string> configList)
 
 void Cluster::setupPollFds()
 {
-	// _pollfds.clear();
-	// _fdToServerMap.clear();
-
 	for (size_t i = 0; i < _servers.size(); ++i)
 	{
 		const std::vector<int>& serverSockets = _servers[i]->getServerSockets();

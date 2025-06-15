@@ -159,13 +159,13 @@ void	Router::checkDirPermission()
 
 void	Router::setDirForType()
 {
-	if (this->_requestedFile == "")
+	if (this->_requestedFile == "") // TODO right code? should we do this check here or before?
 	{
-		this->_request->setCode(403); // TODO
+		this->_request->setCode(403);
 		std::cout << "_requestedFile = "" and returning" << std::endl;
 		this->_mimeType = "text/html";
 		return; // needs to return because otherwise the substr(dotPos) was provoking a crash
-	} //KEEP
+	}
 
 	std::string	fullPath;
 	size_t 		dotPos = this->_requestedFile.find_last_of(".");
