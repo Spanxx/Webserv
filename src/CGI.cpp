@@ -36,7 +36,7 @@
 // 		std::string querySTR = "QUERY_STRING=" + query;
 // 		std::string contentType = "CONTENT_TYPE=" + _request->getHeader("Content-Type");
 // 		std::string contentLength = "CONTENT_LENGTH=" + _request->getHeader("Content-Length");
-		
+
 // 		char *env[] = {
 // 			const_cast<char *>(methodSTR.c_str()),
 // 			const_cast<char *>(querySTR.c_str()),
@@ -45,7 +45,7 @@
 // 			NULL
 // 		};
 
-// 		dup2(inPipe[0], STDIN_FILENO);	
+// 		dup2(inPipe[0], STDIN_FILENO);
 // 		dup2(outPipe[1], STDOUT_FILENO);
 
 // 		close(inPipe[0]);
@@ -69,7 +69,7 @@
 // 		// this->handleERROR(500);
 // 		exit(EXIT_FAILURE);
 // 	}
-		
+
 // 	close(inPipe[0]);
 // 	if (method == "POST")
 // 	{
@@ -175,6 +175,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 
 		// execve failed
 		std::cerr << "ERROR: execve failed!\n";
+		//std::cerr << "Errno: " << errno << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -213,8 +214,8 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 				close(outPipe[0]);
 				return;
 			}
-			time_t currentTime = time(NULL);
-			std::cerr << "Time: " << currentTime << '\n'; 
+			// time_t currentTime = time(NULL);
+			// std::cerr << "Time: " << currentTime << '\n';
 			usleep(1000); // 1ms
 			continue;
 		}
@@ -259,7 +260,6 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 	}
 
 }
-
 
 void Response::parseCGIOutput(const std::string &output)
 {

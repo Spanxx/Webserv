@@ -2,9 +2,10 @@
 #include "../incl/Response.hpp"
 #include "../incl/Utils.hpp"
 
-Response::Response(Request *request): _request(request), _code(request->getCode())
+Response::Response(Request *request, std::string &hostName): _request(request), _code(request->getCode())
 {
 	std::cout << "Response constructed\n";
+	this->_headers["hostname"] = hostName;
 	//status phrase + code here? or set to which default?
 }
 
@@ -67,7 +68,7 @@ std::string Response::process_request(int client_fd) // Every handler shoudl upd
 void Response::assign_status_phrase()
 {
 	std::string line;
-	std::ifstream file("www/private/status_codes.txt");
+	std::ifstream file("www/error/status_codes.txt");
 	if (!file.is_open())
 	{
 		std::cerr << "Error extracting status phrase: error opening file\n";
@@ -91,7 +92,8 @@ void	Response::handleERROR(int statusCode)
 	this->_code = statusCode;
 	assign_status_phrase();
 	// read file into string
-	std::ifstream file("www/private/status_page.html");
+
+	std::ifstream file("www/error/status_page.html");
 	if (!file)
 	{
 		std::cerr << "Error opening status code file\n";
@@ -115,7 +117,7 @@ void	Response::handleGET()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "File type: " << fileType << std::endl;
+	std::cout << "Response File type: " << fileType << std::endl;
 	if (isCGI(uri))
 	{
 		// std::string exec_path = "./" + uri;
@@ -134,7 +136,7 @@ void	Response::handlePOST()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "File type: " << fileType << std::endl;
+	std::cout << "Response File type: " << fileType << std::endl;
 	if (isCGI(uri))
 	{
 		std::string exec_path = "./" + uri;
@@ -187,6 +189,7 @@ std::string Response::responseBuilder()
 
 	// if (this->_request->getPath() != "www/files/favicon.ico")
 	// 	std::cout << " --> Response:\n" << response << std::endl;
+	//std::cout << "Response body: "<< std::endl << this->_body << "-- End of body --"<<std::endl;
 	return (response);
 }
 
@@ -196,13 +199,12 @@ std::string	Response::headersBuilder()
 
 	if (_headers.find("Content-Type") == _headers.end())
 		_headers["Content-Type"] = "text/html";	// should we change these to text/html for the error pages
-	// _headers["Content-Type"] = "text/plain";	// should we change these to text/html for the error pages
 
 	header << this->_request->getVersion() << ' '
 			<< this->_code << ' '
 			<< this->_status["phrase"] << "\r\n"
 			// << this->_request->getPath() << "\r\n"							// needed?
-			<< "Host: webServ42" << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
+			<< "Host: " << this->_headers["hostname"] << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
 			<< "Connection: " << this->_request->getHeader("Connection") << "\r\n"
 			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
 			<< "Content-Length: " << strToInt(this->_headers["Content-Length"]) << "\r\n";
@@ -210,7 +212,7 @@ std::string	Response::headersBuilder()
 				header << "Location: " << this->_request->getPath() << "\r\n";
 			header << "\r\n";	//empty newline to seperate header and body
 
-	std::cout << "Location for redir: " << this->_request->getPath() << '\n';
+	// std::cout << "Location for redir: " << this->_request->getPath() << '\n';
 
 	return (header.str());
 }

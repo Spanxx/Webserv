@@ -9,7 +9,6 @@ Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(fal
 
 Request::Request(Request &other)
 {
-
 	this->_method = other._method;
 	this->_path = other._path;
 	this->_version = other._version;
@@ -71,19 +70,20 @@ std::string Request::getVersion() { return _version; }
 std::string Request::getBody() { return _body; }
 std::string Request::getQuery() { return _query; }
 int 	Request::getContentLength() { return _content_length; }
+size_t Request::getParsePos() const { return _parse_pos; }
 bool 	Request::getConnection()
-{ 
+{
 	if (_headers["Connection"] == "keep-alive")
 		return true;
 	return false;
 }
-std::string Request::getHeader(const std::string &key) 
-{ 
+std::string Request::getHeader(const std::string &key)
+{
 	std::map<std::string, std::string>::const_iterator it = _headers.find(key);
 	if (it != _headers.end())
         	return it->second;
 	std::cout << "Header " << key << " does not exist\n";
-	return ""; 
+	return "";
 }
 size_t Request::getBodySize() { return _body.size(); }
 bool Request::isChunked() { return _chunked; }
@@ -98,7 +98,6 @@ void	Request::splitURI()
 		_query = _path.substr(pos + 1);
 		_path = _path.substr(0, pos);
 	}
-	
-}
 
+}
 

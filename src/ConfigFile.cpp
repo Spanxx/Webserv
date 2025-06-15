@@ -2,20 +2,53 @@
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
 
+void	createConfigList(std::string configPath, std::vector<std::string> &configList)
+{
+	bool			inServerBlock = false;
+	bool			inLocationBlock = false;
+
+	std::string		line;
+	std::string		serverConfig;
+	std::ifstream	iss(configPath.c_str());
+	if (!iss)
+	{
+		std::cerr << "Creating config list failed!\n";
+		return;
+	}
+
+	while (getline(iss, line))
+	{
+		if (line.find("#") != std::string::npos || line.empty())
+			continue;
+		if (!inServerBlock && line.find("server") != std::string::npos)
+			inServerBlock = true;
+		else if (inServerBlock && line.find("{") != std::string::npos)
+			inLocationBlock = true;
+		else if (inServerBlock && inLocationBlock && line.find("}") != std::string::npos)
+			inLocationBlock = false;
+		else if (inServerBlock && !inLocationBlock && line.find("}") != std::string::npos)
+		{
+			serverConfig.append(line);
+			inServerBlock = false;
+			configList.push_back(serverConfig);
+			serverConfig.clear();
+			continue;
+		}
+		line += '\n';
+		serverConfig.append(line);
+	}
+}
+
 std::map<std::string, std::string>* Server::getConfigMap(const std::string &configName)
 {
 	if (configName == "serverConfig")
 		return(&this->_serverConfig);
 	if (configName == "dirConfig")
 		return(&this->_dirConfig);
-	if (configName == "pageConfig")
-		return(&this->_pageConfig);
-	if (configName == "fileConfig")
-		return(&this->_fileConfig);
-	if (configName == "filetypeConfig")
-		return(&this->_filetypeConfig);
-	else
-		return (NULL);
+	if (configName == "mimeConfig")
+		return(&this->_mimetypeConfig);
+
+	return (NULL);
 }
 
 int	Server::checkConfigFile(std::ifstream &conFile)
@@ -52,15 +85,15 @@ void	Server::extractPorts()
 	std::string item;
 
 	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-	
+
 	if (!config)
 		throw ServerException("Extracting serverConfig map failed!");
 
 	std::map<std::string, std::string>::iterator it = config->begin();
 	while (it != config->end())
 	{
-		if (it->first.find("ports") != std::string::npos)
-		{	
+		if (it->first.find("listen") != std::string::npos)
+		{
 			std::stringstream ss(it->second);
 
 			while (std::getline(ss, item, ','))
@@ -76,80 +109,191 @@ void	Server::extractPorts()
 	}
 
 	this->_numPorts = portCounter;
-	
+
 	std::vector<int>::iterator iPorts = this->_ports.begin();
 	while (iPorts != this->_ports.end())
 	{
-		std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
+		//std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
 		++iPorts;
 	}
 }
 
-void	Server::extractConfigMap(std::ifstream &conFile, std::map<std::string, std::string> &targetMap, std::string target)
+void	Server::extractHost()
+{
+	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
+
+	if (!config)
+		throw ServerException("Extracting serverConfig map failed!");
+
+	std::map<std::string, std::string>::iterator it = config->find("host");
+	if (it != config->end())
+	{
+		this->_IPHost = it->second;
+		std::cout << "Host: " << this->_IPHost << '\n';
+	}
+	else
+	{
+		std::cout << "No host in config file, default set to bind to any local address\n";
+		this->_IPHost = "0.0.0.0"; // bind to any local address
+	}
+}
+
+void	Server::extractName()
+{
+	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
+
+	if (!config)
+		throw ServerException("Extracting serverConfig map failed!");
+
+	std::map<std::string, std::string>::iterator it = config->find("name");
+	if (it != config->end())
+	{
+		this->_name = it->second;
+		std::cout << "Server Name: " << this->_name << '\n';
+	}
+	else
+	{
+		std::cout << "No name in config file, default set to defaultServer!\n";
+		this->_name = "default_server"; // default server name
+	}
+}
+
+void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *_host, std::string *locationPath)
+{
+	size_t		equalPos = trimmed.find("=");
+
+	if (equalPos != std::string::npos)
+	{
+		std::string	key = trimmed.substr(0, equalPos - 1);
+		std::string value = trimmed.substr(equalPos + 1);
+		key = trim(key);
+		value = trim(value);
+
+		if (key == "host" && value != "")
+			*_host = value;
+		if (key == "location" && value != "")
+			*locationPath = value;
+
+		// std::cout << "config key: " << key << " || value: " << value << '\n';	//debug for config values
+		//check for key duplicates
+		if (targetMap.find(key) != targetMap.end())
+		{
+			//std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+					//<< "new Value don't overwrites existing Value!\n";
+		}
+		else
+			targetMap[key] = value;
+	}
+}
+
+int	handleLocationBlocks(bool *inBlock, std::string &trimmed)
+{
+	if (!(*inBlock) && trimmed.find("location") == 0 && trimmed.find("{") != std::string::npos)
+	{
+		*inBlock = true;
+		return (1);
+	}
+	// Check for end of block
+	if (*inBlock && trimmed.find("}") == std::string::npos)
+		return (1);
+
+	if (*inBlock && trimmed.find("}") != std::string::npos)
+	{
+		*inBlock = false;
+		return (1);
+	}
+
+	return (0);
+}
+
+
+void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target)
 {
 	std::string	line;
+	std::string trimmed;
+	std::string locationPath;
+	bool		inBlock = false;
 
-	while (std::getline(conFile, line))
+	std::istringstream iss(configFile);
+	if (!iss)
+		throw ServerException("Extracting config file failed!\n");
+
+	while (getline(iss, line))
 	{
-		if (line == target)
+		trimmed = trim(line);
+		if (trimmed.find(target) != std::string::npos)
 		{
-			while (std::getline(conFile, line))
+			//save dir before continue in dirblock
+			if (target == "location")
 			{
-				if (line == "}")
+				if (trimmed.find_first_of('{') != std::string::npos)
+					trimmed.erase(trimmed.find_first_of('{'));	//remove curly bracket at end of location
+				saveKeyValuePair(trimmed, targetMap, &this->_host, &locationPath);		//save location
+			}
+
+			while (getline(iss, line))
+			{
+				trimmed = trim(line);
+
+				if (trimmed.empty() || trimmed[0] == '#')
+					continue;
+
+				if (trimmed == "}" && !inBlock)
 				{
-					conFile.clear();                // Clear any error flags
-					conFile.seekg(0, std::ios::beg); // Go back to the beginning	
-					return ;
+					if (target == "location" && !targetMap.empty())
+					{
+						this->_locationBlocks[locationPath] = targetMap;
+						targetMap.clear();
+						break;
+					}
 				}
 
-				if (line.empty() || line[0] == '#')
+				if (handleLocationBlocks(&inBlock, trimmed) == 1)
 					continue;
-				
-				size_t	equalPos = line.find('=');
-				if (equalPos != std::string::npos)
-				{
-					std::string	key = line.substr(0, equalPos);
-					std::string value = line.substr(equalPos + 1);
-					// std::cout << "config key: " << key << " || value: " << value << '\n';	debug for config values
-					//check for key duplicates
-					if (targetMap.find(key) != targetMap.end())
-					{
-						std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
-								<< "new Value don't overwrites existing Value!\n";
-					}
-					else
-						targetMap[key] = value;
-				}
+
+				saveKeyValuePair(trimmed, targetMap, &this->_host, &locationPath);
 			}
+
 		}
 	}
 }
 
-int	Server::createConfig(char *av)
+void	Server::loadMimeTypes()
 {
-	std::string filePath = checkFilePath(av);
+	std::string line;
+	std::string mimeConfig;
+	std::string cwd = getcwd(NULL, 0);
+	std::string fullPath;
 
-	// std::ifstream configFile(av);
-	std::ifstream configFile(filePath.c_str());
-	if (!configFile)
+	if (cwd.find("/src") == std::string::npos)
+		fullPath = "www/config/mime.types";
+	else
+		fullPath = "../www/config/mime.types";
+
+	std::ifstream file(fullPath.c_str());
+	if (!file)
+		throw ServerException("Loading mime.types failed!");
+
+	while(getline(file, line))
 	{
-		std::cout << "Reading config File failed!\n";
-		return (1);
+		if (line.empty() || line.find('#') != std::string::npos)
+			continue;
+		line += '\n';
+		mimeConfig.append(line);
+
 	}
-	if (configFile.peek() == std::ifstream::traits_type::eof())
-	{
-		std::cout << "The Config file is empty!\n";
-		return (1);
-	}
+	this->extractConfigMap(mimeConfig, _mimetypeConfig, "types");
+}
 
-	if (Server::checkConfigFile(configFile) == 1)
-		return (1);
+// int	Server::createConfig(char *av, std::string &serverConfig)
+int	Server::createConfig(std::string &serverConfig)
+{
+	// std::string filePath = checkFilePath(av);
 
-	this->extractConfigMap(configFile, _serverConfig, "server{");
-	this->extractConfigMap(configFile, _dirConfig, "dir{");
-	this->extractConfigMap(configFile, _pageConfig, "pages{");
-	this->extractConfigMap(configFile, _fileConfig, "files{");
-	this->extractConfigMap(configFile, _filetypeConfig, "filetypes{");
+	std::map<std::string, std::string>	_dirConfig;
 
+	this->extractConfigMap(serverConfig, _serverConfig, "server");
+	this->extractConfigMap(serverConfig, _dirConfig, "location");
+	this->loadMimeTypes();
 	return (0);
 }

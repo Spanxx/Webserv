@@ -2,16 +2,19 @@
 #include	"../incl/Server.hpp"
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
-// #include	<sys/time.h>
 
-Server::Server(char *av)
+Server::Server(std::string &serverConfig)
 {
 	try
 	{
-		if (this->createConfig(av) == 1)
+		if (this->createConfig(serverConfig) == 1)
 			throw ServerException("Creating Config failed!");
-
+		this->extractName();
 		this->extractPorts();
+		this->extractHost();
+
+		this->storeServerConfig();
+		// this->createDirStructure();
 
 		//set default port if none in config file
 		if (this->_numPorts == 0)
@@ -24,10 +27,10 @@ Server::Server(char *av)
 
 		while (it != this->_ports.end())	// maybe change to for with index
 		{
-			int sock = this->createServerSocket(*it);
-			this->_serverSocket.push_back(sock);
-			startListen(sock);
-			std::cout << "Server socket fd: " << sock << " created and bound\n";
+			int sock = this->createServerSocket(*it); //create a server socket and bind it to the port
+			this->_serverSockets.push_back(sock);
+			startListen(sock); //start listening on the socket and push it to the pollfd array _socketArray
+			std::cout << "From constructor Server socket fd: " << sock << " created and bound\n";
 			++it;
 		}
 	}
@@ -44,10 +47,10 @@ Server::Server(char *av)
 
 Server::~Server()
 {
-	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
+	for (size_t i = 0; i < this->_serverSockets.size(); ++i)
 	{
-		close(this->_serverSocket[i]);
-		std::cout << "Server socket fd: " << this->_serverSocket[i] << " closed\n";
+		close(this->_serverSockets[i]);
+		std::cout << "From destructor Server socket fd: " << this->_serverSockets[i] << " closed\n";
 	}
 }
 
@@ -57,26 +60,37 @@ void	Server::startListen(int socket)
 	if (listen(socket, 10) < 0)	// was 1, 10 is to test / amount of connections
 	{
 		throw ServerException("Listen failed!");
-		// std::cerr << "Error listening on server socket!\n";
-		// exit(1);
 	}
 
-	std::cout << "Server starts listening for incomming connections on FD " << socket <<  "\n";
+	//std::cout << "Server starts listening for incomming connections on FD " << socket <<  "\n";
 
+	/* Now this is done by cluster class
 	struct pollfd serverFd;
 	serverFd.fd = socket;
 	serverFd.events = POLLIN;	// wait for input
-	this->_socketArray.push_back(serverFd);
+	this->_pollFdArray.push_back(serverFd);*/
 }
 
 void Server::closeServer()
 {
-	for (size_t i = 0; i < _socketArray.size(); ++i) {
-		std::cout << "Closing socket fd " << _socketArray[i].fd << std::endl;
-		close(_socketArray[i].fd);
+	for (size_t i = 0; i < _pollFdArray.size(); ++i) {
+		std::cout << "Closing socket fd " << _pollFdArray[i].fd <<std::endl;
+		close(_pollFdArray[i].fd);
 	}
 }
+
+void Server::cleanupConnection(int fd)
+{
+	std::cout << "[Server Cleanup] Cleaning up internal state for fd " << fd << std::endl;
+	_socketBuffers.erase(fd);
+	_requestCollector.erase(fd);
+}
+
+const std::vector<struct pollfd>& Server::getpollFdArray() const { return this->_pollFdArray; }
+const std::vector<int>& Server::getServerSockets() const { return this->_serverSockets; }
 
 Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
 
 size_t	Server::getMaxBodySize() { return _maxBodySize; }
+std::string	Server::getName() { return _name; }
+std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}
