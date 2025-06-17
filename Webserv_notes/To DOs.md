@@ -1,17 +1,17 @@
 
-- [ ] make logic work with many servers
- - [ ] adjust config file --> Nginx reference
+- [x] make logic work with many servers
+ - [x] adjust config file --> Nginx reference
+ - [ ] make routing to index dynamic, according to location block indeces
 - [ ] inside config file:
-	- [ ] set up server names
-	- [ ] set up routes with different configurations
-	- [ ] set up default error pages (what does this mean?)
+	- [x] set up server names
+	- [x] set up routes with different configurations
+	- [x] set up default error pages (what does this mean?)
 	- [ ] define location blocks + implement autoindex on/off
 	- [ ] list available directories or not (is this autoindex?)
-	- [ ] configure where uploaded files should be saved (+adjust makefile rule to delete that specific file, if possible?)
+	- [x] configure where uploaded files should be saved
 	- [x] set max size of request body (+ implement inside read request function)
 		- [ ] double check if correct
 - [x] handle chunked requests
-- [ ] handle chunked responses ?
 - [ ] refactor logic with exceptions instead of return values
 - [ ] check if we need to handle piped requests? --> adjust server loop
 - [ ] check cgi with cgi tester --> does cgi routing work and miscellaneous scripts?
@@ -28,25 +28,18 @@ Henri:
 - [x] check for range of host
 - [x] port range
 - [x] upload dir dynamic
-- [ ] index dynamic? 
 - [x] maxbodysize range check
-- [ ] default 404 error page
+- [x] default 404 error page
 - [ ] query string? 
+- [x] separate css stylesheet test
 - [ ] script types check 
-	- [ ]  should we add checks for allowing .py scripts in root or so, so we sre sure our workflow works? 
 - [x] method check 
 
 Steph:
 
 
 (EDGE) CASES TO FIX:
-- [ ] curl command in terminal: curl -X POST http://localhost:8080/html -F "file=@wetter.html"
+- [ ] curl command in terminal: curl -X POST http://localhost:8080/html -F "file=@wetter.html" ouputs send error on fd x
 
 
 
-QUESTIONS COLLECTION: 
-- should we support folder style requests like "localhost:8080/files" and then serve an index? or is this already related to autoindex
-- should we accept files that have no extension (so no dot)? or is "checkRequestedFiletype()" already commented out for that reason 
-- should we exit the program when an exception is caught upon server building/config reading?
-
-	- Should we add 

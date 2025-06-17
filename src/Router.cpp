@@ -178,9 +178,9 @@ void	Router::setDirForType()
 
 	fullPath = checkCwd();
 
-	if (type == ".html" && this->_requestedFile != "status_page.html")
+	if ((type == ".html" || type == ".css") && this->_requestedFile != "status_page.html")
 		fullPath += "/html" + this->_requestedPath;
-	if (type == ".py" || type == ".php")
+	if (type == ".py" || type == ".php" || type == ".js")
 		fullPath += "/cgi-bin" + this->_requestedPath;
 	if (type == ".png" || type == ".jpg" || type == ".jpeg")
 		fullPath += "/files" + this->_requestedPath;
