@@ -27,17 +27,20 @@ Henri:
 - [x] change host to iphost for config logic
 - [x] check for range of host
 - [x] port range
-- [ ] upload dir dynamic
+- [x] upload dir dynamic
 - [ ] index dynamic? 
 - [x] maxbodysize range check
 - [ ] default 404 error page
 - [ ] query string? 
 - [ ] script types check 
 	- [ ]  should we add checks for allowing .py scripts in root or so, so we sre sure our workflow works? 
-- [ ] method check 
+- [x] method check 
 
 Steph:
 
+
+(EDGE) CASES TO FIX:
+- [ ] curl command in terminal: curl -X POST http://localhost:8080/html -F "file=@wetter.html"
 
 
 

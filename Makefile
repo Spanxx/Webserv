@@ -5,7 +5,7 @@ NAME = webserv
 CC = c++
 
 #Flags
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -g
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
 #Object files folder
 OBJDIR = obj
@@ -33,12 +33,12 @@ all: $(NAME)
 
 #Link object files into target executable
 $(NAME): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $@
+	$(CC) $(CXXFLAGS) $(OBJ) -o $@
 
 #Object file generation
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CXXFLAGS) -c $< -o $@
 
 #Clean up
 clean:

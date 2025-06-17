@@ -2,7 +2,8 @@
 #include "../incl/Request.hpp"
 #include "../incl/Utils.hpp"
 
-Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), _uploadDir(server->getUploadDir()), _server(server)
+Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), _uploadDir(server->getUploadDir()), 
+	_server(server)
 {
 	std::cout << "Request constructed\n";
 }

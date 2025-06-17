@@ -45,7 +45,7 @@ public:
 	int		createConfig(std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
-
+	void	allowedMethods(std::string &trimmed);
 	void	createDirStructure();
 	// void	mkdir_p(const std::string fullPath, mode_t mode);
 	void	loadMimeTypes();

@@ -21,7 +21,7 @@ public:
 	void		checkDirPermission();
 	void		handleRedir();
 	void		handleAutoIndex();
-
+	void		checkMethods();
 	std::string	checkCwd();
 
 private:

@@ -105,7 +105,7 @@ void	Server::extractPorts()
 				++portCounter;
 			}
 		}
-		if (it->first.find("maxbodysize") != std::string::npos)
+		else if (it->first.find("maxbodysize") != std::string::npos)
 		{
 			int size;
 			if (!safeAtoi(it->second, size) || size < 0 || size > 10485760)
@@ -256,13 +256,29 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 						break;
 					}
 				}
-
+				if (trimmed.find("methods") != std::string::npos)
+					allowedMethods(trimmed);
 				if (handleLocationBlocks(&inBlock, trimmed) == 1)
 					continue;
 
 				saveKeyValuePair(trimmed, targetMap, &this->_IPHost, &locationPath);
 			}
 
+		}
+	}
+}
+
+void Server::allowedMethods(std::string &trimmed)
+{
+	size_t pos = trimmed.find_last_of(" ");
+	if (pos != std::string::npos)
+	{
+		std::stringstream ss(trimmed.substr(pos + 1));
+		std::string item;
+		while (std::getline(ss, item, ','))
+		{
+			if (item != "POST" && item != "GET" && item != "DELETE")
+				throw ServerException("Only allowed methods are GET, POST, DELETE");
 		}
 	}
 }

@@ -17,6 +17,7 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	handleFavicon();
 	// handleAutoIndex();
 	// handleRedir();
+	checkMethods();
 }
 
 Router::Router(Router &other)
@@ -125,14 +126,14 @@ void	Router::findDirConfig()
 
 void	Router::checkForDirRequest()
 {
-	if ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/') || this->_requestedFile.empty())
+	if (_request->getMethod() == "GET" && ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/') || this->_requestedFile.empty()))
 	{
 		std::cout << "Detected a directory request or missing file.\n";
 
 		if (_dirConfig["autoindex"] == "on")
 		{
 
-			std::cout << "Autoindex is on → setting CGI path for directory listing\n";
+			std::cout << "Autoindex for directory " << _requestedPath << " is on → setting CGI path for directory listing\n";
 			this->_request->setPath("www/" + _serverName + "/cgi-bin/autoindex.py");	// path to script for listing files in folder
 			this->_requestedFile = "autoindex.py";
 			if (this->_requestedPath == "/") // TODO Confirm if is the best way to do it?
@@ -211,5 +212,23 @@ void	Router::handleAutoIndex()
 
 }
 
+void	Router::checkMethods()
+{
+	std::map<std::string, std::map<std::string, std::string> >::iterator it = this->_locationBlocks->begin();
 
+	while (it != this->_locationBlocks->end())
+	{
+		if (this->_extractedPath == it->first)
+		{
+			std::map<std::string, std::string>::iterator it_conf = it->second.find("methods");
+			if (it_conf != it->second.end())
+			{
+				if (it_conf->second.find(_request->getMethod()) == std::string::npos)
+					this->_request->setCode(405);
+				return ;
+			}
+		}
+		++it;
+	}
+}
 
