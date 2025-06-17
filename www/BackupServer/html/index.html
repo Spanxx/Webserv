@@ -58,6 +58,13 @@
 
 	<br><br>
 
+	<form method="POST" action="{{UPLOAD_BLOCK}}" enctype="multipart/form-data">
+		<input type="file" name="file" />
+		<button type="submit">Upload to disc without CGI</button>
+	</form>
+
+	<br><br>
+
 	<h2>Delete Uploaded File</h2>
 	<label for="fileSelect">Choose a file:</label>
 	<select id="fileSelect">
@@ -96,7 +103,7 @@
 			const filename = select.value;
 			if (!filename) return;
 
-			fetch(`/uploads/${filename}`, {
+			fetch(`{{UPLOAD_BLOCK}}${filename}`, {
 				method: 'DELETE'
 			})
 			.then(response => {

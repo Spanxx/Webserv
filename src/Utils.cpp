@@ -5,6 +5,8 @@
 #include <cerrno>
 #include <climits>
 #include <iostream>
+#include <cstdlib>
+#include <vector>
 
 std::string trim(const std::string &str)
 {
@@ -151,15 +153,15 @@ std::vector<std::string> parseMultipartBody(std::string& body, const std::string
 }
 
 // Extract filename from Content-Disposition header of a part
-std::string extractFilenameFromPart(std::string& part)
+std::string getFilename(std::string& part)
 {
 	std::istringstream stream(part);
 	std::string line;
 	while (std::getline(stream, line) && line != "\r")
 	{
 		// Normalize line endings
-		if (!line.empty() && line.back() == '\r')
-			line.pop_back();
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
 
 		std::string headerName = "Content-Disposition:";
 		if (line.compare(0, headerName.size(), headerName) == 0)
@@ -179,7 +181,7 @@ std::string extractFilenameFromPart(std::string& part)
 }
 
 // Extract file content from part (after headers and blank line)
-std::string extractFileContentFromPart(std::string& part)
+std::string getFileContent(std::string& part)
 {
 	size_t headerEnd = part.find("\r\n\r\n");
 	if (headerEnd == std::string::npos)

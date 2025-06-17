@@ -5,7 +5,7 @@
 void	Server::printPorts()
 {
 	std::vector<int>::iterator it = this->_ports.begin();
-	
+
 	while (it != this->_ports.end())
 	{
 		std::cout << "Port: " << *it << '\n';
@@ -32,7 +32,7 @@ void	Server::extractPorts(std::map<std::string, std::string>::iterator &it)
 	int			portCounter = 0;
 	std::string item;
 	std::string	trimmedItem;
-	
+
 	std::istringstream iss(it->second);
 	while (getline(iss, item, ','))
 	{
@@ -49,7 +49,7 @@ void	Server::extractPorts(std::map<std::string, std::string>::iterator &it)
 void	Server::storeServerConfig()
 {
 	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-	
+
 	if (!config)
 		throw ServerException("Extracting serverConfig map failed!");
 
@@ -58,10 +58,10 @@ void	Server::storeServerConfig()
 	{
 		// if (it->first.find("listen") != std::string::npos)
 		// 	extractPorts(it);
-		
+
 		// if (it->first.find("name") != std::string::npos)
 		// 	this->_name = it->second;
-		
+
 		if (it->first.find("maxbodysize") != std::string::npos)
 		{
 			int size;
@@ -72,7 +72,6 @@ void	Server::storeServerConfig()
 
 		++it;
 	}
-
 	printPorts();
 }
 
@@ -86,7 +85,6 @@ int	Server::createServerSocket(int port)
 	struct sockaddr_in serverAddr;
 	memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;				//IPv4
-	//serverAddr.sin_addr.s_addr = INADDR_ANY;		//bind to any local adress
 	serverAddr.sin_port = htons(port);				//port in network byte order
 	if (this->_IPHost == "0.0.0.0") // Dynamic IP address
 		serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); // Listen on all available interfaces
@@ -102,7 +100,7 @@ int	Server::createServerSocket(int port)
 
 	int yes = 1;
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));	// reuse port
-
+	fcntl(sock, F_SETFL, O_NONBLOCK);	// set socket to non-blocking mode
 	if (bind(sock, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
 	{
 		 std::cerr << "Error binding socket to port " << ntohs(serverAddr.sin_port)

@@ -2,9 +2,7 @@
 #include	"../incl/Server.hpp"
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
-// #include	<sys/time.h>
 
-// Server::Server(char *av)
 Server::Server(std::string &serverConfig)
 {
 	std::cout << "Server created\n";
@@ -31,9 +29,9 @@ Server::Server(std::string &serverConfig)
 		while (it != this->_ports.end())	// maybe change to for with index
 		{
 			int sock = this->createServerSocket(*it); //create a server socket and bind it to the port
-			this->_serverSocket.push_back(sock);
+			this->_serverSockets.push_back(sock);
 			startListen(sock); //start listening on the socket and push it to the pollfd array _socketArray
-			std::cout << "Server socket fd: " << sock << " created and bound\n";
+			std::cout << "From constructor Server socket fd: " << sock << " created and bound\n";
 			++it;
 		}
 		assignUploadDir();
@@ -51,10 +49,10 @@ Server::Server(std::string &serverConfig)
 
 Server::~Server()
 {
-	for (size_t i = 0; i < this->_serverSocket.size(); ++i)
+	for (size_t i = 0; i < this->_serverSockets.size(); ++i)
 	{
-		close(this->_serverSocket[i]);
-		std::cout << "Server socket fd: " << this->_serverSocket[i] << " closed\n";
+		close(this->_serverSockets[i]);
+		std::cout << "From destructor Server socket fd: " << this->_serverSockets[i] << " closed\n";
 	}
 }
 
@@ -66,24 +64,32 @@ void	Server::startListen(int socket)
 		throw ServerException("Listen failed!");
 	}
 
-	std::cout << "Server starts listening for incomming connections on FD " << socket <<  "\n";
+	//std::cout << "Server starts listening for incomming connections on FD " << socket <<  "\n";
 
+	/* Now this is done by cluster class
 	struct pollfd serverFd;
 	serverFd.fd = socket;
 	serverFd.events = POLLIN;	// wait for input
-	this->_socketArray.push_back(serverFd);
+	this->_pollFdArray.push_back(serverFd);*/
 }
 
 void Server::closeServer()
 {
-	for (size_t i = 0; i < _socketArray.size(); ++i) {
-		std::cout << "Closing socket fd " << _socketArray[i].fd << std::endl;
-		close(_socketArray[i].fd);
+	for (size_t i = 0; i < _pollFdArray.size(); ++i) {
+		std::cout << "Closing socket fd " << _pollFdArray[i].fd <<std::endl;
+		close(_pollFdArray[i].fd);
 	}
 }
 
-const std::vector<struct pollfd>& Server::getSocketArray() const { return this->_socketArray; }
-const std::vector<int>& Server::getServerSockets() const { return this->_serverSocket; }
+void Server::cleanupConnection(int fd)
+{
+	std::cout << "[Server Cleanup] Cleaning up internal state for fd " << fd << std::endl;
+	_socketBuffers.erase(fd);
+	_requestCollector.erase(fd);
+}
+
+const std::vector<struct pollfd>& Server::getpollFdArray() const { return this->_pollFdArray; }
+const std::vector<int>& Server::getServerSockets() const { return this->_serverSockets; }
 
 Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
 

@@ -4,7 +4,7 @@
 Router::Router(Server *server, Request *request) : _server(server), _request(request)
 {
 	std::cout << "Router created\n";
-	
+
 	this->_requestedPath = this->_request->getPath();
 	this->_serverName = this->_server->getName();
 	this->_locationBlocks = this->_server->getLocationBlocks();
@@ -46,7 +46,7 @@ Router& Router::operator=(Router &other)
 	this->_locationBlocks = other._locationBlocks;
 	this->_dirConfig = other._dirConfig;
 	this->_extractedPath = other._extractedPath;
-	
+
 	std::cout << "Router assigned\n";
 
 	return (*this);
@@ -66,7 +66,7 @@ std::string	Router::checkCwd()
 		path = "../www/" + this->_serverName;
 	else
 		path = "www/" + this->_serverName;
-	
+
 	return (path);
 }
 
@@ -87,7 +87,7 @@ void	Router::extractPathAndFile()
 		std::cout << "Invalid Request (no slash), redirect to index.html\n";
 
 		this->_request->setCode(404);
-		
+
 		dotPos = this->_requestedPath.find_last_of('.');
 		lastSlashPos = this->_requestedPath.find_last_of('/');
 	}
@@ -103,7 +103,7 @@ void	Router::extractPathAndFile()
 void	Router::findDirConfig()
 {
 	std::map<std::string, std::map<std::string, std::string> >::iterator it = this->_locationBlocks->begin();
-	
+
 	while (it != this->_locationBlocks->end())
 	{
 		if (this->_extractedPath == it->first)
@@ -125,17 +125,29 @@ void	Router::findDirConfig()
 
 void	Router::checkForDirRequest()
 {
-	if (!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/')
+	if ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/') || this->_requestedFile.empty())
 	{
+		std::cout << "Detected a directory request or missing file.\n";
+
 		if (_dirConfig["autoindex"] == "on")
 		{
+
+			std::cout << "Autoindex is on → setting CGI path for directory listing\n";
 			this->_request->setPath("www/" + _serverName + "/cgi-bin/autoindex.py");	// path to script for listing files in folder
+			this->_requestedFile = "autoindex.py";
+			if (this->_requestedPath == "/") // TODO Confirm if is the best way to do it?
+				this->_requestedPath = "/autoindex.py";
 		}
 		else
 		{
-			std::cout << "Directory request (autoindex: off) --> redirect to www/" << this->_serverName << "/html/index.html\n";
+			std::string indexFile = "index.html"; // make it dynamic?
+			std::string redirectPath = "www/" + _serverName + "/html/" + indexFile;
+
+			std::cout << "Directory request (autoindex: off) → redirect to " << redirectPath << "\n";
 			this->_request->setPath("www/" + _serverName + "/html/index.html");	//change it to index from serverblock
-			// this->_request->setCode(200);
+			this->_requestedPath = "/" + indexFile;
+			this->_request->setPath(redirectPath);
+			this->_requestedFile = indexFile;
 		}
 	}
 }
@@ -148,11 +160,20 @@ void	Router::checkDirPermission()
 void	Router::setDirForType()
 {
 	if (this->_requestedFile == "")
+	{
+		this->_request->setCode(403); // TODO
+		std::cout << "_requestedFile = "" and returning" << std::endl;
 		this->_mimeType = "text/html";
-	
+		return; // needs to return because otherwise the substr(dotPos) was provoking a crash
+	} //KEEP
+
 	std::string	fullPath;
 	size_t 		dotPos = this->_requestedFile.find_last_of(".");
-	std::string	type = this->_requestedFile.substr(dotPos);
+	std::string	type = "";
+
+	if (dotPos != std::string::npos) {
+		type = this->_requestedFile.substr(dotPos);
+	}
 
 	fullPath = checkCwd();
 
@@ -163,7 +184,7 @@ void	Router::setDirForType()
 	if (type == ".png" || type == ".jpg" || type == ".jpeg")
 		fullPath += "/files" + this->_requestedPath;
 
-	
+
 
 	std::cout << "FullPath = " << fullPath << '\n';
 	this->_request->setPath(fullPath);

@@ -117,7 +117,7 @@ void	Response::handleGET()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "File type: " << fileType << std::endl;
+	std::cout << "Response File type: " << fileType << std::endl;
 	if (isCGI(uri))
 	{
 		// std::string exec_path = "./" + uri;
@@ -136,7 +136,7 @@ void	Response::handlePOST()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "File type: " << fileType << std::endl;
+	std::cout << "Response File type: " << fileType << std::endl;
 	if (isCGI(uri))
 	{
 		std::string exec_path = "./" + uri;
@@ -189,6 +189,7 @@ std::string Response::responseBuilder()
 
 	// if (this->_request->getPath() != "www/files/favicon.ico")
 	// 	std::cout << " --> Response:\n" << response << std::endl;
+	//std::cout << "Response body: "<< std::endl << this->_body << "-- End of body --"<<std::endl;
 	return (response);
 }
 
@@ -237,7 +238,6 @@ void	Response::bodyBuilder()
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	std::string body = buffer.str();
-	replaceAll(body, "{{UPLOAD_BLOCK}}", _request->getUploadDir()["location"]); // COMMENT FOR LATER: check if this works also for other than index.html or which other methods need to have this 
 	ss << body.size();
 
 	std::cout << "Bytes read: " << ss.str() << std::endl;
@@ -268,9 +268,10 @@ std::string Response::getMimeType(const std::string &path)
 
 bool Response::isUploadsDir(const std::string &path)
 {
-	//if (path.find("/uploads/") != std::string::npos) { return true; }
-	if (path == _request->getUploadDir()["root"]) //COMMENT FOR LATER: double check here if this works / or if it has to be compared to location only
+	if (path.find(_request->getUploadDir()["location"]) != std::string::npos) 
 		return true;
+	//if (path == _request->getUploadDir()["root"]) //COMMENT FOR LATER: double check here if this works / or if it has to be compared to location only
+		//return true;
 	return (false);
 }
 
@@ -316,11 +317,11 @@ void Response::POSTBodyBuilder()
 			handleERROR(400);
 			return;
 		}
-		std::string filename = extractFilenameFromPart(filePart);
-		std::string fileContent = extractFileContentFromPart(filePart);
+		std::string filename = getFilename(filePart);
+		std::string fileContent = getFileContent(filePart);
 
 		//std::string saveTo = "www/files/uploads/" + filename; // COMMENT FOR LATER: make folder dynamic according to config file 
-		std::string saveTo = _request->getUploadDir()["root"] + filename; 
+		std::string saveTo = _request->getUploadDir()["root"] + "/" + filename; 
 		std::ofstream outFile(saveTo.c_str(), std::ios::binary);
 		if (!outFile)
 		{
@@ -335,7 +336,7 @@ void Response::POSTBodyBuilder()
 		std::stringstream ss;
 		ss << "<html><body><h1>File uploaded successfully!</h1><p>Saved as: " << filename << "</p></body></html>";
 		this->_body = ss.str();
-		this->_headers["Content-Length"] = std::to_string(this->_body.size());
+		this->_headers["Content-Length"] = intToString(this->_body.size());
 	}
 	else 	// if not image, then handle how else
 		handleERROR(415);

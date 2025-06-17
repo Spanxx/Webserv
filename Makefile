@@ -23,7 +23,8 @@ SRCS = main.cpp \
 		src/Request.cpp src/RequestChecks.cpp src/RequestParsing.cpp\
 		src/Response.cpp \
 		src/CGI.cpp \
-		src/Utils.cpp
+		src/Utils.cpp \
+		src/Cluster.cpp
 
 OBJ = $(patsubst %.cpp, $(OBJDIR)/%.o, $(SRCS))
 

@@ -4,6 +4,7 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 std::string trim(const std::string &str);
 
@@ -22,7 +23,7 @@ bool isValidIP(std::string &host);
 bool safeAtoi(const std::string& str, int& result);
 
 std::vector<std::string> parseMultipartBody(std::string& body, const std::string& boundary);
-std::string extractFileContentFromPart(std::string& part);
-std::string extractFilenameFromPart(std::string& part);
+std::string getFileContent(std::string& part);
+std::string getFilename(std::string& part);
 
 #endif
