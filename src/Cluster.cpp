@@ -59,8 +59,10 @@ void Cluster::run()
 		int ret = poll(_pollfds.data(), _pollfds.size(), POLL_TIME_OUT);
 		if (ret < 0)
 		{
-			std::cerr << "Poll error " << std::endl;
-			continue;
+			if (errno == EINTR)
+				continue;
+			perror("poll");
+			break;
 		}
 		time_t now = time(NULL);
 		for (int i = _pollfds.size() - 1; i >= 0; --i)

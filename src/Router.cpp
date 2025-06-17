@@ -59,9 +59,17 @@ Router::~Router()
 
 std::string	Router::checkCwd()
 {
-	std::string cwd = getcwd(NULL, 0);
+	std::string cwd;
 	std::string path;
 
+	char* rawCwd = getcwd(NULL, 0);
+	if (rawCwd)
+	{
+		cwd = rawCwd;
+		free(rawCwd);
+	}
+	else{}
+		//TODO
 	if (cwd.find("/src") != std::string::npos)
 		path = "../www/" + this->_serverName;
 	else
