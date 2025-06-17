@@ -125,29 +125,28 @@ void	Router::findDirConfig()
 
 void	Router::checkForDirRequest()
 {
+	std::cout << "--->>>> " << this->_requestedPath << " is the requested path\n";
+	std::cout << "--->>>> " << this->_requestedFile << " is the requested file\n";
+	// Check if the requested path ends with a slash or if the requested file is empty
 	if ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/') || this->_requestedFile.empty())
 	{
 		std::cout << "Detected a directory request or missing file.\n";
 
 		if (_dirConfig["autoindex"] == "on")
 		{
-
-			std::cout << "Autoindex is on → setting CGI path for directory listing\n";
-			this->_request->setPath("www/" + _serverName + "/cgi-bin/autoindex.py");	// path to script for listing files in folder
-			this->_requestedFile = "autoindex.py";
-			if (this->_requestedPath == "/") // TODO Confirm if is the best way to do it?
-				this->_requestedPath = "/autoindex.py";
+			std::cout << "Autoindex is on → creating directory listing\n";
+			this->_request->setPath("www/autoindex.html");
+			this->_request->getDirectories("www/" + this->_requestedPath); // get directories in requested path
+			this->_requestedFile = "autoindex.html";
 		}
 		else
 		{
 			std::string indexFile = "index.html"; // make it dynamic?
-			std::string redirectPath = "www/" + _serverName + "/html/" + indexFile;
+			std::string redirectPath = "www/html/" + indexFile;
 
 			std::cout << "Directory request (autoindex: off) → redirect to " << redirectPath << "\n";
-			this->_request->setPath("www/" + _serverName + "/html/index.html");	//change it to index from serverblock
-			this->_requestedPath = "/" + indexFile;
-			this->_request->setPath(redirectPath);
-			this->_requestedFile = indexFile;
+			this->_request->setPath(redirectPath);	//change it to index from serverblock
+			this->_requestedPath = redirectPath;
 		}
 	}
 }

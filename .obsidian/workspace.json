@@ -13,12 +13,24 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Webserv_notes/To DOs.md",
+                "file": "Webserv_notes/03 - Steph/TODO.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "To DOs"
+              "title": "TODO"
+            }
+          },
+          {
+            "id": "c90af6e7662afb25",
+            "type": "leaf",
+            "state": {
+              "type": "pdf",
+              "state": {
+                "file": "Webserv_notes/04 - Files/webserv.subject.pdf"
+              },
+              "icon": "lucide-file-text",
+              "title": "webserv.subject"
             }
           }
         ]
@@ -171,37 +183,38 @@
   },
   "active": "a8a648abaced861c",
   "lastOpenFiles": [
-    "www/BackupServer/files/uploads/IMG_7409_1.jpg",
-    "www/BackupServer/files/uploads/IMG_7409.jpg",
-    "www/webserv42/files/uploads/IMG_7380.jpg",
-    "www/webserv42/files/uploads/IMG_7371.jpg",
-    "obj/src/ServerLoop-e066c816.o.tmp",
-    "www/webserv42/files/uploads/IMG_7409.jpg",
-    "obj/src/Router-48286cd4.o.tmp",
-    "obj/src/Router-b6d914b8.o.tmp",
-    "obj/src/Router.o",
-    "obj/src/Router-daa7569c.o.tmp",
-    "obj/src/Router-aa3be6e0.o.tmp",
-    "obj/src/Router-33016e01.o.tmp",
-    "obj/src/Router-99583fec.o.tmp",
-    "obj/src/Router-1d30b34e.o.tmp",
-    "obj/src/Router-f5cd18a0.o.tmp",
-    "www/BackupServer/files/uploads/IMG_7371.jpg",
-    "www/webserv42/files/uploads/IMG_2537 Medium.jpeg",
-    "www/webserv42/files/image.png",
+    "www/html/index.html",
+    "www/html/autoindex.html",
+    "www/html",
+    "obj/src/Router-aa86378b.o.tmp",
+    "obj/src/Router-8278e205.o.tmp",
+    "obj/src/RequestChecks-60d764b4.o.tmp",
+    "obj/src/Router-834af1de.o.tmp",
+    "Webserv_notes/04 - Files/webserv.subject.pdf",
+    "obj/src/RequestChecks-b8148a29.o.tmp",
+    "obj/src/Router-28a56648.o.tmp",
+    "obj/src/Router-ec1601a7.o.tmp",
+    "Webserv_notes/03 - Steph/TODO.md",
+    "Webserv_notes/To DOs.md",
+    "Webserv_notes/Subject summary and thoughts.md",
     "www/BackupServer/files/image.png",
+    "www/webserv42/files/image.png",
     "src/www/webserv42/files/uploads/Atlassian_logo_2.png",
     "src/www/webserv42/files/uploads/Atlassian_logo_1.png",
+    "src/www/webserv42/files/uploads/Atlassian_logo.png",
     "Webserv_notes/conflict-files-obsidian-git.md",
+    "Webserv_notes/03 - Steph/Delete notes/Sending DELETE request.md",
     "Webserv_notes/03 - Steph/Response notes/Some possible functions to use in the response.md",
     "Webserv_notes/03 - Steph/Response notes/HTTP responses.md",
-    "Webserv_notes/03 - Steph/Delete notes/Sending DELETE request.md",
-    "Webserv_notes/03 - Steph/TODO.md",
     "Webserv_notes/03 - Steph/Plan for location blocks.md",
     "Webserv_notes/03 - Steph/Links to check.md",
     "Webserv_notes/01 - Chris/Tester from 42 for webserv.md",
     "Webserv_notes/01 - Chris/NGINX.md",
-    "Webserv_notes/To DOs.md",
+    "www/files/image.png",
+    "www/BackupServer/files/uploads/IMG_7409_1.jpg",
+    "www/BackupServer/files/uploads/IMG_7409.jpg",
+    "www/webserv42/files/uploads/IMG_7380.jpg",
+    "www/webserv42/files/uploads/IMG_7371.jpg",
     "Webserv_notes/Obsidian Basics.md",
     "Webserv_notes/04 - Files/Excalidraw/Hello World!.md",
     "Webserv_notes/06 - Allowed functions/Explicitly named (C) functions.md",
@@ -215,7 +228,6 @@
     "Webserv_notes/01 - Chris/Basic planning.md",
     "Webserv_notes/🐙 02 - Henri/details.md",
     "Webserv_notes/🐙 02 - Henri/general research.md",
-    "Webserv_notes/01 - Chris/Testing Telnet & NGINX.md",
-    "Webserv_notes/01 - Chris/Sources i found but not checked.md"
+    "Webserv_notes/01 - Chris/Testing Telnet & NGINX.md"
   ]
 }

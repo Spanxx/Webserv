@@ -43,7 +43,7 @@ class Request
 		size_t getBodySize();
 		size_t getParsePos() const;
 		bool isChunked();
-
+		void getDirectories(const std::string& path);
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 

@@ -191,3 +191,32 @@ int	Request::checkRequestedFiletype()
 
 	return (0);
 }
+
+
+void Request::getDirectories(const std::string& path)
+{
+	std::vector<std::string> directories;
+	DIR *dir;
+	struct dirent *ent;
+
+	if ((dir = opendir(path.c_str())) != NULL)
+	{
+		std::cout << "Opening directory: " << path << std::endl;
+		while ((ent = readdir(dir)) != NULL)
+		{
+			// Check if it's a directory and not "." or ".."
+			if (ent->d_type == DT_DIR || ent->d_type == DT_REG)
+			{
+				if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0)
+					directories.push_back(ent->d_name);
+				std::cout << "Found directory or fyle: " << ent->d_name << std::endl;
+			}
+		}
+		closedir(dir);
+	} else {
+		std::cerr << "Could not open directory: " << path << std::endl;
+		this->_code = 500; // Internal Server Error
+		//return directories; // Return empty vector on error
+	}
+	//return directories;
+}
