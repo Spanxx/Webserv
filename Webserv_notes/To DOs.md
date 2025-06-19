@@ -42,4 +42,22 @@ Steph:
 - [ ] curl command in terminal: curl -X POST http://localhost:8080/html -F "file=@wetter.html" ouputs send error on fd x
 
 
+when get, and autoindex is off then show index from each directory
+- show path in html file (index.html)
+- does nginx this?
 
+```
+location = /files/ {
+methods = GET
+root = www/webserv42/files
+index = www/webserv42/files/index.html
+autoindex = off
+}
+```
+
+
+Memleak for cwd function
+
+Fehler error in send, server closes when get with curl
+
+Timeout if transfer is big...is child killed
