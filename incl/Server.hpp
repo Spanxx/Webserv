@@ -74,7 +74,7 @@ public:
 	void write_to_connection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds);
 	void close_erase(int fd);
 	void cleanupConnection(int fd);
-	void close_erase_fd(int fd, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
+	//void close_erase_fd(int fd, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
 	const std::vector<struct pollfd>& getpollFdArray() const;
 	const std::vector<int>& getServerSockets() const;
 

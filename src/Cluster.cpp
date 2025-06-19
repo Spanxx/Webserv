@@ -131,7 +131,7 @@ void Cluster::removeConnection(int fd)
 {
 	close(fd);
 	if (_fdToServerMap.count(fd))
-		_fdToServerMap[fd]->close_erase(fd);
+		_fdToServerMap[fd]->close_erase(fd); // Delete form _socketBuffers and _requestCollector
 
 	_fdToServerMap.erase(fd);
 	_responseCollector.erase(fd);

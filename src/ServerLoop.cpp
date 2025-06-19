@@ -146,21 +146,26 @@ void	Server::write_to_connection(std::map<int, std::string> &response_collector,
 
 void	Server::close_erase(int fd)
 {
-
 	if (isServerSocket(fd))
 		return;
 
 	_socketBuffers.erase(fd);
 
-	std::map<int, Request*>::iterator it = _requestCollector.find(fd);
-	if (it != _requestCollector.end())
+	std::map<int, Request*>::iterator it = _requestCollector.begin();
+	while(it != _requestCollector.end())
 	{
-		delete it->second;
-		_requestCollector.erase(it);
+		if (it->first == fd)
+		{
+			delete it->second; // Free Request object
+			it = _requestCollector.erase(it); // Remove from collector
+			break;
+		}
+		else
+			++it;
 	}
 }
 
-void Server::close_erase_fd(int fd,
+/*void Server::close_erase_fd(int fd,
 	std::map<int, std::string> &response_collector,
 	std::map<int, bool> &keepAlive,
 	std::vector<struct pollfd> &globalPollFds,
@@ -189,7 +194,7 @@ void Server::close_erase_fd(int fd,
 	lastActive.erase(fd);
 
 	std::cout << "[CLOSE] Closed client fd = " << fd << std::endl;
-}
+}*/
 
 void Server::initialize_request(int fd, const std::string &data, size_t header_end)
 {
