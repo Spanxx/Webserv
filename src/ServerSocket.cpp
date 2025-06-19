@@ -66,7 +66,7 @@ void	Server::storeServerConfig()
 		{
 			int size;
 			if (!safeAtoi(it->second, size) || size < 0)
-				throw ServerException("Max body size needs to be positive number");
+				throw ServerException("Max body size needs to be between 0 and INT MAX");
 			_maxBodySize = static_cast<size_t>(size);
 		}
 

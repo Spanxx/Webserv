@@ -38,7 +38,7 @@ Henri:
 - [ ] script types check 
 - [x] method check 
 - [ ] upload.py script checken wegen regex filename 
-- [ ] upload directory assignment with upload_dir 
+- [x] upload directory assignment with upload_dir 
 - [ ] implement default error page variable (config file name)
 - [ ] make checks ob permission ok ist fuer cgi script 
 

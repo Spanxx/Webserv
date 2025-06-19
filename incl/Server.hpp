@@ -112,6 +112,7 @@ private:
 	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 	// std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 	std::map<std::string, std::string>	_uploadDir;
+	std::string	_errorPage;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

@@ -109,12 +109,22 @@ void	Server::extractPorts()
 		{
 			int size;
 			if (!safeAtoi(it->second, size) || size < 0)
-				throw ServerException("Max body size needs to be positive number");
+				throw ServerException("Max body size needs to be between 0 and INT MAX");
 			_maxBodySize = static_cast<size_t>(size);
+		}
+		else if (it->first.find("errorPage") != std::string::npos)
+		{
+			_errorPage = it->second;
+			std::ifstream file(_errorPage);
+			if (!file.good())
+				throw ServerException("Error page file does not exist or is not readable");
+			
 		}
 		++it;
 	}
 
+	if (_errorPage.empty())
+		throw ServerException("Config file needs to specify an error page file");
 	this->_numPorts = portCounter;
 
 	std::vector<int>::iterator iPorts = this->_ports.begin();
@@ -327,25 +337,25 @@ void Server::assignUploadDir()
 {
 	for (std::map<std::string, std::map<std::string, std::string> >::iterator it = _locationBlocks.begin(); it != _locationBlocks.end(); ++it)
 	{
-		std::string location = it->first;
 
-		if (location == "/" || location == "/cgi-bin/" || location == "/files/" ||location.find("html") != std::string::npos)
-			continue;
-		bool allowPOST = checkPOST(it->second); //COMMENT FOR LATER: should we add more checks if the config block is ok?
-		if (allowPOST)
+		std::map<std::string, std::string>::iterator it_dir = it->second.find("upload_dir");
+		if (it_dir != it->second.end() && it_dir->second == "yes")
 		{
-			if (_uploadDir.empty() || location.find("upload") != std::string::npos)
+			if (_uploadDir.empty() )
 			{
-				_uploadDir["location"] = location;
-				_uploadDir["root"] = findRoot(it->second);
+				if (!checkPOST(it->second))
+					throw ServerException("Upload directory must allow POST method");
+				_uploadDir ["root"] = findRoot(it->second);
+				_uploadDir["location"] = it->first;
 				std::cout << "Assigned upload dir location: " << _uploadDir["location"] << std::endl;
-				if (location.find("upload") != std::string::npos)
-					return;
 			}
+			else
+				throw ServerException("Can only assign one upload dir");
+
 		}
 	}
 	if (_uploadDir.empty())
-		throw ServerException("Config file needs to assign uploads directory (required to allow POST method), cannot be root, files, cgi-bin or name containing html");
+		throw ServerException("Must assign one config file. Set in location block 'upload_dir = yes'");
 }
 
 bool Server::checkPOST(std::map<std::string, std::string> configblock)
