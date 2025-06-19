@@ -57,7 +57,7 @@ Server::~Server()
 void	Server::startListen(int socket)
 {
 	//start listening for incoming connections
-	if (listen(socket, 10) < 0)	// was 1, 10 is to test / amount of connections
+	if (listen(socket, 20) < 0)	// was 1, 10 is to test / amount of connections
 	{
 		throw ServerException("Listen failed!");
 	}

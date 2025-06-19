@@ -101,10 +101,7 @@ bool Server::readFromConnection(std::map<int, std::string> &response_collector, 
 	return true;
 }
 
-void	Server::write_to_connection(std::map<int, std::string> &response_collector,
-															int fd,
-															std::map<int, bool> &keepAlive,
-															std::vector<struct pollfd> &globalPollFds)
+int	Server::write_to_connection(std::map<int, std::string> &response_collector, int fd, std::vector<struct pollfd> &globalPollFds)
 {
 	std::string &resp = response_collector[fd];
 
@@ -113,35 +110,31 @@ void	Server::write_to_connection(std::map<int, std::string> &response_collector,
 	if (sent < 0)
 	{
 		std::cerr << "Send error on fd " << fd << std::endl;
-		close_erase(fd);
-		return;
+		// close_erase(fd);
+		return (SEND_ERROR);
 	}
 
 	if ((size_t)sent < resp.size())
 		resp = resp.substr(sent); // not all sent; store remainder
 	else
 	{
-		if (keepAlive[fd])
+		response_collector.erase(fd);
+		_socketBuffers[fd].clear(); // Optional: clear to prepare for pipelined request
+		_requestCollector.erase(fd);
+		// Switch to POLLIN
+		
+		// Switch fd back to POLLIN to receive more requests
+		for (size_t i = 0; i < globalPollFds.size(); ++i)
 		{
-			response_collector.erase(fd);
-			// Switch to POLLIN
-			_requestCollector.erase(fd);
-			_socketBuffers[fd].clear(); // Optional: clear to prepare for pipelined request
-
-			// Switch fd back to POLLIN to receive more requests
-			for (size_t i = 0; i < globalPollFds.size(); ++i)
+			if (globalPollFds[i].fd == fd)
 			{
-				if (globalPollFds[i].fd == fd)
-				{
-					globalPollFds[i].events = POLLIN;
-					std::cout << "Switched fd " << fd << " to POLLIN (keep-alive)\n";
-					break;
-				}
+				globalPollFds[i].events = POLLIN;
+				std::cout << "Switched fd " << fd << " to POLLIN\n";
+				return (SEND_COMPLETE);
 			}
 		}
-		else
-			close_erase(fd);
-    }
+	}
+	return (SEND_CONTINUE);
 }
 
 void	Server::close_erase(int fd)
@@ -157,7 +150,7 @@ void	Server::close_erase(int fd)
 		if (it->first == fd)
 		{
 			delete it->second; // Free Request object
-			it = _requestCollector.erase(it); // Remove from collector
+			_requestCollector.erase(it->first); // Remove from collector
 			break;
 		}
 		else
@@ -265,15 +258,15 @@ void Server::prepare_response(int fd, std::map<int, std::string> &response_colle
 	response_collector[fd] = response->process_request(fd);
 
 	// Switch to POLLOUT on this fd Hacerlo en cluster!!
-	for (size_t j = 0; j < _pollFdArray.size(); ++j)
-	{
-		if (_pollFdArray[j].fd == fd)
-		{
-			_pollFdArray[j].events = POLLOUT;
-			break;
-		}
-	}
-	std::cout << "Switched to POLLOUT for fd = " << fd << "\n";
+	// for (size_t j = 0; j < _pollFdArray.size(); ++j)
+	// {
+	// 	if (_pollFdArray[j].fd == fd)
+	// 	{
+	// 		_pollFdArray[j].events = POLLOUT;
+	// 		break;
+	// 	}
+	// }
+	// std::cout << "Switched to POLLOUT for fd = " << fd << "\n";
 
 	delete request;
 	delete response;

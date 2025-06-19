@@ -73,9 +73,11 @@ int 	Request::getContentLength() { return _content_length; }
 size_t Request::getParsePos() const { return _parse_pos; }
 bool 	Request::getConnection()
 {
-	if (_headers["Connection"] == "keep-alive")
-		return true;
-	return false;
+	// if (_headers["Connection"] == "keep-alive")
+		// return true;
+	if(_headers["Connection"] == "close")
+		return false;
+	return (true);
 }
 std::string Request::getHeader(const std::string &key)
 {

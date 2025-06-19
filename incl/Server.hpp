@@ -25,6 +25,9 @@
 extern volatile sig_atomic_t stopSignal;
 
 #define TIMEOUT_SEC 5 //timeout for CGI
+#define SEND_COMPLETE 1
+#define SEND_ERROR 2
+#define SEND_CONTINUE 3
 
 class Request;
 
@@ -71,7 +74,7 @@ public:
 	void initialize_request(int fd, const std::string &data, size_t header_end);
 	RequestState handleRequest(std::string &data, size_t header_end, std::map<int, bool> &keepAlive, int fd);
 	void prepare_response(int fd, std::map<int, std::string> &response_collector);
-	void write_to_connection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds);
+	int	 write_to_connection(std::map<int, std::string> &response_collector, int fd, std::vector<struct pollfd> &globalPollFds);
 	void close_erase(int fd);
 	void cleanupConnection(int fd);
 	//void close_erase_fd(int fd, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
