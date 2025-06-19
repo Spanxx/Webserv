@@ -262,14 +262,21 @@ void	Server::loadMimeTypes()
 {
 	std::string line;
 	std::string mimeConfig;
-	std::string cwd = getcwd(NULL, 0);
 	std::string fullPath;
+	std::string cwd;
+	char* rawCwd = getcwd(NULL, 0);
 
+	if (rawCwd)
+	{
+		cwd = rawCwd;
+		free(rawCwd);
+	}
+	else
+		throw ServerException("Loading mime.types failed!");
 	if (cwd.find("/src") == std::string::npos)
 		fullPath = "www/config/mime.types";
 	else
 		fullPath = "../www/config/mime.types";
-
 	std::ifstream file(fullPath.c_str());
 	if (!file)
 		throw ServerException("Loading mime.types failed!");
