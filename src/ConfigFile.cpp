@@ -108,8 +108,8 @@ void	Server::extractPorts()
 		else if (it->first.find("maxbodysize") != std::string::npos)
 		{
 			int size;
-			if (!safeAtoi(it->second, size) || size < 0 || size > 10485760)
-				throw ServerException("Max body size needs to be between 0 and 10MB");
+			if (!safeAtoi(it->second, size) || size < 0)
+				throw ServerException("Max body size needs to be positive number");
 			_maxBodySize = static_cast<size_t>(size);
 		}
 		++it;

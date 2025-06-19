@@ -22,6 +22,9 @@ Chris:
 - [x] create top map for the dir maps. with path as key and map as value == Should work, needs recheck tommorow
 - [ ] check autoindex, if on, provide a list with the files inside requested directory
 	- [ ] response with file links and code 301 for redirecting
+- [ ] router umbauen: if path is directory + method is POST, then it's correct (check what case is for DELETE) 
+- [ ] delete negative number check
+- [ ] check timeout conditions for big files (how it works with child killing)
 
 Henri:
 - [x] change host to iphost for config logic
@@ -34,6 +37,10 @@ Henri:
 - [x] separate css stylesheet test
 - [ ] script types check 
 - [x] method check 
+- [ ] upload.py script checken wegen regex filename 
+- [ ] upload directory assignment with upload_dir 
+- [ ] implement default error page variable (config file name)
+- [ ] make checks ob permission ok ist fuer cgi script 
 
 Steph:
 

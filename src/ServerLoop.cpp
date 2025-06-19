@@ -56,7 +56,7 @@ bool Server::readFromConnection(std::map<int, std::string> &response_collector, 
 		return false;
 	}
 
-	std::cout << "Read " << bytes_read << " bytes from fd " << fd << "\n";
+	//std::cout << "Read " << bytes_read << " bytes from fd " << fd << "\n";
 	_socketBuffers[fd].append(buffer, bytes_read);
 
 	std::string &data = _socketBuffers[fd];
@@ -110,9 +110,10 @@ void	Server::write_to_connection(std::map<int, std::string> &response_collector,
 
 	std::cout << "Writing response to fd " << fd << ": " << resp.size() << " bytes\n";
 	ssize_t sent = send(fd, resp.c_str(), resp.size(), 0);
-	if (sent < 0)
+	if (sent <= 0)
 	{
-		std::cerr << "Send error on fd " << fd << std::endl;
+		if (sent < 0)
+			std::cerr << "Send error on fd " << fd << std::endl;
 		close_erase(fd);
 		return;
 	}
@@ -224,7 +225,7 @@ if (_requestCollector.find(fd) == _requestCollector.end())
 		size_t total_required = header_end + 4 + content_length; // +4 for "\r\n\r\n"
 		if (data.size() < total_required)
 		{
-			std::cout << "Not enough data yet for fd " << fd << ", waiting for more...\n";
+			//std::cout << "Not enough data yet for fd " << fd << ", waiting for more...\n";
 			return REQUEST_INCOMPLETE; // Keep connection open, still waiting for data
 		}
 		std::string body_part;

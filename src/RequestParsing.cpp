@@ -70,8 +70,8 @@ int Request::split_headers(std::istringstream &rstream)
 		_headers[key] = value;
 		if (key == "Content-Length")
 		{
-			if (!safeAtoi(value, _content_length) || _content_length < 0 || _content_length > 11000000)
-				return (std::cout << "Content length should be between 0 and 11000000 bytes\n", 0);
+			if (!safeAtoi(value, _content_length) || _content_length < 0 || _content_length > INT_MAX)
+				return (std::cout << "Content length should be between 0 and INT MAX bytes\n", 0); // COMMENT FOR LATER: ADD EXCEPTION SO PROGRAM QUITS HERE 
 			std::cout << "Content-Length: " << _content_length << "*****" << std::endl;
 		}
 		if (key == "Transfer-Encoding" && value == "chunked")
