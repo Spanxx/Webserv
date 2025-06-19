@@ -1,6 +1,7 @@
 
 #include "../incl/Response.hpp"
 #include "../incl/Utils.hpp"
+#include "../incl/Libraries.hpp"
 
 Response::Response(Request *request, std::string &hostName): _request(request), _code(request->getCode())
 {
@@ -127,6 +128,19 @@ void	Response::handleGET()
 		std::cout << "QUERY STRING: " << query_string << std::endl;
 		cgiExecuter(exec_path, query_string);
 	}
+	else if (isAutoindex(uri))
+	{
+		std::string autoindexPath = uri.substr(0, uri.find("autoindex.html"));
+		std::cout << "Autoindex requested for: " << autoindexPath << std::endl;
+		std::vector<FileEntry> entries = getDirectoryEntries(autoindexPath);
+		if (entries.empty())
+		{
+			handleERROR(404);
+			return;
+		}
+		autoindexBuilder(autoindexPath, entries);
+		return;
+	}
 	else
 		bodyBuilder();
 }
@@ -150,26 +164,22 @@ void	Response::handlePOST()
 		// bodyBuilder();
 }
 
-void	Response::handleDELETE() //Pending handle the files with space in the name
+void	Response::handleDELETE()
 {
 	std::string uri = this->_request->getPath();
 	if (isUploadsDir(uri))
 	{
 		if (access(uri.c_str(), F_OK) != 0)
 		{
-			//this->setCode(404);
 			handleERROR(404);
 			return;
 		}
 		if (std::remove(uri.c_str()) != 0)
 		{
-			//this->setCode(500);
 			handleERROR(500);
 			return;
 		}
 		this->setCode(200);
-		// this->setCode(301);
-		// this->_request->setPath("/index.html");
 		this->_headers["Content-Length"] = "0";
 	}
 	else
@@ -189,7 +199,7 @@ std::string Response::responseBuilder()
 
 	// if (this->_request->getPath() != "www/files/favicon.ico")
 	// 	std::cout << " --> Response:\n" << response << std::endl;
-	//std::cout << "Response body: "<< std::endl << this->_body << "-- End of body --"<<std::endl;
+	//std::cout << "Response"<< std::endl << response << "-- End of response --"<<std::endl;
 	return (response);
 }
 
@@ -219,11 +229,8 @@ std::string	Response::headersBuilder()
 
 void	Response::bodyBuilder()
 {
-	std::string 		line;
-
 	std::string			path;
 	std::stringstream	ss;
-	//int					lineCount = 0;
 
 	path = this->_request->getPath();
 	std::cout << "Trying to open: " << path << '\n';
@@ -231,7 +238,6 @@ void	Response::bodyBuilder()
 	if (!file)
 	{
 		std::cerr << "Requested file open error!\n";
-		// setCode(404);
 		handleERROR(404);
 		return;
 	}
@@ -277,4 +283,110 @@ bool Response::isCGI(const std::string &path)
 	if (path.find("/cgi-bin/") != std::string::npos) { return true; }
 	if (path.find(".cgi") != std::string::npos) { return true; }		//this would allow to execute scripts which are not in the cgi/bin folder? Maybe we add both conditions in one if?
 	return (false);
+}
+
+std::string formatTime(std::time_t t)
+{
+	char buf[256];
+	std::tm* tm = std::localtime(&t);
+	if (tm)
+	{
+		std::strftime(buf, sizeof(buf), "%d-%b-%Y %H:%M", tm);
+		return std::string(buf);
+	}
+	return "-";
+}
+
+std::string formatSize(off_t size)
+{
+	char buf[32];
+
+	if (size < 1024)
+		std::snprintf(buf, sizeof(buf), "%ld B", static_cast<long>(size));
+	else if (size < 1024 * 1024)
+		std::snprintf(buf, sizeof(buf), "%.1f KB", size / 1024.0);
+	else
+		std::snprintf(buf, sizeof(buf), "%.1f MB", size / (1024.0 * 1024));
+	return std::string(buf);
+}
+
+bool Response::isAutoindex(const std::string &path)
+{
+	if (path.find("autoindex.html") != std::string::npos)
+		return true;
+	return false;
+}
+
+std::vector<FileEntry> Response::getDirectoryEntries(const std::string& path)
+{
+	std::vector<FileEntry> entries;
+	DIR *dir;
+	struct dirent *ent;
+
+	std::cout << "Getting directory entries for: " << path << std::endl;
+
+	if ((dir = opendir(path.c_str())) != NULL)
+	{
+		while ((ent = readdir(dir)) != NULL)
+		{
+			std::string name(ent->d_name);
+
+			if (name == "." || name == "..")
+				continue;
+			std::string full_path = path + "/" + name;
+			struct stat st;
+			if (stat(full_path.c_str(), &st) == -1)
+				continue;
+
+			FileEntry entry;
+			entry.name = name;
+			entry.is_directory = S_ISDIR(st.st_mode);
+			entry.last_modified = formatTime(st.st_mtime);
+			entry.size_str = entry.is_directory ? "-" : formatSize(st.st_size);
+
+			entries.push_back(entry);
+		}
+		closedir(dir);
+	}
+	else
+		std::cerr << "Could not open directory: " << path << std::endl;
+
+	return entries;
+}
+
+void		Response::autoindexBuilder(const std::string &path, const std::vector<FileEntry>& entries)
+{
+	std::ifstream file("www/autoindex/autoindex.html");
+	if (!file)
+	{
+		std::cerr << "Error opening autoindex template file\n";
+		handleERROR(500);
+		return;
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string html = buffer.str();
+	replaceAll(html, "{{path}}", path);
+
+	//std::cout << "For NOW" << html << std::endl;
+
+	std::string entries_html;
+	for (size_t i = 0; i <entries.size(); ++i)
+	{
+		entries_html += "<tr>";
+		entries_html += "<td><a href=\"" + entries[i].name + "\">" + entries[i].name + "</a></td>";
+		entries_html += "<td>" + entries[i].last_modified + "</td>";
+		entries_html += "<td>" + entries[i].size_str + "</td>";
+		entries_html += "</tr>\n";
+	}
+
+	replaceAll(html, "{{entries}}", entries_html);
+
+	std::stringstream ss;
+	ss << html.size();
+	this->_headers["Content-Length"] = ss.str();
+	this->_headers["Content-Type"] = "text/html";
+	this->_body = html;
+	this->_code = 200;
+	std::cout << "Autoindex built for path: " << path << std::endl;
 }

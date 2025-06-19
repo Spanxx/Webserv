@@ -33,8 +33,6 @@ class Response {
 		void		handlePOST();
 		void		handleDELETE();
 		void 		assign_status_phrase();
-		//std::string make_status_page_string();
-		//void make_status_page_string(unsigned int code);
 
 		void 		sendResponse(int client_fd);
 		void 		cgiExecuter(std::string path, const std::string &query);
@@ -42,6 +40,10 @@ class Response {
 		std::string getMimeType(const std::string &path);
 		bool 		isCGI(const std::string &path);
 		bool		isUploadsDir(const std::string &path);
+
+		bool		isAutoindex(const std::string &path);
+		void		autoindexBuilder(const std::string &path, const std::vector<FileEntry>& entries);
+		std::vector<FileEntry> getDirectoryEntries(const std::string& path);
 
 	private:
 		Request *_request;

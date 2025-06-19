@@ -11,14 +11,12 @@
             "id": "a8a648abaced861c",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "pdf",
               "state": {
-                "file": "Webserv_notes/03 - Steph/TODO.md",
-                "mode": "source",
-                "source": false
+                "file": "Webserv_notes/04 - Files/webserv.subject.pdf"
               },
-              "icon": "lucide-file",
-              "title": "TODO"
+              "icon": "lucide-file-text",
+              "title": "webserv.subject"
             }
           },
           {
@@ -183,34 +181,35 @@
   },
   "active": "a8a648abaced861c",
   "lastOpenFiles": [
-    "www/html/index.html",
-    "www/html/autoindex.html",
-    "www/html",
-    "obj/src/Router-aa86378b.o.tmp",
-    "obj/src/Router-8278e205.o.tmp",
-    "obj/src/RequestChecks-60d764b4.o.tmp",
-    "obj/src/Router-834af1de.o.tmp",
-    "Webserv_notes/04 - Files/webserv.subject.pdf",
-    "obj/src/RequestChecks-b8148a29.o.tmp",
-    "obj/src/Router-28a56648.o.tmp",
-    "obj/src/Router-ec1601a7.o.tmp",
-    "Webserv_notes/03 - Steph/TODO.md",
-    "Webserv_notes/To DOs.md",
-    "Webserv_notes/Subject summary and thoughts.md",
-    "www/BackupServer/files/image.png",
+    "obj/src/Router-0e9f9ca0.o.tmp",
+    "obj/src/Router-b96a270d.o.tmp",
+    "obj/src/Router-cf69ec2b.o.tmp",
+    "obj/src/Router-7a51e194.o.tmp",
+    "obj/src/Response-09bd028a.o.tmp",
+    "obj/src/Response-69e3c81b.o.tmp",
+    "obj/src/Response-15a7e682.o.tmp",
+    "obj/src/Response-9cd4fd98.o.tmp",
+    "obj/src/Response-17292f66.o.tmp",
+    "obj/src/Response-af71681b.o.tmp",
+    "obj/src/Response-a467c733.o.tmp",
     "www/webserv42/files/image.png",
+    "www/BackupServer/files/image.png",
     "src/www/webserv42/files/uploads/Atlassian_logo_2.png",
     "src/www/webserv42/files/uploads/Atlassian_logo_1.png",
     "src/www/webserv42/files/uploads/Atlassian_logo.png",
+    "Webserv_notes/🐙 02 - Henri/Package loss simulation test & Chunking.md",
     "Webserv_notes/conflict-files-obsidian-git.md",
-    "Webserv_notes/03 - Steph/Delete notes/Sending DELETE request.md",
+    "Webserv_notes/To DOs.md",
     "Webserv_notes/03 - Steph/Response notes/Some possible functions to use in the response.md",
     "Webserv_notes/03 - Steph/Response notes/HTTP responses.md",
+    "Webserv_notes/03 - Steph/Delete notes/Sending DELETE request.md",
+    "Webserv_notes/03 - Steph/TODO.md",
     "Webserv_notes/03 - Steph/Plan for location blocks.md",
     "Webserv_notes/03 - Steph/Links to check.md",
     "Webserv_notes/01 - Chris/Tester from 42 for webserv.md",
     "Webserv_notes/01 - Chris/NGINX.md",
     "www/files/image.png",
+    "Webserv_notes/Subject summary and thoughts.md",
     "www/BackupServer/files/uploads/IMG_7409_1.jpg",
     "www/BackupServer/files/uploads/IMG_7409.jpg",
     "www/webserv42/files/uploads/IMG_7380.jpg",
@@ -227,7 +226,6 @@
     "Webserv_notes/01 - Chris/Config File.md",
     "Webserv_notes/01 - Chris/Basic planning.md",
     "Webserv_notes/🐙 02 - Henri/details.md",
-    "Webserv_notes/🐙 02 - Henri/general research.md",
-    "Webserv_notes/01 - Chris/Testing Telnet & NGINX.md"
+    "Webserv_notes/🐙 02 - Henri/general research.md"
   ]
 }

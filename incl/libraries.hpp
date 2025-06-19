@@ -12,6 +12,7 @@
 #include <sstream>      // For string stream operations (e.g., std::stringstream)
 #include <csignal>      // For signal handling (e.g., signal, SIGINT)
 #include <cstring>      // For C-style string manipulation (e.g., memset)
+#include <cstdio>       // for snprintf
 
 // System-Specific Libraries
 #include <sys/stat.h>   // For file status and permissions (e.g., stat, mkdir)
@@ -38,4 +39,10 @@ enum RequestState {
 		REQUEST_ERROR_CLOSE_CONN    // Fatal error requiring immediate connection close
 	};
 
+	struct FileEntry {
+		std::string name;
+		bool is_directory;
+		std::string last_modified;
+		std::string size_str;
+	};
 #endif

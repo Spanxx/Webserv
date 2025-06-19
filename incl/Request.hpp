@@ -29,6 +29,7 @@ class Request
 		int		checkRequestedFiletype();
 
 		void	setCode(int code);
+		// void	setAutoindex(bool autoindex);
 		void	setPath(std::string path);
 		void	append_body(const std::string &body_part);
 		int getCode();
@@ -43,7 +44,6 @@ class Request
 		size_t getBodySize();
 		size_t getParsePos() const;
 		bool isChunked();
-		void getDirectories(const std::string& path);
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 
@@ -52,6 +52,7 @@ class Request
 		std::string 						_path;
 		std::string 						_query;
 		std::string 						_version;
+		// bool 									_autoindex;
 		std::map<std::string, std::string>	_headers;
 		int 								_content_length;
 		std::string 						_body;

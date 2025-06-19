@@ -134,19 +134,18 @@ void	Router::checkForDirRequest()
 
 		if (_dirConfig["autoindex"] == "on")
 		{
-			std::cout << "Autoindex is on → creating directory listing\n";
-			this->_request->setPath("www/autoindex.html");
-			this->_request->getDirectories("www/" + this->_requestedPath); // get directories in requested path
+			std::cout << "Autoindex is on → updating path to autoindex\n";
+			//this->_request->setAutoindex(true);
+			this->_request->setPath(this->_serverName + this->_requestedPath + "autoindex.html");
 			this->_requestedFile = "autoindex.html";
 		}
 		else
 		{
 			std::string indexFile = "index.html"; // make it dynamic?
-			std::string redirectPath = "www/html/" + indexFile;
 
-			std::cout << "Directory request (autoindex: off) → redirect to " << redirectPath << "\n";
-			this->_request->setPath(redirectPath);	//change it to index from serverblock
-			this->_requestedPath = redirectPath;
+			std::cout << "Directory request (autoindex: off) → redirect to index.html "  << "\n";
+			this->_requestedFile = indexFile; // set the requested file to index.html
+			this->_requestedPath = "/index.html"; //TODO: dynamic
 		}
 	}
 }
@@ -158,23 +157,29 @@ void	Router::checkDirPermission()
 
 void	Router::setDirForType()
 {
+	std::string	fullPath;
+	fullPath = checkCwd();
+
+	if (this->_requestedFile == "autoindex.html")
+	{
+		this->_request->setPath(fullPath + "/autoindex.html");
+		this->_mimeType = "text/html";
+		return;
+	}
+
 	if (this->_requestedFile == "") // TODO right code? should we do this check here or before?
 	{
 		this->_request->setCode(403);
-		std::cout << "_requestedFile = "" and returning" << std::endl;
 		this->_mimeType = "text/html";
 		return; // needs to return because otherwise the substr(dotPos) was provoking a crash
 	}
 
-	std::string	fullPath;
 	size_t 		dotPos = this->_requestedFile.find_last_of(".");
 	std::string	type = "";
 
 	if (dotPos != std::string::npos) {
 		type = this->_requestedFile.substr(dotPos);
 	}
-
-	fullPath = checkCwd();
 
 	if (type == ".html" && this->_requestedFile != "status_page.html")
 		fullPath += "/html" + this->_requestedPath;

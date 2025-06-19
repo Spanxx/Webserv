@@ -61,6 +61,7 @@ std::ostream &operator<<(std::ostream &os, Request &request)
 
 void 	Request::setCode(int code) { _code = code; }
 void	Request::setPath(std::string path) { this->_path = path; }
+// void	Request::setAutoindex(bool autoindex) {_autoindex = autoindex; };
 void	Request::append_body(const std::string &body_part) { _body += body_part; }
 
 int	Request::getCode() { return _code; }
