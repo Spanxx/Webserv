@@ -51,8 +51,6 @@ bool Server::readFromConnection(std::map<int, std::string> &response_collector, 
 			std::cerr << "[recv error] fd " << fd << "\n";
 		else
 			std::cout << "[client closed] fd " << fd << "\n";
-
-		close_erase(fd); // cleans buffers + requestCollector
 		return false;
 	}
 
@@ -62,8 +60,12 @@ bool Server::readFromConnection(std::map<int, std::string> &response_collector, 
 	std::string &data = _socketBuffers[fd];
 
 	size_t header_end = data.find("\r\n\r\n");
+
 	if (header_end == std::string::npos)
+	{
+		std::cout << "[Incomplete headers] Still waiting for \\r\\n\\r\\n\n";
 		return true; // Wait for more header data
+	}
 
 	// --- Initialize Request object if it's the first time ---
 	if (_requestCollector.find(fd) == _requestCollector.end())
@@ -87,7 +89,7 @@ bool Server::readFromConnection(std::map<int, std::string> &response_collector, 
 	_socketBuffers[fd] = data.substr(consumed); // remove consumed part
 
 	// --- Prepare response ---
-	prepare_response(fd, response_collector); // sets to POLLOUT
+	prepare_response(fd, response_collector);
 
 	// --- Switch to POLLOUT mode ---
 	for (size_t i = 0; i < globalPollFds.size(); ++i) {
@@ -122,7 +124,7 @@ int	Server::write_to_connection(std::map<int, std::string> &response_collector, 
 		_socketBuffers[fd].clear(); // Optional: clear to prepare for pipelined request
 		_requestCollector.erase(fd);
 		// Switch to POLLIN
-		
+
 		// Switch fd back to POLLIN to receive more requests
 		for (size_t i = 0; i < globalPollFds.size(); ++i)
 		{
@@ -157,37 +159,6 @@ void	Server::close_erase(int fd)
 			++it;
 	}
 }
-
-/*void Server::close_erase_fd(int fd,
-	std::map<int, std::string> &response_collector,
-	std::map<int, bool> &keepAlive,
-	std::vector<struct pollfd> &globalPollFds,
-	std::map<int, time_t> &lastActive)
-{
-	close(fd);
-	// Remove from _socketArray
-	for (std::vector<struct pollfd>::iterator it = _pollFdArray.begin(); it != _pollFdArray.end(); ++it)
-	{
-		if (it->fd == fd)
-		{
-			_pollFdArray.erase(it);
-			break;
-		}
-	}
-	for (std::vector<struct pollfd>::iterator it = globalPollFds.begin(); it != globalPollFds.end(); ++it)
-	{
-		if (it->fd == fd)
-		{
-			globalPollFds.erase(it);
-			break;
-		}
-	}
-	response_collector.erase(fd);
-	keepAlive.erase(fd);
-	lastActive.erase(fd);
-
-	std::cout << "[CLOSE] Closed client fd = " << fd << std::endl;
-}*/
 
 void Server::initialize_request(int fd, const std::string &data, size_t header_end)
 {
@@ -256,17 +227,6 @@ void Server::prepare_response(int fd, std::map<int, std::string> &response_colle
 	Response *response = new Response(request, this->_name);
 
 	response_collector[fd] = response->process_request(fd);
-
-	// Switch to POLLOUT on this fd Hacerlo en cluster!!
-	// for (size_t j = 0; j < _pollFdArray.size(); ++j)
-	// {
-	// 	if (_pollFdArray[j].fd == fd)
-	// 	{
-	// 		_pollFdArray[j].events = POLLOUT;
-	// 		break;
-	// 	}
-	// }
-	// std::cout << "Switched to POLLOUT for fd = " << fd << "\n";
 
 	delete request;
 	delete response;

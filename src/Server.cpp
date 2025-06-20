@@ -79,13 +79,6 @@ void Server::closeServer()
 	}
 }
 
-void Server::cleanupConnection(int fd)
-{
-	std::cout << "[Server Cleanup] Cleaning up internal state for fd " << fd << std::endl;
-	_socketBuffers.erase(fd);
-	_requestCollector.erase(fd);
-}
-
 const std::vector<struct pollfd>& Server::getpollFdArray() const { return this->_pollFdArray; }
 const std::vector<int>& Server::getServerSockets() const { return this->_serverSockets; }
 

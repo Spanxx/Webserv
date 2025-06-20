@@ -40,7 +40,6 @@ public:
 	~Server();
 
 	void	startListen(int socket);
-	void	serverLoop();
 	bool	isServerSocket(int fd);
 	void	sendResponse(int client_fd);
 	void	closeServer();
@@ -50,7 +49,6 @@ public:
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
 
 	void	createDirStructure();
-	// void	mkdir_p(const std::string fullPath, mode_t mode);
 	void	loadMimeTypes();
 
 	void	storeServerConfig();
@@ -76,8 +74,6 @@ public:
 	void prepare_response(int fd, std::map<int, std::string> &response_collector);
 	int	 write_to_connection(std::map<int, std::string> &response_collector, int fd, std::vector<struct pollfd> &globalPollFds);
 	void close_erase(int fd);
-	void cleanupConnection(int fd);
-	//void close_erase_fd(int fd, std::map<int, std::string> &response_collector, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds, std::map<int, time_t> &lastActive);
 	const std::vector<struct pollfd>& getpollFdArray() const;
 	const std::vector<int>& getServerSockets() const;
 
@@ -102,13 +98,10 @@ private:
 	std::vector<struct pollfd>								_pollFdArray; // (_socketArray) pollfd array of each server socket Maybe not necessary anymore
 
 	std::string																			_host;
-	std::map<int, time_t> 																_lastActive;
 	std::map<std::string, std::string>													_serverConfig;
 	std::map<std::string, std::string>													_dirConfig;
 	std::map<std::string, std::map<std::string, std::string> >							_locationBlocks;
 	std::map<std::string, std::string>													_mimetypeConfig;
-	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
-	// std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 
 	Server(Server &other);
 	Server& operator=(Server &other);
