@@ -28,7 +28,7 @@
 // Custom Header
 #include "Utils.hpp"    // Your custom utility header file
 
-#define POLL_TIME_OUT 500		// milliseconds
+#define POLL_TIME_OUT 100		// milliseconds
 #define CLIENT_TIMEOUT 10
 #define BUFFER_SIZE 1024
 

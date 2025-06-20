@@ -57,7 +57,7 @@ Server::~Server()
 void	Server::startListen(int socket)
 {
 	//start listening for incoming connections
-	if (listen(socket, 10) < 0)	// was 1, 10 is to test / amount of connections
+	if (listen(socket, 20) < 0)	// was 1, 10 is to test / amount of connections
 	{
 		throw ServerException("Listen failed!");
 	}
@@ -77,13 +77,6 @@ void Server::closeServer()
 		std::cout << "Closing socket fd " << _pollFdArray[i].fd <<std::endl;
 		close(_pollFdArray[i].fd);
 	}
-}
-
-void Server::cleanupConnection(int fd)
-{
-	std::cout << "[Server Cleanup] Cleaning up internal state for fd " << fd << std::endl;
-	_socketBuffers.erase(fd);
-	_requestCollector.erase(fd);
 }
 
 const std::vector<struct pollfd>& Server::getpollFdArray() const { return this->_pollFdArray; }
