@@ -108,7 +108,7 @@ bool isValidIP(const std::string &host)
 	if (parts.size() != 4)
 		return false;
 	//10.0.0.0 /8 and 172.0.0.0 /8 and 192.168.0.0 /16
-	if (parts[0] == 10 || parts[0] == 127 || (parts[0] == 192 && parts[1] == 168))
+	if (parts[0] == 10 || parts[0] == 127 || (parts[0] == 192 && parts[1] == 168) || host == "0.0.0.0")
 		return true;
 	return false;
 }

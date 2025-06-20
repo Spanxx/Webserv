@@ -59,8 +59,10 @@ void Cluster::run()
 		int ret = poll(_pollfds.data(), _pollfds.size(), POLL_TIME_OUT);
 		if (ret < 0)
 		{
-			std::cerr << "Poll error " << std::endl;
-			continue;
+			if (errno == EINTR)
+				continue;
+			perror("poll");
+			break;
 		}
 		time_t now = time(NULL);
 		for (int i = _pollfds.size() - 1; i >= 0; --i)
@@ -94,8 +96,11 @@ void Cluster::run()
 			}
 			else if (revents & POLLOUT)
 			{
-				server->write_to_connection(_responseCollector, fd, _keepAlive, _pollfds);
-				_lastActive[fd] = now;
+				int sendResult = server->write_to_connection(_responseCollector, fd, _pollfds);
+				if (sendResult == SEND_ERROR || (sendResult == SEND_COMPLETE && _keepAlive[fd] == false))
+					removeConnection(fd);
+				else
+					_lastActive[fd] = now;
 			}
 			else if (revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
@@ -128,8 +133,9 @@ void Cluster::handleNewConnection(int serverSocketFd, Server* server)
 void Cluster::removeConnection(int fd)
 {
 	close(fd);
+	std::cout << "Closing fd: " << fd << '\n';
 	if (_fdToServerMap.count(fd))
-		_fdToServerMap[fd]->close_erase(fd);
+		_fdToServerMap[fd]->close_erase(fd); // Delete form _socketBuffers and _requestCollector
 
 	_fdToServerMap.erase(fd);
 	_responseCollector.erase(fd);

@@ -148,6 +148,10 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		std::string contentLenSTR	= "CONTENT_LENGTH=" + _request->getHeader("Content-Length");
 		std::string uploadDirSTR	= "UPLOAD_DIR=" + _request->getUploadDir()["root"];
 		std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + _request->getUploadDir()["location"];
+		std::string redirectStatus	= "REDIRECT_STATUS=200";
+		std::string gatewayInterface	= "GATEWAY_INTERFACE=CGI/1.1";
+		std::string serverProtocol	= "SERVER_PROTOCOL=HTTP/1.1";
+		std::string scriptFilename	= "SCRIPT_FILENAME=" + path;
 
 		char *env[] = {
 			const_cast<char *>(methodSTR.c_str()),
@@ -156,6 +160,10 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			const_cast<char *>(contentLenSTR.c_str()),
 			const_cast<char *>(uploadDirSTR.c_str()),
 			const_cast<char *>(uploadBlockSTR.c_str()),
+			const_cast<char *>(redirectStatus.c_str()),
+			const_cast<char *>(gatewayInterface.c_str()),
+			const_cast<char *>(serverProtocol.c_str()),
+			const_cast<char *>(scriptFilename.c_str()),
 			NULL
 		};
 

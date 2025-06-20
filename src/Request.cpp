@@ -77,9 +77,11 @@ std::map<std::string, std::string> Request::getUploadDir() { return _uploadDir; 
 std::string Request::getErrorPage() { return _errorPage; };
 bool 	Request::getConnection()
 {
-	if (_headers["Connection"] == "keep-alive")
-		return true;
-	return false;
+	// if (_headers["Connection"] == "keep-alive")
+		// return true;
+	if(_headers["Connection"] == "close")
+		return false;
+	return (true);
 }
 std::string Request::getHeader(const std::string &key)
 {

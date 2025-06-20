@@ -1,7 +1,7 @@
 
 - [x] make logic work with many servers
  - [x] adjust config file --> Nginx reference
- - [ ] make routing to index dynamic, according to location block indeces
+ - [ ] make routing to index dynamic, according to location block indeces (+ root should route to server index?)
 - [ ] inside config file:
 	- [x] set up server names
 	- [x] set up routes with different configurations
@@ -41,6 +41,7 @@ Henri:
 - [x] implement default error page variable (config file name)
 - [x] make checks ob permission ok ist fuer cgi script 
 - [ ] make index dynamic inside upload script (after index has been passed as variable by Chris)
+- [ ] implement max height of uploaded images on index
 
 Steph:
 
