@@ -97,9 +97,7 @@ void Cluster::run()
 			else if (revents & POLLOUT)
 			{
 				int sendResult = server->write_to_connection(_responseCollector, fd, _pollfds);
-				if (sendResult == SEND_ERROR)
-					removeConnection(fd);
-				else if (sendResult == SEND_COMPLETE && _keepAlive[fd] == false)
+				if (sendResult == SEND_ERROR || (sendResult == SEND_COMPLETE && _keepAlive[fd] == false))
 					removeConnection(fd);
 				else
 					_lastActive[fd] = now;

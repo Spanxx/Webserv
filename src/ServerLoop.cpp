@@ -112,7 +112,6 @@ int	Server::write_to_connection(std::map<int, std::string> &response_collector, 
 	if (sent < 0)
 	{
 		std::cerr << "Send error on fd " << fd << std::endl;
-		// close_erase(fd);
 		return (SEND_ERROR);
 	}
 
