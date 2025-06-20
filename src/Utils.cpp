@@ -89,7 +89,7 @@ bool isValidHex(const std::string& str, int& value)
 	return !iss.fail() && iss.eof();
 }
 
-bool isValidIP(std::string &host)
+bool isValidIP(const std::string &host)
 {
 	std::istringstream iss(host);
 	std::string token;

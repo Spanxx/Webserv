@@ -1,7 +1,7 @@
 #include	"../incl/Server.hpp"
-#include	"../incl/Request.hpp"
-#include	"../incl/Response.hpp"
-#include	"../incl/Utils.hpp"
+//#include	"../incl/Request.hpp"
+//#include	"../incl/Response.hpp"
+//#include	"../incl/Utils.hpp"
 
 void	createConfigList(std::string configPath, std::vector<std::string> &configList)
 {
@@ -79,104 +79,6 @@ int	Server::checkConfigFile(std::ifstream &conFile)
 	return (0);
 }
 
-void	Server::extractPorts()
-{
-	int			port = 0;
-	int			portCounter = 0;
-	std::string item;
-
-	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-
-	if (!config)
-		throw ServerException("Extracting serverConfig map failed!");
-
-	std::map<std::string, std::string>::iterator it = config->begin();
-	while (it != config->end())
-	{
-		if (it->first.find("listen") != std::string::npos)
-		{
-			std::stringstream ss(it->second);
-
-			while (std::getline(ss, item, ','))
-			{
-				if (!safeAtoi(item, port) || port < 1024 || port > 65535) //below 1024 only with sudo rights
-					throw ServerException("Ports need to be between 1024 and 65535");
-				this->_ports.push_back(port);
-				++portCounter;
-			}
-		}
-		else if (it->first.find("maxbodysize") != std::string::npos)
-		{
-			int size;
-			if (!safeAtoi(it->second, size) || size < 0)
-				throw ServerException("Max body size needs to be between 0 and INT MAX");
-			_maxBodySize = static_cast<size_t>(size);
-		}
-		else if (it->first.find("errorPage") != std::string::npos)
-		{
-			_errorPage = it->second;
-			std::ifstream file(_errorPage);
-			if (!file.good())
-				throw ServerException("Error page file does not exist or is not readable");
-			
-		}
-		++it;
-	}
-
-	if (_errorPage.empty())
-		throw ServerException("Config file needs to specify an error page file");
-	this->_numPorts = portCounter;
-
-	std::vector<int>::iterator iPorts = this->_ports.begin();
-	while (iPorts != this->_ports.end())
-	{
-		//std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
-		++iPorts;
-	}
-}
-
-void	Server::extractHost()
-{
-	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-
-	if (!config)
-		throw ServerException("Extracting serverConfig map failed!");
-
-	std::map<std::string, std::string>::iterator it = config->find("host");
-	if (it != config->end())
-	{
-		if (!isValidIP(it->second))
-			throw ServerException("Host IP needs to be within a private or loopback range");
-		this->_IPHost = it->second;
-		std::cout << "Host: " << this->_IPHost << '\n';
-	}
-	else
-	{
-		std::cout << "No host in config file, default set to bind to any local address\n";
-		this->_IPHost = "0.0.0.0"; // bind to any local address
-	}
-}
-
-void	Server::extractName()
-{
-	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-
-	if (!config)
-		throw ServerException("Extracting serverConfig map failed!");
-
-	std::map<std::string, std::string>::iterator it = config->find("name");
-	if (it != config->end())
-	{
-		this->_name = it->second;
-		std::cout << "Server Name: " << this->_name << '\n';
-	}
-	else
-	{
-		std::cout << "No name in config file, default set to defaultServer!\n";
-		this->_name = "default_server"; // default server name
-	}
-}
-
 void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *host, std::string *locationPath)
 {
 	size_t		equalPos = trimmed.find("=");
@@ -224,7 +126,6 @@ int	handleLocationBlocks(bool *inBlock, std::string &trimmed)
 
 	return (0);
 }
-
 
 void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target)
 {
@@ -278,21 +179,6 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 	}
 }
 
-void Server::allowedMethods(std::string &trimmed)
-{
-	size_t pos = trimmed.find_last_of(" ");
-	if (pos != std::string::npos)
-	{
-		std::stringstream ss(trimmed.substr(pos + 1));
-		std::string item;
-		while (std::getline(ss, item, ','))
-		{
-			if (item != "POST" && item != "GET" && item != "DELETE")
-				throw ServerException("Only allowed methods are GET, POST, DELETE");
-		}
-	}
-}
-
 void	Server::loadMimeTypes()
 {
 	std::string line;
@@ -331,45 +217,4 @@ int	Server::createConfig(std::string &serverConfig)
 	this->extractConfigMap(serverConfig, _dirConfig, "location");
 	this->loadMimeTypes();
 	return (0);
-}
-
-void Server::assignUploadDir()
-{
-	for (std::map<std::string, std::map<std::string, std::string> >::iterator it = _locationBlocks.begin(); it != _locationBlocks.end(); ++it)
-	{
-
-		std::map<std::string, std::string>::iterator it_dir = it->second.find("upload_dir");
-		if (it_dir != it->second.end() && it_dir->second == "yes")
-		{
-			if (_uploadDir.empty() )
-			{
-				if (!checkPOST(it->second))
-					throw ServerException("Upload directory must allow POST method");
-				_uploadDir ["root"] = findRoot(it->second);
-				_uploadDir["location"] = it->first;
-				std::cout << "Assigned upload dir location: " << _uploadDir["location"] << std::endl;
-			}
-			else
-				throw ServerException("Can only assign one upload dir");
-
-		}
-	}
-	if (_uploadDir.empty())
-		throw ServerException("Must assign one config file. Set in location block 'upload_dir = yes'");
-}
-
-bool Server::checkPOST(std::map<std::string, std::string> configblock)
-{
-	std::map<std::string, std::string>::iterator it = configblock.find("methods");
-	if (it != configblock.end() && it->second.find("POST") != std::string::npos)
-		return true;
-	return false;
-}
-
-std::string Server::findRoot(std::map<std::string, std::string> configblock)
-{
-	std::map<std::string, std::string>::iterator it = configblock.find("root");
-	if (it != configblock.end())
-		return it->second;
-	return "";
 }

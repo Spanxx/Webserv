@@ -3,7 +3,7 @@
 #include "../incl/Utils.hpp"
 
 Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), _uploadDir(server->getUploadDir()), 
-	_server(server)
+	_errorPage(server->getErrorPage()), _server(server)
 {
 	std::cout << "Request constructed\n";
 }
@@ -74,6 +74,7 @@ std::string Request::getQuery() { return _query; }
 int 	Request::getContentLength() { return _content_length; }
 size_t Request::getParsePos() const { return _parse_pos; }
 std::map<std::string, std::string> Request::getUploadDir() { return _uploadDir; }
+std::string Request::getErrorPage() { return _errorPage; };
 bool 	Request::getConnection()
 {
 	if (_headers["Connection"] == "keep-alive")

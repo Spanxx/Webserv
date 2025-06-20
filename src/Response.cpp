@@ -57,9 +57,6 @@ std::string Response::process_request(int client_fd) // Every handler shoudl upd
 		handlePOST();
 	else if (_request->getMethod() == "DELETE")
 		handleDELETE();
-	else
-		this->handleERROR(405);
-
 	std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	return responseBuilder();
@@ -84,6 +81,7 @@ void Response::assign_status_phrase()
 			return;
 		}
 	}
+	file.close();
 	_status["phrase"] = "Not found";
 }
 
@@ -93,14 +91,15 @@ void	Response::handleERROR(int statusCode)
 	assign_status_phrase();
 	// read file into string
 
-	std::ifstream file("www/error/status_page.html");
-	if (!file)
+	std::ifstream file(_request->getErrorPage().c_str());
+	if (!file.is_open())
 	{
 		std::cerr << "Error opening status code file\n";
 		return;
 	}
  	std::stringstream buffer;
 	buffer  << file.rdbuf(); //rdbuf to read entire content of file stream into stringstream
+	file.close();
 	std::string html = buffer.str();
 
 	replaceAll(html, "{{CODE}}", _status["code"]);
@@ -108,6 +107,7 @@ void	Response::handleERROR(int statusCode)
 	std::stringstream ss;
 	ss << html.size();
 	this->_headers["Content-Length"] = ss.str();
+	this->_headers["Content-Type"] = "text/html";
 	this->_body = html;
 	//return html;
 }
@@ -238,6 +238,7 @@ void	Response::bodyBuilder()
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	std::string body = buffer.str();
+	replaceAll(body, "{{UPLOAD_BLOCK}}", _request->getUploadDir()["location"]);
 	ss << body.size();
 
 	std::cout << "Bytes read: " << ss.str() << std::endl;
@@ -320,7 +321,12 @@ void Response::POSTBodyBuilder()
 		std::string filename = getFilename(filePart);
 		std::string fileContent = getFileContent(filePart);
 
-		//std::string saveTo = "www/files/uploads/" + filename; // COMMENT FOR LATER: make folder dynamic according to config file 
+		if (filename.empty())
+		{
+			std::cout << "No file selected for upload\n";
+			handleERROR(400);
+			return;
+		}
 		std::string saveTo = _request->getUploadDir()["root"] + "/" + filename; 
 		std::ofstream outFile(saveTo.c_str(), std::ios::binary);
 		if (!outFile)
@@ -331,7 +337,6 @@ void Response::POSTBodyBuilder()
 		outFile.write(fileContent.data(), fileContent.size());
 		outFile.close();
 
-		// or make other response / reaction for succesful upload 
 		this->_headers["Content-Type"] = "text/html";
 		std::stringstream ss;
 		ss << "<html><body><h1>File uploaded successfully!</h1><p>Saved as: " << filename << "</p></body></html>";

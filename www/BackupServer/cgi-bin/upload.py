@@ -37,9 +37,7 @@ def main():
         upload_block = os.environ.get('UPLOAD_BLOCK', '')
         match = re.search(r'boundary=(.*)', content_type)
         if not match:
-            print("Content-Type: text/html\r\n")
-            print("<html><body><p>Error: Missing boundary in content type.</p></body></html>")
-            return
+            sys.exit(1)
 
         boundary = b'--' + match.group(1).encode()
         raw_data = sys.stdin.buffer.read(content_length)
@@ -64,12 +62,10 @@ def main():
             print("Content-Type: text/html\r\n")
             print(html_content)
         else:
-            print("Content-Type: text/html\r\n")
-            print("<html><body><p>Error: Failed to extract file content.</p></body></html>")
+            sys.exit(1)
 
     except Exception as e:
-        print("Content-Type: text/html\r\n")
-        print(f"<html><body><p>Exception occurred: {e}</p></body></html>")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

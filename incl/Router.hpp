@@ -24,6 +24,7 @@ public:
 	void		checkMethods();
 	std::string	checkCwd();
 
+
 private:
 	Server 														*_server;
 	Request 													*_request;

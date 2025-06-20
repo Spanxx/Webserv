@@ -1,6 +1,7 @@
 #include "../incl/Router.hpp"
 #include "../incl/Server.hpp"
 
+
 Router::Router(Server *server, Request *request) : _server(server), _request(request)
 {
 	std::cout << "Router created\n";
@@ -119,7 +120,7 @@ void	Router::findDirConfig()
 	if (it == this->_locationBlocks->end())
 	{
 		std::cout << "No locationblock for routing found!\n";
-		this->_request->setPath("www/" + _serverName + "/error/status_page.html");
+		this->_request->setPath("www/error/status_page.html");
 		this->_request->setCode(404);
 	}
 }
@@ -160,7 +161,7 @@ void	Router::checkDirPermission()
 
 void	Router::setDirForType()
 {
-	if (this->_requestedFile == "")
+	if (this->_requestedFile == "" && _request->getMethod() == "GET")
 	{
 		this->_request->setCode(403); // TODO
 		std::cout << "_requestedFile = "" and returning" << std::endl;
@@ -231,4 +232,5 @@ void	Router::checkMethods()
 		++it;
 	}
 }
+
 

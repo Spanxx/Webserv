@@ -61,10 +61,17 @@ public:
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
 	std::map<std::string, std::string> getUploadDir();
+	std::string getErrorPage();
+	void	checkScriptsExecutable();
 
-	void	extractPorts();
-	void	extractHost();
-	void	extractName();
+	void	extractVariables();
+	void	extractPorts(const std::string &ports);
+	void	extractHost(const std::string &host);
+	void	extractName(const std::string &name);
+	void	extractMaxBody(const std::string &maxbody);
+	void	extractErrorPage(const std::string &path);
+	void	checkCompletes();
+
 	int		createServerSocket(int port);
 
 

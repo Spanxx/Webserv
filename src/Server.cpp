@@ -10,9 +10,10 @@ Server::Server(std::string &serverConfig)
 	{
 		if (this->createConfig(serverConfig) == 1)
 			throw ServerException("Creating Config failed!");
-		this->extractName();
-		this->extractPorts();
-		this->extractHost();
+		this->extractVariables();
+		//this->extractName();
+		//this->extractPorts();
+		//this->extractHost();
 
 		this->storeServerConfig();
 		// this->createDirStructure();
@@ -35,6 +36,7 @@ Server::Server(std::string &serverConfig)
 			++it;
 		}
 		assignUploadDir();
+		checkScriptsExecutable();
 	}
 	catch (std::exception &e)
 	{
@@ -98,3 +100,4 @@ std::string	Server::getName() { return _name; }
 std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}
 
 std::map<std::string, std::string> Server::getUploadDir() { return _uploadDir; }
+std::string Server::getErrorPage() { return _errorPage; };

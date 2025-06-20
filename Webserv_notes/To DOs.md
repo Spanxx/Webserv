@@ -25,6 +25,7 @@ Chris:
 - [ ] router umbauen: if path is directory + method is POST, then it's correct (check what case is for DELETE) 
 - [ ] delete negative number check
 - [ ] check timeout conditions for big files (how it works with child killing)
+- [ ] make check for duplicate in host:port combination or port duplicates 
 
 Henri:
 - [x] change host to iphost for config logic
@@ -32,21 +33,19 @@ Henri:
 - [x] port range
 - [x] upload dir dynamic
 - [x] maxbodysize range check
-- [x] default 404 error page
 - [ ] query string? 
 - [x] separate css stylesheet test
 - [ ] script types check 
 - [x] method check 
-- [ ] upload.py script checken wegen regex filename 
 - [x] upload directory assignment with upload_dir 
-- [ ] implement default error page variable (config file name)
-- [ ] make checks ob permission ok ist fuer cgi script 
+- [x] implement default error page variable (config file name)
+- [x] make checks ob permission ok ist fuer cgi script 
+- [ ] make index dynamic inside upload script (after index has been passed as variable by Chris)
 
 Steph:
 
 
-(EDGE) CASES TO FIX:
-- [ ] curl command in terminal: curl -X POST http://localhost:8080/html -F "file=@wetter.html" ouputs send error on fd x
+
 
 
 

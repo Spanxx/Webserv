@@ -26,25 +26,25 @@ void	Server::checkPortDuplicates(int &port)
 	}
 }
 
-void	Server::extractPorts(std::map<std::string, std::string>::iterator &it)
-{
-	int			port = 0;
-	int			portCounter = 0;
-	std::string item;
-	std::string	trimmedItem;
+// void	Server::extractPorts(std::map<std::string, std::string>::iterator &it)
+// {
+// 	int			port = 0;
+// 	int			portCounter = 0;
+// 	std::string item;
+// 	std::string	trimmedItem;
 
-	std::istringstream iss(it->second);
-	while (getline(iss, item, ','))
-	{
-		trimmedItem = trim(item);
-		if (!safeAtoi(trimmedItem, port) || port < 1024 || port > 65535) //below 1024 only with sudo rights
-			throw ServerException("Ports need to be between 1024 and 65535");
-		checkPortDuplicates(port);
-		this->_ports.push_back(port);
-		++portCounter;
-	}
-	this->_numPorts = portCounter;
-}
+// 	std::istringstream iss(it->second);
+// 	while (getline(iss, item, ','))
+// 	{
+// 		trimmedItem = trim(item);
+// 		if (!safeAtoi(trimmedItem, port) || port < 1024 || port > 65535) //below 1024 only with sudo rights
+// 			throw ServerException("Ports need to be between 1024 and 65535");
+// 		checkPortDuplicates(port);
+// 		this->_ports.push_back(port);
+// 		++portCounter;
+// 	}
+// 	this->_numPorts = portCounter;
+// }
 
 void	Server::storeServerConfig()
 {
