@@ -56,7 +56,8 @@ void	Server::createDirStructure()
 
 	std::string cgiBin = serverPath + "/cgi-bin";
 	std::string error = serverPath + "/error";
-	std::string files = serverPath + "/files/uploads";
+	//std::string files = serverPath + "/files/uploads";
+	std::string files = _uploadDir["root"];
 	std::string html = serverPath + "/html";
 	
 	if (mkdir_p(cgiBin, 0755) == 1)

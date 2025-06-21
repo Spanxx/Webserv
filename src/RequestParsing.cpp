@@ -17,9 +17,11 @@ void	Request::check_headers(const std::string &headers_raw)
 			return;
 		}
 	}
+	
 	// make extra check for header too long for buffer --> code 431
 	// URI to long
 	_path = urlDecode(_path);
+	replaceAll(_path, "{{UPLOAD_BLOCK}}", _uploadDir["location"].substr(1));
 	if (_path.empty())
 	{
 		this->_code = 400;
@@ -38,7 +40,6 @@ void	Request::check_headers(const std::string &headers_raw)
 	// 	return ;
 
 	Router Router(this->_server, this);
-	//this->_code = 200;
 }
 
 int Request::split_headers(std::istringstream &rstream)
@@ -69,7 +70,8 @@ int Request::split_headers(std::istringstream &rstream)
 		_headers[key] = value;
 		if (key == "Content-Length")
 		{
-			_content_length = std::atoi(value.c_str());
+			if (!safeAtoi(value, _content_length) || _content_length < 0 || _content_length > INT_MAX)
+				return (std::cout << "Content length should be between 0 and INT MAX bytes\n", 0); // COMMENT FOR LATER: ADD EXCEPTION SO PROGRAM QUITS HERE 
 			std::cout << "Content-Length: " << _content_length << "*****" << std::endl;
 		}
 		if (key == "Transfer-Encoding" && value == "chunked")

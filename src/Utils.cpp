@@ -2,6 +2,11 @@
 #include "../incl/Utils.hpp"
 #include <cctype>  // for isxdigit
 #include <cstdio>  // for sscanf
+#include <cerrno>
+#include <climits>
+#include <iostream>
+#include <cstdlib>
+#include <vector>
 
 std::string trim(const std::string &str)
 {
@@ -19,15 +24,15 @@ const std::string intToString(int num)
 	return oss.str();
 }
 
-int strToInt(std::string &value)
-{
-	int	num = 0;
-	std::stringstream oss;
-	oss << value;
-	oss >> num;
+// int strToInt(std::string &value)
+// {
+// 	int	num = 0;
+// 	std::stringstream oss;
+// 	oss << value;
+// 	oss >> num;
 
-	return (num);
-}
+// 	return (num);
+// }
 
 void replaceAll(std::string &str, const std::string &placeholder, const std::string &goal)
 {
@@ -46,40 +51,140 @@ std::string urlDecode(const std::string &str)
 	size_t i = 0;
 	while (i < str.length())
 	{
-        	if (str[i] == '%')
-        	{
+		if (str[i] == '%')
+		{
 			if (i + 2 < str.length())
 			{
-                		std::string hex = str.substr(i + 1, 2);
-                		int val;
-                		if (is_valid_hex(hex, val))
-                		{
+				std::string hex = str.substr(i + 1, 2);
+				int val;
+				if (isValidHex(hex, val))
+				{
 					result += static_cast<char>(val);
-                			i += 3;
+					i += 3;
 				}
-            		}
-            		else
-            		{
-                		// malformed %
-                		result += str[i++];
+			}
+			else
+			{
+				// malformed %
+ 				result += str[i++];
 				return "";
-            		}
-        	}
-        	else if (str[i] == '+') // '+' in URL encoding means space, so convert it
-        	{
+			}
+		}
+		else if (str[i] == '+') // '+' in URL encoding means space, so convert it
+		{
 			result += ' ';
 			++i;
-        	}
-        	else
-        		result += str[i++]; // Normal character, just append
-    }
-    return result;
+		}
+		else
+			result += str[i++]; // Normal character, just append
+	}
+	return result;
 }
 
-bool is_valid_hex(const std::string& str, int& value)
+bool isValidHex(const std::string& str, int& value)
 {
 	std::istringstream iss(str);
 	iss >> std::hex >> value;
 
 	return !iss.fail() && iss.eof();
+}
+
+bool isValidIP(const std::string &host)
+{
+	std::istringstream iss(host);
+	std::string token;
+	std::vector<int> parts;
+
+	while (std::getline(iss, token, '.'))
+	{
+		int num;
+		if (!safeAtoi(token, num) || (num < 0 || num > 255))
+		{
+			
+			return false;
+		}
+		parts.push_back(num);
+	}
+	if (parts.size() != 4)
+		return false;
+	//10.0.0.0 /8 and 172.0.0.0 /8 and 192.168.0.0 /16
+	if (parts[0] == 10 || parts[0] == 127 || (parts[0] == 192 && parts[1] == 168) || host == "0.0.0.0")
+		return true;
+	return false;
+}
+
+bool safeAtoi(const std::string& str, int& result)
+{
+	errno = 0;
+	char* end;
+	long val = std::strtol(str.c_str(), &end, 10);
+
+	if (errno == ERANGE || val > INT_MAX || val < INT_MIN || *end != '\0')
+		return false;
+
+	result = static_cast<int>(val);
+	return true;
+}
+std::vector<std::string> parseMultipartBody(std::string& body, const std::string& boundary)
+{
+	std::vector<std::string> parts;
+	std::string delimiter = "--" + boundary;
+	size_t start = 0;
+	while (true)
+	{
+		size_t pos = body.find(delimiter, start);
+		if (pos == std::string::npos)
+			break;
+		pos += delimiter.size();
+		// Skip trailing CRLF after boundary
+		if (body.compare(pos, 2, "\r\n") == 0)
+			pos += 2;
+
+		// Find next boundary
+		size_t nextPos = body.find(delimiter, pos);
+		if (nextPos == std::string::npos)
+			break;
+
+		std::string part = body.substr(pos, nextPos - pos);
+		parts.push_back(part);
+		start = nextPos;
+	}
+	return parts;
+}
+
+// Extract filename from Content-Disposition header of a part
+std::string getFilename(std::string& part)
+{
+	std::istringstream stream(part);
+	std::string line;
+	while (std::getline(stream, line) && line != "\r")
+	{
+		// Normalize line endings
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
+
+		std::string headerName = "Content-Disposition:";
+		if (line.compare(0, headerName.size(), headerName) == 0)
+		{
+			// look for filename="..."
+			size_t filenamePos = line.find("filename=\"");
+			if (filenamePos != std::string::npos)
+			{
+				filenamePos += 10; // length of 'filename="'
+				size_t endPos = line.find("\"", filenamePos);
+				if (endPos != std::string::npos)
+					return line.substr(filenamePos, endPos - filenamePos);
+			}
+		}
+	}
+	return "";
+}
+
+// Extract file content from part (after headers and blank line)
+std::string getFileContent(std::string& part)
+{
+	size_t headerEnd = part.find("\r\n\r\n");
+	if (headerEnd == std::string::npos)
+		return "";
+	return part.substr(headerEnd + 4); // +4 to skip \r\n\r\n
 }

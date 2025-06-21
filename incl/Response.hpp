@@ -27,6 +27,7 @@ class Response {
 		std::string responseBuilder();
 		std::string	headersBuilder();
 		void		bodyBuilder();
+		void		POSTBodyBuilder();
 
 		void		handleERROR(int statusCode);
 		void		handleGET();

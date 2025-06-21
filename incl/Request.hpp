@@ -40,6 +40,8 @@ class Request
 		bool getConnection();
 		std::string getHeader(const std::string &key);
 		int getContentLength();
+		std::map<std::string, std::string> getUploadDir();
+		std::string getErrorPage();
 		size_t getBodySize();
 		size_t getParsePos() const;
 		bool isChunked();
@@ -58,6 +60,8 @@ class Request
 		int 								_code;
 		bool 								_chunked;
 		size_t 								_parse_pos;
+		std::map<std::string, std::string>	_uploadDir;
+		std::string	_errorPage;
 		Server 								*_server;
 };
 

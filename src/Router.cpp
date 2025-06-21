@@ -1,6 +1,7 @@
 #include "../incl/Router.hpp"
 #include "../incl/Server.hpp"
 
+
 Router::Router(Server *server, Request *request) : _server(server), _request(request)
 {
 	std::cout << "Router created\n";
@@ -17,6 +18,7 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	handleFavicon();
 	// handleAutoIndex();
 	// handleRedir();
+	checkMethods();
 }
 
 Router::Router(Router &other)
@@ -126,21 +128,21 @@ void	Router::findDirConfig()
 	if (it == this->_locationBlocks->end())
 	{
 		std::cout << "No locationblock for routing found!\n";
-		this->_request->setPath("www/" + _serverName + "/error/status_page.html");
+		this->_request->setPath("www/error/status_page.html");
 		this->_request->setCode(404);
 	}
 }
 
 void	Router::checkForDirRequest()
 {
-	if ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/') || this->_requestedFile.empty())
+	if (_request->getMethod() == "GET" && ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/') || this->_requestedFile.empty()))
 	{
 		std::cout << "Detected a directory request or missing file.\n";
 
 		if (_dirConfig["autoindex"] == "on")
 		{
 
-			std::cout << "Autoindex is on → setting CGI path for directory listing\n";
+			std::cout << "Autoindex for directory " << _requestedPath << " is on → setting CGI path for directory listing\n";
 			this->_request->setPath("www/" + _serverName + "/cgi-bin/autoindex.py");	// path to script for listing files in folder
 			this->_requestedFile = "autoindex.py";
 			if (this->_requestedPath == "/") // TODO Confirm if is the best way to do it?
@@ -167,7 +169,7 @@ void	Router::checkDirPermission()
 
 void	Router::setDirForType()
 {
-	if (this->_requestedFile == "")
+	if (this->_requestedFile == "" && _request->getMethod() == "GET")
 	{
 		this->_request->setCode(403); // TODO
 		std::cout << "_requestedFile = "" and returning" << std::endl;
@@ -185,9 +187,9 @@ void	Router::setDirForType()
 
 	fullPath = checkCwd();
 
-	if (type == ".html" && this->_requestedFile != "status_page.html")
+	if ((type == ".html" || type == ".css") && this->_requestedFile != "status_page.html")
 		fullPath += "/html" + this->_requestedPath;
-	if (type == ".py" || type == ".php")
+	if (type == ".py" || type == ".php" || type == ".js")
 		fullPath += "/cgi-bin" + this->_requestedPath;
 	if (type == ".png" || type == ".jpg" || type == ".jpeg")
 		fullPath += "/files" + this->_requestedPath;
@@ -219,5 +221,24 @@ void	Router::handleAutoIndex()
 
 }
 
+void	Router::checkMethods()
+{
+	std::map<std::string, std::map<std::string, std::string> >::iterator it = this->_locationBlocks->begin();
+
+	while (it != this->_locationBlocks->end())
+	{
+		if (this->_extractedPath == it->first)
+		{
+			std::map<std::string, std::string>::iterator it_conf = it->second.find("methods");
+			if (it_conf != it->second.end())
+			{
+				if (it_conf->second.find(_request->getMethod()) == std::string::npos)
+					this->_request->setCode(405);
+				return ;
+			}
+		}
+		++it;
+	}
+}
 
 

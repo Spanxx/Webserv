@@ -1,6 +1,7 @@
 #include	"../incl/Server.hpp"
-#include	"../incl/Request.hpp"
-#include	"../incl/Response.hpp"
+//#include	"../incl/Request.hpp"
+//#include	"../incl/Response.hpp"
+//#include	"../incl/Utils.hpp"
 
 void	createConfigList(std::string configPath, std::vector<std::string> &configList)
 {
@@ -78,87 +79,7 @@ int	Server::checkConfigFile(std::ifstream &conFile)
 	return (0);
 }
 
-void	Server::extractPorts()
-{
-	int			port = 0;
-	int			portCounter = 0;
-	std::string item;
-
-	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-
-	if (!config)
-		throw ServerException("Extracting serverConfig map failed!");
-
-	std::map<std::string, std::string>::iterator it = config->begin();
-	while (it != config->end())
-	{
-		if (it->first.find("listen") != std::string::npos)
-		{
-			std::stringstream ss(it->second);
-
-			while (std::getline(ss, item, ','))
-			{
-				port = strToInt(item);
-				this->_ports.push_back(port);
-				++portCounter;
-			}
-		}
-		if (it->first.find("maxbodysize") != std::string::npos)
-			_maxBodySize = atoi(it->second.c_str());
-		++it;
-	}
-
-	this->_numPorts = portCounter;
-
-	std::vector<int>::iterator iPorts = this->_ports.begin();
-	while (iPorts != this->_ports.end())
-	{
-		//std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
-		++iPorts;
-	}
-}
-
-void	Server::extractHost()
-{
-	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-
-	if (!config)
-		throw ServerException("Extracting serverConfig map failed!");
-
-	std::map<std::string, std::string>::iterator it = config->find("host");
-	if (it != config->end())
-	{
-		this->_IPHost = it->second;
-		std::cout << "Host: " << this->_IPHost << '\n';
-	}
-	else
-	{
-		std::cout << "No host in config file, default set to bind to any local address\n";
-		this->_IPHost = "0.0.0.0"; // bind to any local address
-	}
-}
-
-void	Server::extractName()
-{
-	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-
-	if (!config)
-		throw ServerException("Extracting serverConfig map failed!");
-
-	std::map<std::string, std::string>::iterator it = config->find("name");
-	if (it != config->end())
-	{
-		this->_name = it->second;
-		std::cout << "Server Name: " << this->_name << '\n';
-	}
-	else
-	{
-		std::cout << "No name in config file, default set to defaultServer!\n";
-		this->_name = "default_server"; // default server name
-	}
-}
-
-void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *_host, std::string *locationPath)
+void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *host, std::string *locationPath)
 {
 	size_t		equalPos = trimmed.find("=");
 
@@ -170,7 +91,7 @@ void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &
 		value = trim(value);
 
 		if (key == "host" && value != "")
-			*_host = value;
+			*host = value;
 		if (key == "location" && value != "")
 			*locationPath = value;
 
@@ -206,7 +127,6 @@ int	handleLocationBlocks(bool *inBlock, std::string &trimmed)
 	return (0);
 }
 
-
 void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target)
 {
 	std::string	line;
@@ -228,7 +148,7 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 			{
 				if (trimmed.find_first_of('{') != std::string::npos)
 					trimmed.erase(trimmed.find_first_of('{'));	//remove curly bracket at end of location
-				saveKeyValuePair(trimmed, targetMap, &this->_host, &locationPath);		//save location
+				saveKeyValuePair(trimmed, targetMap, &this->_IPHost, &locationPath);		//save location
 			}
 
 			while (getline(iss, line))
@@ -247,11 +167,12 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 						break;
 					}
 				}
-
+				if (trimmed.find("methods") != std::string::npos)
+					allowedMethods(trimmed);
 				if (handleLocationBlocks(&inBlock, trimmed) == 1)
 					continue;
 
-				saveKeyValuePair(trimmed, targetMap, &this->_host, &locationPath);
+				saveKeyValuePair(trimmed, targetMap, &this->_IPHost, &locationPath);
 			}
 
 		}
