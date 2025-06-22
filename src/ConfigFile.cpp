@@ -1,7 +1,5 @@
 #include	"../incl/Server.hpp"
-//#include	"../incl/Request.hpp"
-//#include	"../incl/Response.hpp"
-//#include	"../incl/Utils.hpp"
+#include	"../incl/Libraries.hpp"
 
 void	createConfigList(std::string configPath, std::vector<std::string> &configList)
 {
@@ -50,33 +48,6 @@ std::map<std::string, std::string>* Server::getConfigMap(const std::string &conf
 		return(&this->_mimetypeConfig);
 
 	return (NULL);
-}
-
-int	Server::checkConfigFile(std::ifstream &conFile)
-{
-	std::string	line;
-	while(std::getline(conFile, line))
-	{
-		for(int i = 0; line[i] != '\n' && line[i]; ++i)
-		{
-			if (line[0] == '#')
-				break ;
-			if (line[i] == 32)	//space
-			{
-				std::cerr << "Error: Forbidden char <space> found in config file!\n";
-				return (1);
-			}
-			if (line[i] == '=' && line[i + 1] == '-')	//negative value found //  must be changed for new version 111,222,333
-			{
-				std::cerr << "Error: Non-positive value found in config file!\n";
-				return (1);
-			}
-		}
-		// maybe add more checks?
-	}
-	conFile.clear();                // Clear any error flags
-	conFile.seekg(0, std::ios::beg); // Go back to the beginning
-	return (0);
 }
 
 void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *host, std::string *locationPath)

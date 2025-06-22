@@ -86,7 +86,7 @@ Server::ServerException::ServerException(const std::string &error) : std::runtim
 
 std::string	Server::getName() { return _name; }
 
-std::string Server::getRoot() { return _root;}
+std::string Server::getRoot() { return _serverRoot;}
 
 size_t	Server::getMaxBodySize() { return _maxBodySize; }
 

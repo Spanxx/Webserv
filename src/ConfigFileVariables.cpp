@@ -90,7 +90,7 @@ void	Server::extractRoot(const std::string &root)
 	if (root.find(this->_name) == std::string::npos)
 		throw ServerException("Root path usage: www/<ServerName>\n");
 	
-	this->_root = root;
+	this->_serverRoot = root;
 }
 
 void	Server::checkCompletes()

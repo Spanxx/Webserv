@@ -44,13 +44,12 @@ public:
 	void	sendResponse(int client_fd);
 	void	closeServer();
 
+	// Handle Config file
 	int		createConfig(std::string &serverConfig);
-	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
 	void	allowedMethods(std::string &trimmed);
 	void	createDirStructure();
 	void	loadMimeTypes();
-
 	void	storeServerConfig();
 	void	extractPorts(std::map<std::string, std::string>::iterator &it);
 	void	checkPortDuplicates(int &port);
@@ -91,9 +90,9 @@ public:
 	size_t														getMaxBodySize();
 	std::string													getName();
 	std::map<std::string, std::map<std::string, std::string> >*	getLocationBlocks();
-	void assignUploadDir();
-	bool checkPOST(std::map<std::string, std::string> configblock);
-	std::string findRoot(std::map<std::string, std::string> configblock);
+	void														assignUploadDir();
+	bool														checkPOST(std::map<std::string, std::string> configblock);
+	std::string													findRoot(std::map<std::string, std::string> configblock);
 
 	class ServerException : public std::runtime_error {
 	public:
@@ -105,7 +104,7 @@ private:
 	std::vector<int>																	_ports;
 	std::string 																		_name;
 	std::string																			_IPHost;
-	std::string																			_root;
+	std::string																			_serverRoot;
 	size_t																				_maxBodySize;
 	short																				_limitRequestLine;
 	std::string																			_errorPage;
