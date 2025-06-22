@@ -1,6 +1,7 @@
 #include "../incl/Router.hpp"
 #include "../incl/Server.hpp"
 #include "../incl/Libraries.hpp"
+#include "../incl/Utils.hpp"
 
 
 Router::Router(Server *server, Request *request) : _server(server), _request(request)
@@ -11,14 +12,12 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	this->_serverName = this->_server->getName();
 	this->_locationBlocks = this->_server->getLocationBlocks();
 
-	extractPathAndFile();
+	extractPath();
+	extractFile();
 	findDirConfig();
-	// checkDirPermission();
 	checkForDirRequest();
 	setDirForType();
 	handleFavicon();
-	// handleAutoIndex();
-	// handleRedir();
 	checkMethods();
 }
 
@@ -60,33 +59,49 @@ Router::~Router()
 	std::cout << "Router deconstructed\n";
 }
 
-void	Router::extractPathAndFile()
+void	Router::extractPath()
 {
 	std::cout << "Requested Path: " << this->_requestedPath << '\n';
 	// "/index.html"
 
+	int 		lastSlashPos = -1;
+
+	lastSlashPos = this->_requestedPath.find_last_of('/');
+	if (lastSlashPos == -1)
+	{
+		std::cout << "Invalid Request (no slash)!\n";
+		this->_request->setCode(404);
+		return ;
+	}
+
+	this->_extractedPath = this->_requestedPath.substr(0, lastSlashPos + 1);
+}
+
+void	Router::extractFile()
+{
 	int 		dotPos 		= -1;
 	int 		lastSlashPos = -1;
-	std::string	newPath;
+	std::map<std::string, std::string> uploadLocationBlock = this->_server->getUploadDir();
+
+	std::string uploadDir = uploadLocationBlock["location"];
+	int start = uploadDir.find_first_of("/");
+	int end = uploadDir.find_last_of("/");
+
+	uploadDir = uploadDir.substr(start + 1, end - 1);
 
 	dotPos = this->_requestedPath.find_last_of('.');
 	lastSlashPos = this->_requestedPath.find_last_of('/');
 
-	if (lastSlashPos == -1)
+
+	this->_requestedFile = this->_requestedPath.substr(lastSlashPos + 1);
+	//check if directory was set to requested file
+	if (dotPos == -1)
 	{
-		std::cout << "Invalid Request (no slash), redirect to index.html\n";
-
-		this->_request->setCode(404);
-
-		dotPos = this->_requestedPath.find_last_of('.');
-		lastSlashPos = this->_requestedPath.find_last_of('/');
-	}
-
-	this->_extractedPath = this->_requestedPath.substr(0, lastSlashPos + 1);
-
-	if (dotPos != -1)
-	{
-		this->_requestedFile = this->_requestedPath.substr(lastSlashPos + 1);
+		if (this->_requestedFile == "files" || this->_requestedFile == "cgi-bin"
+			|| this->_requestedFile == "html" || this->_requestedFile == uploadDir)
+		{
+			this->_requestedFile = "";
+		}
 	}
 }
 
@@ -98,6 +113,7 @@ void	Router::findDirConfig()
 	{
 		if (this->_extractedPath == it->first)
 		{
+			_dirConfig.clear();
 			_dirConfig = it->second;
 			std::cout << "Locationblock for routing found!\n";
 			return ;
@@ -121,9 +137,8 @@ void	Router::checkForDirRequest()
 
 		if (_dirConfig["autoindex"] == "on")
 		{
-
 			std::cout << "Autoindex for directory " << _requestedPath << " is on → setting CGI path for directory listing\n";
-			this->_request->setPath("www/" + _serverName + "/cgi-bin/autoindex.py");	// path to script for listing files in folder
+			this->_request->setPath(this->_server->getRoot() + "/cgi-bin/autoindex.py");	// path to script for listing files in folder
 			this->_requestedFile = "autoindex.py";
 			if (this->_requestedPath == "/") // TODO Confirm if is the best way to do it?
 				this->_requestedPath = "/autoindex.py";
@@ -131,61 +146,113 @@ void	Router::checkForDirRequest()
 		else
 		{
 			std::string indexFile = "index.html"; // make it dynamic?
-			std::string redirectPath = "www/" + _serverName + "/html/" + indexFile;
+			std::string redirectPath = this->_server->getRoot() + "/html/" + indexFile;
 
 			std::cout << "Directory request (autoindex: off) → redirect to " << redirectPath << "\n";
-			this->_request->setPath("www/" + _serverName + "/html/index.html");	//change it to index from serverblock
+			this->_request->setPath(redirectPath);	//change it to index from serverblock (for redirect Path)
 			this->_requestedPath = "/" + indexFile;
-			this->_request->setPath(redirectPath);
 			this->_requestedFile = indexFile;
 		}
 	}
 }
 
-void	Router::checkDirPermission()
+void	Router::assignFileWithExtension(std::string &type)
 {
+	std::string	serverRoot = this->_server->getRoot();
+	std::string	fullPath = checkCwd(serverRoot, false);
+	
+	std::map<std::string, std::string> *config =  this->_server->getConfigMap("typeDirConfig");
+	std::map<std::string, std::string>::iterator it = config->begin();
 
+	while (it != config->end())
+	{
+		if (type == it->first)
+		{
+			if (it->second == "/files/")
+			{
+				std::map<std::string, std::string> uploadDir = this->_server->getUploadDir();
+				fullPath = uploadDir["root"] + "/" + this->_requestedFile;
+				std::cout << "Filetype found, redirects to: " << fullPath << '\n';
+			}
+			else
+				fullPath += it->second + this->_requestedFile;
+			
+			std::cout << "Filetype found, redirects to: " << fullPath << '\n';
+			this->_request->setPath(fullPath);
+			return ;
+		}
+		++it;
+	}
+	if (it == config->end())
+		this->_request->setCode(405);
+}
+
+std::string	checkMultiDeclaration(std::string &type)
+{
+	int			spacePos = 0;
+	std::string	value;
+	std::string trimmed = trim(type);
+
+	spacePos = trimmed.find_first_of(" ");
+	
+	if (spacePos > 0)
+		value = trimmed.substr(0, spacePos);
+	else
+		value = trimmed;
+	
+	return (value);
+}
+
+void	Router::assignFileWithoutExtension()
+{
+	std::string type = ".";
+	
+	std::map<std::string, std::string> *config =  this->_server->getConfigMap("mimeConfig");
+	std::map<std::string, std::string>::iterator it = config->begin();
+
+	while (it != config->end())
+	{
+		if (it->first == this->_mimeType)
+		{
+			// get filetype by mimetype from config/mime.types
+			type += checkMultiDeclaration(it->second);
+			assignFileWithExtension(type);
+			return ;
+		}
+		++it;
+	}
+
+	if (it == config->end())
+		this->_request->setCode(405);
 }
 
 void	Router::setDirForType()
 {
-	if (this->_requestedFile == "" && _request->getMethod() == "GET")
-	{
-		this->_request->setCode(403); // TODO
-		std::cout << "_requestedFile = "" and returning" << std::endl;
-		this->_mimeType = "text/html";
-		return; // needs to return because otherwise the substr(dotPos) was provoking a crash
-	} //KEEP
+	// if (this->_requestedFile == "" && _request->getMethod() == "GET")
+	// {
+	// 	this->_request->setCode(403); // TODO
+	// 	std::cout << "_requestedFile = EMPTY --> returning" << std::endl;
+	// 	this->_mimeType = "text/html";
+	// 	return; // needs to return because otherwise the substr(dotPos) was provoking a crash
+	// } //KEEP
 
+	std::string	type;
 	std::string	fullPath;
 	size_t 		dotPos = this->_requestedFile.find_last_of(".");
-	std::string	type = "";
 
-	if (dotPos != std::string::npos) {
+	if (dotPos != std::string::npos && !this->_requestedFile.empty())
+	{
 		type = this->_requestedFile.substr(dotPos);
+		assignFileWithExtension(type);
 	}
-
-
-	std::string	serverRoot = this->_server->getRoot();
-	fullPath = checkCwd(serverRoot);
-
-	if ((type == ".html" || type == ".css") && this->_requestedFile != "status_page.html")
-		fullPath += "/html" + this->_requestedPath;
-	if (type == ".py" || type == ".php" || type == ".js")
-		fullPath += "/cgi-bin" + this->_requestedPath;
-	if (type == ".png" || type == ".jpg" || type == ".jpeg")
-		fullPath += "/files" + this->_requestedPath;
-
-
-
-	std::cout << "FullPath = " << fullPath << '\n';
-	this->_request->setPath(fullPath);
+	else if (dotPos == std::string::npos && !this->_requestedFile.empty())
+		assignFileWithoutExtension();
 }
 
 void	Router::handleFavicon()
 {
 	std::string	serverRoot = this->_server->getRoot();
-	std::string newPath = checkCwd(serverRoot);
+	std::string newPath = checkCwd(serverRoot, false);
 
 	if (this->_requestedFile == "favicon.ico")
 	{
@@ -194,34 +261,43 @@ void	Router::handleFavicon()
 	}
 }
 
-void	Router::handleRedir()
-{
-
-}
-
-void	Router::handleAutoIndex()
-{
-
-}
-
 void	Router::checkMethods()
 {
-	std::map<std::string, std::map<std::string, std::string> >::iterator it = this->_locationBlocks->begin();
+	std::string	method = this->_request->getMethod();
+	std::map<std::string, std::string>::iterator it = this->_dirConfig.begin();
 
-	while (it != this->_locationBlocks->end())
+	while (it != this->_dirConfig.end())
 	{
-		if (this->_extractedPath == it->first)
+		if (it->first == "methods")
 		{
-			std::map<std::string, std::string>::iterator it_conf = it->second.find("methods");
-			if (it_conf != it->second.end())
-			{
-				if (it_conf->second.find(_request->getMethod()) == std::string::npos)
-					this->_request->setCode(405);
-				return ;
-			}
+			if (it->second.find(method) != std::string::npos)
+				std::cout << "Request Method is allowed: "<< method << '\n'; 
+			return ;
 		}
 		++it;
 	}
+	// Method not found
+	this->_request->setCode(405);
 }
+
+// void	Router::checkMethods()
+// {
+// 	std::map<std::string, std::map<std::string, std::string> >::iterator it = this->_locationBlocks->begin();
+
+// 	while (it != this->_locationBlocks->end())
+// 	{
+// 		if (this->_extractedPath == it->first)
+// 		{
+// 			std::map<std::string, std::string>::iterator it_conf = it->second.find("methods");
+// 			if (it_conf != it->second.end())
+// 			{
+// 				if (it_conf->second.find(_request->getMethod()) == std::string::npos)
+// 					this->_request->setCode(405);
+// 				return ;
+// 			}
+// 		}
+// 		++it;
+// 	}
+// }
 
 

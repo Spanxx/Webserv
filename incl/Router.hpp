@@ -14,15 +14,16 @@ public:
 	Router& operator=(Router &other);
 	~Router();
 
-	void		extractPathAndFile();
-	void		findDirConfig();
-	void		checkForDirRequest();
-	void		handleFavicon();
-	void		setDirForType();
-	void		checkDirPermission();
-	void		handleRedir();
-	void		handleAutoIndex();
-	void		checkMethods();
+	void	extractPath();
+	void	extractFile();
+	void	findDirConfig();
+	void	checkForDirRequest();
+	void	handleFavicon();
+	void	setDirForType();
+	void	assignFileWithExtension(std::string &type);
+	void	assignFileWithoutExtension();
+	void	checkDirPermission();
+	void	checkMethods();
 
 private:
 	Server 														*_server;

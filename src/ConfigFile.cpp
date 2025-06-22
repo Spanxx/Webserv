@@ -46,6 +46,8 @@ std::map<std::string, std::string>* Server::getConfigMap(const std::string &conf
 		return(&this->_dirConfig);
 	if (configName == "mimeConfig")
 		return(&this->_mimetypeConfig);
+	if (configName == "typeDirConfig")
+		return(&this->_typeDirConfig);
 
 	return (NULL);
 }
@@ -150,38 +152,31 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 	}
 }
 
-void	Server::loadMimeTypes()
+void	Server::loadTypeFiles(std::string fileName, std::string keyword)
 {
 	std::string line;
-	std::string mimeConfig;
+	std::string config;
 	std::string fullPath;
-	std::string cwd;
-	char* rawCwd = getcwd(NULL, 0);
 
-	if (rawCwd)
-	{
-		cwd = rawCwd;
-		free(rawCwd);
-	}
-	else
-		throw ServerException("Loading mime.types failed!");
-	if (cwd.find("/src") == std::string::npos)
-		fullPath = "www/config/mime.types";
-	else
-		fullPath = "../www/config/mime.types";
+	fullPath = checkCwd(this->_serverRoot, true);
+
+	fullPath += "/" + fileName;
 	std::ifstream file(fullPath.c_str());
 	if (!file)
-		throw ServerException("Loading mime.types failed!");
+		throw ServerException("Loading Typefile failed!");
 
 	while(getline(file, line))
 	{
 		if (line.empty() || line.find('#') != std::string::npos)
 			continue;
 		line += '\n';
-		mimeConfig.append(line);
-
+		config.append(line);
 	}
-	this->extractConfigMap(mimeConfig, _mimetypeConfig, "types");
+
+	if (fileName == "mime.types")
+		this->extractConfigMap(config, _mimetypeConfig, keyword);
+	else if (fileName == "typeDir.conf")
+		this->extractConfigMap(config, _typeDirConfig, keyword);
 }
 
 // int	Server::createConfig(char *av, std::string &serverConfig)
@@ -193,6 +188,7 @@ int	Server::createConfig(std::string &serverConfig)
 
 	this->extractConfigMap(serverConfig, _serverConfig, "server");
 	this->extractConfigMap(serverConfig, _dirConfig, "location");
-	this->loadMimeTypes();
+	this->loadTypeFiles("mime.types", "types");
+	this->loadTypeFiles("typeDir.conf", "typeDir");
 	return (0);
 }

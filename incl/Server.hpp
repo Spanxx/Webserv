@@ -49,7 +49,7 @@ public:
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
 	void	allowedMethods(std::string &trimmed);
 	void	createDirStructure();
-	void	loadMimeTypes();
+	void	loadTypeFiles(std::string fileName, std::string keyword);
 	void	storeServerConfig();
 	void	extractPorts(std::map<std::string, std::string>::iterator &it);
 	void	checkPortDuplicates(int &port);
@@ -77,15 +77,15 @@ public:
 	int		createServerSocket(int port);
 
 
-	std::vector<int>	makeNewConnections(int server_fd);
-	bool readFromConnection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds);
-	void initialize_request(int fd, const std::string &data, size_t header_end);
-	RequestState handleRequest(std::string &data, size_t header_end, std::map<int, bool> &keepAlive, int fd);
-	void prepare_response(int fd, std::map<int, std::string> &response_collector);
-	int	 write_to_connection(std::map<int, std::string> &response_collector, int fd, std::vector<struct pollfd> &globalPollFds);
-	void close_erase(int fd);
-	const std::vector<struct pollfd>& getpollFdArray() const;
-	const std::vector<int>& getServerSockets() const;
+	std::vector<int>					makeNewConnections(int server_fd);
+	bool 								readFromConnection(std::map<int, std::string> &response_collector, int fd, std::map<int, bool> &keepAlive, std::vector<struct pollfd> &globalPollFds);
+	void 								initialize_request(int fd, const std::string &data, size_t header_end);
+	RequestState						handleRequest(std::string &data, size_t header_end, std::map<int, bool> &keepAlive, int fd);
+	void 								prepare_response(int fd, std::map<int, std::string> &response_collector);
+	int	 								write_to_connection(std::map<int, std::string> &response_collector, int fd, std::vector<struct pollfd> &globalPollFds);
+	void 								close_erase(int fd);
+	const std::vector<struct pollfd>&	getpollFdArray() const;
+	const std::vector<int>&				getServerSockets() const;
 
 	size_t														getMaxBodySize();
 	std::string													getName();
@@ -119,6 +119,7 @@ private:
 	std::map<std::string, std::string>													_dirConfig;
 	std::map<std::string, std::map<std::string, std::string> >							_locationBlocks;
 	std::map<std::string, std::string>													_mimetypeConfig;
+	std::map<std::string, std::string>													_typeDirConfig;
 	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 	std::map<std::string, std::string>													_uploadDir;
 
@@ -127,6 +128,7 @@ private:
 };
 
 void	createConfigList(std::string configPath, std::vector<std::string> &configList);
+int		checkforSocketDuplicates(std::vector<std::string> &configList);
 
 int		mkdir_p(const std::string fullPath, mode_t mode);
 

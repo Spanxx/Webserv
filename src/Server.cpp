@@ -12,7 +12,6 @@ Server::Server(std::string &serverConfig)
 			throw ServerException("Creating Config failed!");
 		
 		this->extractVariables();
-		this->storeServerConfig();
 
 		//set default port if none in config file
 		if (this->_numPorts == 0)

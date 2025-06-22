@@ -26,55 +26,6 @@ void	Server::checkPortDuplicates(int &port)
 	}
 }
 
-// void	Server::extractPorts(std::map<std::string, std::string>::iterator &it)
-// {
-// 	int			port = 0;
-// 	int			portCounter = 0;
-// 	std::string item;
-// 	std::string	trimmedItem;
-
-// 	std::istringstream iss(it->second);
-// 	while (getline(iss, item, ','))
-// 	{
-// 		trimmedItem = trim(item);
-// 		if (!safeAtoi(trimmedItem, port) || port < 1024 || port > 65535) //below 1024 only with sudo rights
-// 			throw ServerException("Ports need to be between 1024 and 65535");
-// 		checkPortDuplicates(port);
-// 		this->_ports.push_back(port);
-// 		++portCounter;
-// 	}
-// 	this->_numPorts = portCounter;
-// }
-
-void	Server::storeServerConfig()
-{
-	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
-
-	if (!config)
-		throw ServerException("Extracting serverConfig map failed!");
-
-	std::map<std::string, std::string>::iterator it = config->begin();
-	while (it != config->end())
-	{
-		// if (it->first.find("listen") != std::string::npos)
-		// 	extractPorts(it);
-
-		// if (it->first.find("name") != std::string::npos)
-		// 	this->_name = it->second;
-
-		if (it->first.find("maxbodysize") != std::string::npos)
-		{
-			int size;
-			if (!safeAtoi(it->second, size) || size < 0)
-				throw ServerException("Max body size needs to be between 0 and INT MAX");
-			_maxBodySize = static_cast<size_t>(size);
-		}
-
-		++it;
-	}
-	printPorts();
-}
-
 int	Server::createServerSocket(int port)
 {
 	int sock = socket(AF_INET, SOCK_STREAM, 0);

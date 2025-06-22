@@ -38,7 +38,6 @@ void replaceAll(std::string &str, const std::string &placeholder, const std::str
 	}
 }
 
-
 std::string urlDecode(const std::string &str)
 {
 	std::string result;
@@ -119,6 +118,7 @@ bool safeAtoi(const std::string& str, int& result)
 	result = static_cast<int>(val);
 	return true;
 }
+
 std::vector<std::string> parseMultipartBody(std::string& body, const std::string& boundary)
 {
 	std::vector<std::string> parts;
@@ -183,22 +183,32 @@ std::string getFileContent(std::string& part)
 	return part.substr(headerEnd + 4); // +4 to skip \r\n\r\n
 }
 
-std::string	checkCwd(std::string &serverRoot)
+std::string	checkCwd(std::string &serverRoot, bool serverConf)
 {
 	std::string cwd;
 	std::string path;
 
 	char* rawCwd = getcwd(NULL, 0);
-	if (rawCwd)
-	{
-		cwd = rawCwd;
-		free(rawCwd);
-	}
+	if (!rawCwd)
+		return ("");
 
-	if (cwd.find("/src") != std::string::npos)
-		path = "../" + serverRoot;
+	cwd = rawCwd;
+	free(rawCwd);
+
+	if (serverConf == false)
+	{
+		if (cwd.find("/src") != std::string::npos)
+			path = "../" + serverRoot;
+		else
+			path = serverRoot;
+	}
 	else
-		path = serverRoot;
+	{
+		if (cwd.find("/src") != std::string::npos)
+			path = "../www/config";
+		else
+			path = "www/config";
+	}
 
 	return (path);
 }

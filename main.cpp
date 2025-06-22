@@ -1,5 +1,6 @@
 
 #include "incl/Server.hpp"
+#include "incl/Libraries.hpp"
 #include "incl/Cluster.hpp"
 
 volatile sig_atomic_t stopSignal = 0;
@@ -47,6 +48,104 @@ void	createConfigList(char *av, std::vector<std::string> &configList)
 	}
 }
 
+std::vector<std::string>	extractPorts(std::string &line)
+{
+	size_t						equalPos = line.find_first_of("=");
+	size_t						commaPos;
+	std::string					tmpLine;
+	std::string					port;
+	std::vector<std::string>	portList;
+
+	if (equalPos == std::string::npos)
+		return (portList);
+
+	tmpLine = line.substr(equalPos + 1);
+	tmpLine = trim(tmpLine);
+
+	while (1)
+	{
+		commaPos = tmpLine.find_first_of(",");
+		if (commaPos != std::string::npos)
+		{
+			port = tmpLine.substr(0, commaPos);
+			port = trim(port);
+			tmpLine = tmpLine.substr(commaPos + 1);			
+		}
+		else
+			port = trim(tmpLine);
+		
+		portList.push_back(port);
+		
+		if (commaPos == std::string::npos)
+			break;
+	}
+
+	return (portList);
+}
+
+std::string	extractHost(std::string &line)
+{
+	std::string	host;
+	int			equalPos = line.find_first_of("=");
+
+	host = line.substr(equalPos + 1);
+	
+	return (trim(host));
+}
+
+int	createCombinations(std::string &host, std::vector<std::string> &ports, std::map<std::string, int> *combinations)
+{
+
+	(void)host;
+	(void)ports;
+	// create all combinations of host + port and store this combostring as key in map...
+	// check if each key is unique, otherwise we have a duplicate
+	// value is just trash (not needed because std::set is not allowed in cpp11)
+
+	return (0);
+}
+
+int		checkforSocketDuplicates(std::vector<std::string> &configList)
+{
+	std::string					host;
+	std::vector<std::string>	ports;
+	int							socketComplete = 0;
+	std::string					serverConfigs;
+	std::string 				line;
+	std::map<std::string, int>	combinations;
+	
+	std::vector<std::string>::iterator it = configList.begin();
+	
+	while (it != configList.end())
+	{
+		serverConfigs = *it;
+		std::istringstream			iss(serverConfigs);
+
+		while (getline(iss, line))
+		{
+			line = trim(line);
+			if (line.find("host") != std::string::npos)
+			{
+				host = extractHost(line);	// configList is one long string...needs splitting -.-
+				++socketComplete;
+			}
+			else if (line.find("listen") != std::string::npos)
+			{
+				ports = extractPorts(line);
+				++socketComplete;
+			}
+
+			if (socketComplete == 2)
+			{
+				createCombinations(host, ports, &combinations);
+				socketComplete = 0;
+			}
+		}
+		++it;
+	}
+	return (0);
+}
+
 int main(int ac, char **av)
 {
 	std::signal(SIGINT, signalHandler);
@@ -65,16 +164,22 @@ int main(int ac, char **av)
 	}
 
 	std::vector<std::string>	configList;
-	std::vector<Server*>			serverList;
-	Cluster cluster;
-
+	std::vector<Server*>		serverList;
+	
 	createConfigList(configPath, configList);
-
 	if (configList.size() < 1)
 	{
 		std::cerr << "Loading server configuration failed!\n";
 		return (1);
 	}
+
+	if (checkforSocketDuplicates(configList) == 1)
+	{
+		std::cerr << "Socket duplicate (Host + Port) found!\n";
+		return (1);
+	}
+
+	Cluster cluster;
 
 	try
 	{

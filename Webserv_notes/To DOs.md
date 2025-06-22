@@ -20,7 +20,7 @@
 # Chris:
 - [x] creating the mandatory folders if there is a new server
 - [x] create top map for the dir maps. with path as key and map as value == Should work, needs recheck tommorow
-- [ ] router umbauen: if path is directory + method is POST, then it's correct (check what case is for DELETE) 
+- [x] router umbauen: if path is directory + method is POST, then it's correct (check what case is for DELETE) 
 - [x] delete negative number check
 - [ ] check timeout conditions for big files (how it works with child killing)
 - [ ] make check for duplicate in host:port combination or port duplicates

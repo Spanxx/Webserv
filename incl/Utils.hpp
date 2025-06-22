@@ -23,7 +23,6 @@ bool safeAtoi(const std::string& str, int& result);
 std::vector<std::string> parseMultipartBody(std::string& body, const std::string& boundary);
 std::string getFileContent(std::string& part);
 std::string getFilename(std::string& part);
-std::string	checkCwd(std::string &serverRoot);
-
+std::string	checkCwd(std::string &serverRoot, bool serverConf);
 
 #endif
