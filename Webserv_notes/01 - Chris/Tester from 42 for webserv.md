@@ -51,6 +51,7 @@ press enter to continue
 	- if i deactivate the if statement for this check, then it works
 		- but is this not technically incorrect?
 - then the tester tries a Post with size 0, but we already redirected him to index.html
+- 
 ```
 - Test POST http://127.0.0.1:8080/ with a size of 0
 FATAL ERROR ON LAST TEST: bad status code

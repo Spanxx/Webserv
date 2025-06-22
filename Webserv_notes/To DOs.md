@@ -17,17 +17,20 @@
 - [ ] check cgi with cgi tester --> does cgi routing work and miscellaneous scripts?
 	- [ ] make cgi extension check seperate from other file type checks
 
-Chris:
+# Chris:
 - [x] creating the mandatory folders if there is a new server
 - [x] create top map for the dir maps. with path as key and map as value == Should work, needs recheck tommorow
-- [ ] check autoindex, if on, provide a list with the files inside requested directory
-	- [ ] response with file links and code 301 for redirecting
 - [ ] router umbauen: if path is directory + method is POST, then it's correct (check what case is for DELETE) 
 - [ ] delete negative number check
 - [ ] check timeout conditions for big files (how it works with child killing)
-- [ ] make check for duplicate in host:port combination or port duplicates 
+- [ ] make check for duplicate in host:port combination or port duplicates
+	- [ ] check with 2 browser (1 upload / 1 load index, is it blocking?)
+- [ ] add exceptions
+- [ ] check memleaks
+- [ ] check files without filetypes / get mimetype and handle file
+- [ ] hello.php script is not working on linux...
 
-Henri:
+# Henri:
 - [x] change host to iphost for config logic
 - [x] check for range of host
 - [x] port range
@@ -43,10 +46,16 @@ Henri:
 - [ ] make index dynamic inside upload script (after index has been passed as variable by Chris)
 - [ ] implement max height of uploaded images on index
 
-Steph:
+# Steph:
+ - [ ] check autoindex, if on, provide a list with the files inside requested directory
+	- [ ] response with file links and code 301 for redirecting
+- [ ] create index for each location block
 
+# Bonus:
 
-
+- [ ] Cookies
+- [ ] Session management
+- [ ] multiple CGI scripts
 
 
 
