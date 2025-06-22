@@ -1,5 +1,6 @@
 #include "../incl/Router.hpp"
 #include "../incl/Server.hpp"
+#include "../incl/Libraries.hpp"
 
 
 Router::Router(Server *server, Request *request) : _server(server), _request(request)
@@ -57,27 +58,6 @@ Router& Router::operator=(Router &other)
 Router::~Router()
 {
 	std::cout << "Router deconstructed\n";
-}
-
-std::string	Router::checkCwd()
-{
-	std::string cwd;
-	std::string path;
-
-	char* rawCwd = getcwd(NULL, 0);
-	if (rawCwd)
-	{
-		cwd = rawCwd;
-		free(rawCwd);
-	}
-	else{}
-		//TODO
-	if (cwd.find("/src") != std::string::npos)
-		path = "../www/" + this->_serverName;
-	else
-		path = "www/" + this->_serverName;
-
-	return (path);
 }
 
 void	Router::extractPathAndFile()
@@ -185,7 +165,9 @@ void	Router::setDirForType()
 		type = this->_requestedFile.substr(dotPos);
 	}
 
-	fullPath = checkCwd();
+
+	std::string	serverRoot = this->_server->getRoot();
+	fullPath = checkCwd(serverRoot);
 
 	if ((type == ".html" || type == ".css") && this->_requestedFile != "status_page.html")
 		fullPath += "/html" + this->_requestedPath;
@@ -202,7 +184,8 @@ void	Router::setDirForType()
 
 void	Router::handleFavicon()
 {
-	std::string newPath = checkCwd();
+	std::string	serverRoot = this->_server->getRoot();
+	std::string newPath = checkCwd(serverRoot);
 
 	if (this->_requestedFile == "favicon.ico")
 	{

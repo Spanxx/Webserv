@@ -30,6 +30,10 @@
 - [ ] check files without filetypes / get mimetype and handle file
 - [ ] hello.php script is not working on linux...
 
+
+## Chris notes:
+- when uploading a file(cgi) --> server changes background color
+
 # Henri:
 - [x] change host to iphost for config logic
 - [x] check for range of host

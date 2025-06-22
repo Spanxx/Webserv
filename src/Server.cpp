@@ -10,13 +10,9 @@ Server::Server(std::string &serverConfig)
 	{
 		if (this->createConfig(serverConfig) == 1)
 			throw ServerException("Creating Config failed!");
+		
 		this->extractVariables();
-		//this->extractName();
-		//this->extractPorts();
-		//this->extractHost();
-
 		this->storeServerConfig();
-		// this->createDirStructure();
 
 		//set default port if none in config file
 		if (this->_numPorts == 0)
@@ -88,9 +84,14 @@ const std::vector<int>& Server::getServerSockets() const { return this->_serverS
 
 Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
 
-size_t	Server::getMaxBodySize() { return _maxBodySize; }
 std::string	Server::getName() { return _name; }
-std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}
+
+std::string Server::getRoot() { return _root;}
+
+size_t	Server::getMaxBodySize() { return _maxBodySize; }
 
 std::map<std::string, std::string> Server::getUploadDir() { return _uploadDir; }
+
 std::string Server::getErrorPage() { return _errorPage; };
+
+std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}

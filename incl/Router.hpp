@@ -4,6 +4,7 @@
 #include "Server.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "Libraries.hpp"
 
 class Router
 {
@@ -22,8 +23,6 @@ public:
 	void		handleRedir();
 	void		handleAutoIndex();
 	void		checkMethods();
-	std::string	checkCwd();
-
 
 private:
 	Server 														*_server;

@@ -4,6 +4,7 @@ std::string checkFilePath(char *av)
 {
 	std::string filePath;
 	std::string tryPath;
+	std::string workDir;
 
 	if (av != NULL)
 		filePath = av;
@@ -12,10 +13,16 @@ std::string checkFilePath(char *av)
 	if (f1.good())
 		return (filePath);
 
-	std::string cwd = getcwd(NULL, 0);
-	if (cwd.find("src/") != std::string::npos)
-		tryPath = "../";
+	char *cwd =	getcwd(NULL, 0);
+	if (cwd)
+	{
+		workDir = cwd;
+		free (cwd);
+	}
 
+	if (workDir.find("src/") != std::string::npos)
+		tryPath = "../";
+	
 	tryPath += "www/config/" + filePath;
 	std::ifstream f2(tryPath.c_str());
 	if (f2.good())
@@ -25,11 +32,6 @@ std::string checkFilePath(char *av)
 	std::ifstream f3(tryPath.c_str());
 	if (f3.good())
 		return (tryPath);
-
-	// std::string fallback = "www/config/default.conf";
-	// std::ifstream f4(fallback.c_str());
-	// if (f4.good())
-	// 	return fallback;
-
+	
 	return ("");
 }

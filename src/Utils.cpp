@@ -1,12 +1,6 @@
 
 #include "../incl/Utils.hpp"
-#include <cctype>  // for isxdigit
-#include <cstdio>  // for sscanf
-#include <cerrno>
-#include <climits>
-#include <iostream>
-#include <cstdlib>
-#include <vector>
+#include "../incl/Libraries.hpp"
 
 std::string trim(const std::string &str)
 {
@@ -187,4 +181,24 @@ std::string getFileContent(std::string& part)
 	if (headerEnd == std::string::npos)
 		return "";
 	return part.substr(headerEnd + 4); // +4 to skip \r\n\r\n
+}
+
+std::string	checkCwd(std::string &serverRoot)
+{
+	std::string cwd;
+	std::string path;
+
+	char* rawCwd = getcwd(NULL, 0);
+	if (rawCwd)
+	{
+		cwd = rawCwd;
+		free(rawCwd);
+	}
+
+	if (cwd.find("/src") != std::string::npos)
+		path = "../" + serverRoot;
+	else
+		path = serverRoot;
+
+	return (path);
 }

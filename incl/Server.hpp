@@ -20,7 +20,7 @@
 #include <csignal>
 #include <arpa/inet.h> // need for inet_aton
 #include "Utils.hpp"
-#include "libraries.hpp"
+#include "Libraries.hpp"
 
 extern volatile sig_atomic_t stopSignal;
 
@@ -57,18 +57,20 @@ public:
 	void	extractMaxBodySize();
 	void	printPorts();
 
-	int	router();
+	// int		router();
 
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
-	std::map<std::string, std::string> getUploadDir();
-	std::string getErrorPage();
-	void	checkScriptsExecutable();
+	std::map<std::string, std::string>	getUploadDir();
+	std::string 						getErrorPage();
+	std::string							getRoot();
+	void								checkScriptsExecutable();
 
 	void	extractVariables();
 	void	extractPorts(const std::string &ports);
 	void	extractHost(const std::string &host);
 	void	extractName(const std::string &name);
+	void	extractRoot(const std::string &root);
 	void	extractMaxBody(const std::string &maxbody);
 	void	extractErrorPage(const std::string &path);
 	void	checkCompletes();
@@ -99,26 +101,27 @@ public:
 	};
 
 private:
-	std::string 											_name;
-	int														_numPorts;
-	std::vector<int>										_ports;
-	std::string												_IPHost;
-	std::vector<int>										_serverSockets; // vector of fd of each socket of the server
-	size_t													_maxBodySize;
-	std::map<int, std::string> 								_socketBuffers;
-	std::map<int, Request*> 								_requestCollector;
-	std::vector<struct pollfd>								_pollFdArray; // (_socketArray) pollfd array of each server socket Maybe not necessary anymore
+	int																					_numPorts;
+	std::vector<int>																	_ports;
+	std::string 																		_name;
+	std::string																			_IPHost;
+	std::string																			_root;
+	size_t																				_maxBodySize;
+	short																				_limitRequestLine;
+	std::string																			_errorPage;
+	
+	std::vector<int>																	_serverSockets; // vector of fd of each socket of the server
+	std::map<int, std::string> 															_socketBuffers;
+	std::map<int, Request*> 															_requestCollector;
+	std::vector<struct pollfd>															_pollFdArray; // (_socketArray) pollfd array of each server socket Maybe not necessary anymore
 
-	//std::string																			_host;
 	std::map<int, time_t> 																_lastActive;
 	std::map<std::string, std::string>													_serverConfig;
 	std::map<std::string, std::string>													_dirConfig;
 	std::map<std::string, std::map<std::string, std::string> >							_locationBlocks;
 	std::map<std::string, std::string>													_mimetypeConfig;
 	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
-	// std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
-	std::map<std::string, std::string>	_uploadDir;
-	std::string	_errorPage;
+	std::map<std::string, std::string>													_uploadDir;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

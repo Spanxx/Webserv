@@ -12,6 +12,10 @@
 #include <sstream>      // For string stream operations (e.g., std::stringstream)
 #include <csignal>      // For signal handling (e.g., signal, SIGINT)
 #include <cstring>      // For C-style string manipulation (e.g., memset)
+#include <cctype>  		// for isxdigit
+#include <cstdio>  		// for sscanf
+#include <cerrno>
+#include <climits>
 
 // System-Specific Libraries
 #include <sys/stat.h>   // For file status and permissions (e.g., stat, mkdir)
