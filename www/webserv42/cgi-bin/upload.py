@@ -37,7 +37,7 @@ def main():
         upload_block = os.environ.get('UPLOAD_BLOCK', '')
         match = re.search(r'boundary=(.*)', content_type)
         if not match:
-            sys.exit(1)
+            sys.exit(2)
 
         boundary = b'--' + match.group(1).encode()
         raw_data = sys.stdin.buffer.read(content_length)
@@ -52,7 +52,7 @@ def main():
             with open(full_path, "wb") as f:
                 f.write(file_data)
 
-            index_path = "www/BackupServer/html/index.html"
+            index_path = "www/webserv42/html/index.html"
             with open(index_path, "r", encoding="utf-8") as f:
                 html_content = f.read()
 
@@ -62,7 +62,7 @@ def main():
             print("Content-Type: text/html\r\n")
             print(html_content)
         else:
-            sys.exit(1)
+            sys.exit(2)
 
     except Exception as e:
         sys.exit(1)

@@ -42,6 +42,8 @@ Response& Response::operator=(Response &other)
 	return (*this);
 }
 
+Response::ResponseException::ResponseException(const std::string &error) : std::runtime_error(error) {}
+
 void Response::setCode(int code) { _code = code; }
 int Response::getCode() { return _code; }
 
@@ -344,6 +346,6 @@ void Response::POSTBodyBuilder()
 		this->_body = ss.str();
 		this->_headers["Content-Length"] = intToString(this->_body.size());
 	}
-	else 	// if not image, then handle how else
+	else 
 		handleERROR(415);
 }

@@ -11,7 +11,7 @@ void Server::allowedMethods(std::string &trimmed)
 		while (std::getline(ss, item, ','))
 		{
 			if (item != "POST" && item != "GET" && item != "DELETE")
-				throw ServerException("Only allowed methods are GET, POST, DELETE");
+				throw ConfigException("Only allowed methods are GET, POST, DELETE");
 		}
 	}
 }
@@ -27,18 +27,18 @@ void Server::assignUploadDir()
 			if (_uploadDir.empty() )
 			{
 				if (!checkPOST(it->second))
-					throw ServerException("Upload directory must allow POST method");
+					throw ConfigException("Upload directory must allow POST method");
 				_uploadDir ["root"] = findRoot(it->second);
 				_uploadDir["location"] = it->first;
 				std::cout << "Assigned upload dir location: " << _uploadDir["location"] << std::endl;
 			}
 			else
-				throw ServerException("Can only assign one upload dir");
+				throw ConfigException("Can only assign one upload dir");
 
 		}
 	}
 	if (_uploadDir.empty())
-		throw ServerException("Must assign one config file. Set in location block 'upload_dir = yes'");
+		throw ConfigException("Must assign one upload directory. Set in location block 'upload_dir = yes'");
 }
 
 bool Server::checkPOST(std::map<std::string, std::string> configblock)
@@ -70,7 +70,7 @@ void	Server::checkScriptsExecutable()
 		}
 	}
 	if (dir.empty())
-		throw ServerException("No cgi-bin directory in config file");
+		throw ConfigException("Must include cgi-bin directory");
 	DIR* directory = opendir(dir.c_str());
 	if (!directory)
 		throw ServerException("Can not open directory " + dir);

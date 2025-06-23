@@ -61,6 +61,8 @@ std::ostream &operator<<(std::ostream &os, Request &request)
 	return os;
 }
 
+Request::RequestException::RequestException(const std::string &error) : std::runtime_error(error) {}
+
 void 	Request::setCode(int code) { _code = code; }
 void	Request::setPath(std::string path) { this->_path = path; }
 void	Request::append_body(const std::string &body_part) { _body += body_part; }

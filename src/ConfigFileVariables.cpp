@@ -6,7 +6,7 @@ void	Server::extractVariables()
 	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
 
 	if (!config)
-		throw ServerException("Extracting serverConfig map failed!");
+		throw ConfigException("Extracting serverConfig map failed!");
 
 	std::map<std::string, std::string>::iterator it = config->begin();
 	while (it != config->end())
@@ -35,7 +35,7 @@ void	Server::extractPorts(const std::string &ports)
 	while (std::getline(ss, item, ','))
 	{
 		if (!safeAtoi(item, port) || port < 1024 || port > 65535) //below 1024 only with sudo rights
-			throw ServerException("Ports need to be between 1024 and 65535");
+			throw ConfigException("Ports need to be between 1024 and 65535");
 		this->_ports.push_back(port);
 		++portCounter;
 	}
@@ -52,7 +52,7 @@ void	Server::extractPorts(const std::string &ports)
 void	Server::extractHost(const std::string &host)
 {
 	if (!isValidIP(host))
-			throw ServerException("Host IP needs to be within a private or loopback range");
+			throw ConfigException("Host IP needs to be within a private or loopback range");
 	this->_IPHost = host;
 	std::cout << "Host: " << this->_IPHost << '\n';
 }
@@ -61,7 +61,7 @@ void	Server::extractMaxBody(const std::string &maxbody)
 {
 	int size;
 	if (!safeAtoi(maxbody, size) || size < 0)
-		throw ServerException("Max body size needs to be between 0 and INT MAX");
+		throw ConfigException("Max body size needs to be between 0 and INT MAX");
 	_maxBodySize = static_cast<size_t>(size);
 }
 
@@ -70,7 +70,7 @@ void	Server::extractErrorPage(const std::string &path)
 	_errorPage = path;
 	std::ifstream file(_errorPage.c_str());
 	if (!file.is_open())
-		throw ServerException("Error page file does not exist or is not readable");
+		throw ConfigException("Error page file does not exist or is not readable");
 	file.close();
 }
 
@@ -83,7 +83,7 @@ void	Server::extractName(const std::string &name)
 void	Server::checkCompletes()
 {
 	if (_errorPage.empty())
-			throw ServerException("Config file needs to specify an error page file");
+			throw ConfigException("Config file needs to specify an error page file");
 	if (_IPHost.empty())
 	{
 		std::cout << "No host in config file, default set to bind to any local address\n";
@@ -95,5 +95,5 @@ void	Server::checkCompletes()
 		this->_name = "default_server"; // default server name
 	}
 	if (_ports.empty())
-		throw ServerException("Config file needs to specify port per server");
+		throw ConfigException("Config file needs to specify port per server");
 }

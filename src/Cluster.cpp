@@ -10,22 +10,24 @@ So when a server is initialized, it creates a socket for each port in the config
 
 Cluster::Cluster() {}
 
+Cluster::ClusterException::ClusterException(const std::string &error) : std::runtime_error(error) {}
+
 void Cluster::initializeServers(std::vector<std::string> configList)
 {
-	try
-	{
+	// try
+	// {
 		if (configList.empty())
-			throw std::runtime_error("No server configurations provided.");
+			throw ClusterException("No server configurations provided.");
 		for (size_t i = 0; i < configList.size(); ++i)
 		{
 			Server* newServer = new Server(configList[i]); //Create a new Server instance, all its sockets according to the ports are initialized in the constructor and they bind and listen to the ports
 			_servers.push_back(newServer);
 		}
 	setupPollFds();
-	} catch (const std::exception& e)
-	{
-		std::cerr << "Cluster initialization error: " << e.what() << std::endl;
-	}
+	// } catch (const std::exception& e)
+	// {
+	// 	std::cerr << "Cluster initialization error: " << e.what() << std::endl;
+	// }
 }
 
 void Cluster::setupPollFds()
@@ -170,7 +172,7 @@ void Cluster::removePollFd(int fd)
 
 Cluster::~Cluster() {
 	if (_servers.empty()) {
-		std::cout << "No servers to clean up." << std::endl;
+		//std::cout << "No servers to clean up." << std::endl;
 		return;
 	}
 	for (size_t i = 0; i < _servers.size(); ++i) {

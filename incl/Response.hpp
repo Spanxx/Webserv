@@ -44,6 +44,11 @@ class Response {
 		bool 		isCGI(const std::string &path);
 		bool		isUploadsDir(const std::string &path);
 
+		class ResponseException : public std::runtime_error {
+			public:
+				ResponseException(const std::string &error);
+		};
+
 	private:
 		Request *_request;
 		int _code;

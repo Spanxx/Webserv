@@ -37,7 +37,7 @@ def main():
         upload_block = os.environ.get('UPLOAD_BLOCK', '')
         match = re.search(r'boundary=(.*)', content_type)
         if not match:
-            sys.exit(1)
+            sys.exit(2)
 
         boundary = b'--' + match.group(1).encode()
         raw_data = sys.stdin.buffer.read(content_length)
@@ -62,7 +62,7 @@ def main():
             print("Content-Type: text/html\r\n")
             print(html_content)
         else:
-            sys.exit(1)
+            sys.exit(2)
 
     except Exception as e:
         sys.exit(1)

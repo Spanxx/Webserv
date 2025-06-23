@@ -51,41 +51,36 @@ int main(int ac, char **av)
 {
 	std::signal(SIGINT, signalHandler);
 
-	if (ac != 2)
-	{
-		std::cout << "Please provide a config file [Usage: ./webserv *.conf]\n";
-		return (1);
-	}
-
-	std::string configPath = checkFilePath(av[1]);
-	if (configPath.empty())
-	{
-		std::cerr << "Invalid path for config file!\n";
-		return (1);
-	}
-
 	std::vector<std::string>	configList;
-	std::vector<Server*>			serverList;
+	std::vector<Server*>		serverList;
 	Cluster cluster;
-
-	createConfigList(configPath, configList);
-
-	if (configList.size() < 1)
-	{
-		std::cerr << "Loading server configuration failed!\n";
-		return (1);
-	}
-
+	
 	try
 	{
+		if (ac != 2)
+			throw Server::ConfigException("Please provide a config file [Usage: ./webserv *.conf]");
+
+		std::string configPath = checkFilePath(av[1]);
+		if (configPath.empty())
+			throw Server::ConfigException("Invalid path for config file");
+
+		createConfigList(configPath, configList);
+
+		if (configList.size() < 1)
+			throw Server::ServerException("Loading server configuration failed");
+
+		
 		cluster.initializeServers(configList);
 		cluster.run();
 	}
-	catch (std::exception &e)
-	{
-		std::cerr << "Error during server initialization or execution: ";
-		std::cerr << e.what() << std::endl;
-	}
+	catch (const Server::ConfigException &e) {
+		std::cerr << "Config file error: " << e.what() << std::endl; }
+	catch (const Cluster::ClusterException &e) {
+		std::cerr << "Cluster error: " << e.what() << std::endl; }
+	catch (const Server::ServerException &e) {
+		std::cerr << "Server error: " << e.what() << std::endl; }
+	catch (std::exception &e) {
+		std::cerr << "Unspecified error: " << e.what() << std::endl; }
 	for (size_t i = 0; i < serverList.size(); ++i)
 		delete serverList[i]; // Calls the Server's destructor and frees memory
 	return (0);
