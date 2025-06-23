@@ -30,15 +30,8 @@ void	Request::check_headers(const std::string &headers_raw)
 	splitURI();
 	std::cout << "PATH: " << _path << ", QUERY: " << _query << std::endl;
 
-	if (split_headers(rstream) == 1)
+	if (split_headers(rstream) == 1 || checkURILength() == 1 || checkPathChars() == 1)
 		return ;
-	if (checkURILength() == 1)
-		return ;
-	if (checkPathChars() == 1)
-		return;
-	// if (checkRequestedFiletype() == 1)
-	// 	return ;
-
 	Router Router(this->_server, this);
 }
 

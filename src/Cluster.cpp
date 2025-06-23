@@ -14,20 +14,14 @@ Cluster::ClusterException::ClusterException(const std::string &error) : std::run
 
 void Cluster::initializeServers(std::vector<std::string> configList)
 {
-	// try
-	// {
-		if (configList.empty())
-			throw ClusterException("No server configurations provided.");
-		for (size_t i = 0; i < configList.size(); ++i)
-		{
-			Server* newServer = new Server(configList[i]); //Create a new Server instance, all its sockets according to the ports are initialized in the constructor and they bind and listen to the ports
-			_servers.push_back(newServer);
-		}
+	if (configList.empty())
+		throw ClusterException("No server configurations provided.");
+	for (size_t i = 0; i < configList.size(); ++i)
+	{
+		Server* newServer = new Server(configList[i]); //Create a new Server instance, all its sockets according to the ports are initialized in the constructor and they bind and listen to the ports
+		_servers.push_back(newServer);
+	}
 	setupPollFds();
-	// } catch (const std::exception& e)
-	// {
-	// 	std::cerr << "Cluster initialization error: " << e.what() << std::endl;
-	// }
 }
 
 void Cluster::setupPollFds()
@@ -52,10 +46,7 @@ void Cluster::setupPollFds()
 void Cluster::run()
 {
 	if (_servers.empty())
-	{
-		std::cerr << "No servers initialized. Cannot run cluster." << std::endl;
-		return;
-	}
+		throw ClusterException("No servers initialized. Cannot run cluster.");
 	while (!stopSignal)
 	{
 		int ret = poll(_pollfds.data(), _pollfds.size(), POLL_TIME_OUT);

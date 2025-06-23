@@ -79,8 +79,6 @@ int main(int ac, char **av)
 		std::cerr << "Cluster error: " << e.what() << std::endl; }
 	catch (const Server::ServerException &e) {
 		std::cerr << "Server error: " << e.what() << std::endl; }
-	catch (std::exception &e) {
-		std::cerr << "Unspecified error: " << e.what() << std::endl; }
 	for (size_t i = 0; i < serverList.size(); ++i)
 		delete serverList[i]; // Calls the Server's destructor and frees memory
 	return (0);

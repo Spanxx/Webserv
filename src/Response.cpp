@@ -42,8 +42,6 @@ Response& Response::operator=(Response &other)
 	return (*this);
 }
 
-Response::ResponseException::ResponseException(const std::string &error) : std::runtime_error(error) {}
-
 void Response::setCode(int code) { _code = code; }
 int Response::getCode() { return _code; }
 
