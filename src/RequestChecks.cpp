@@ -152,7 +152,10 @@ int	Request::checkPathChars()
 // }
 
 int	Request::checkRequestedFiletype()
-{	std::map<std::string, std::string> *fileTypes = this->_server->getConfigMap("mimeConfig");
+{	
+	if (_method == "POST") // COMMENT FOR LATER: this is to circumvent the case where we want to upload something, so the path would only contain directory names, no file extension
+		return 0;
+	std::map<std::string, std::string> *fileTypes = this->_server->getConfigMap("mimeConfig");
 	if (!fileTypes)
 	{
 		std::cerr << "Config map 'fileTypesConfig' not found!\n";

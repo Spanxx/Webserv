@@ -47,7 +47,7 @@ public:
 	int		createConfig(std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
-
+	void	allowedMethods(std::string &trimmed);
 	void	createDirStructure();
 	void	loadMimeTypes();
 
@@ -61,9 +61,18 @@ public:
 
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
-	void	extractPorts();
-	void	extractHost();
-	void	extractName();
+	std::map<std::string, std::string> getUploadDir();
+	std::string getErrorPage();
+	void	checkScriptsExecutable();
+
+	void	extractVariables();
+	void	extractPorts(const std::string &ports);
+	void	extractHost(const std::string &host);
+	void	extractName(const std::string &name);
+	void	extractMaxBody(const std::string &maxbody);
+	void	extractErrorPage(const std::string &path);
+	void	checkCompletes();
+
 	int		createServerSocket(int port);
 
 
@@ -80,6 +89,9 @@ public:
 	size_t														getMaxBodySize();
 	std::string													getName();
 	std::map<std::string, std::map<std::string, std::string> >*	getLocationBlocks();
+	void assignUploadDir();
+	bool checkPOST(std::map<std::string, std::string> configblock);
+	std::string findRoot(std::map<std::string, std::string> configblock);
 
 	class ServerException : public std::runtime_error {
 	public:
@@ -97,11 +109,16 @@ private:
 	std::map<int, Request*> 								_requestCollector;
 	std::vector<struct pollfd>								_pollFdArray; // (_socketArray) pollfd array of each server socket Maybe not necessary anymore
 
-	std::string																			_host;
+	//std::string																			_host;
+	std::map<int, time_t> 																_lastActive;
 	std::map<std::string, std::string>													_serverConfig;
 	std::map<std::string, std::string>													_dirConfig;
 	std::map<std::string, std::map<std::string, std::string> >							_locationBlocks;
 	std::map<std::string, std::string>													_mimetypeConfig;
+	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
+	// std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
+	std::map<std::string, std::string>	_uploadDir;
+	std::string	_errorPage;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

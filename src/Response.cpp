@@ -58,9 +58,6 @@ std::string Response::process_request(int client_fd) // Every handler shoudl upd
 		handlePOST();
 	else if (_request->getMethod() == "DELETE")
 		handleDELETE();
-	else
-		this->handleERROR(405);
-
 	std::cout << *this->_request << std::endl;
 	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	return responseBuilder();
@@ -85,6 +82,7 @@ void Response::assign_status_phrase()
 			return;
 		}
 	}
+	file.close();
 	_status["phrase"] = "Not found";
 }
 
@@ -94,14 +92,15 @@ void	Response::handleERROR(int statusCode)
 	assign_status_phrase();
 	// read file into string
 
-	std::ifstream file("www/error/status_page.html");
-	if (!file)
+	std::ifstream file(_request->getErrorPage().c_str());
+	if (!file.is_open())
 	{
 		std::cerr << "Error opening status code file\n";
 		return;
 	}
  	std::stringstream buffer;
 	buffer  << file.rdbuf(); //rdbuf to read entire content of file stream into stringstream
+	file.close();
 	std::string html = buffer.str();
 
 	replaceAll(html, "{{CODE}}", _status["code"]);
@@ -109,6 +108,7 @@ void	Response::handleERROR(int statusCode)
 	std::stringstream ss;
 	ss << html.size();
 	this->_headers["Content-Length"] = ss.str();
+	this->_headers["Content-Type"] = "text/html";
 	this->_body = html;
 	//return html;
 }
@@ -160,8 +160,8 @@ void	Response::handlePOST()
 		cgiExecuter(exec_path, query_string);
 		return;
 	}
-	// else
-		// bodyBuilder();
+	else
+		POSTBodyBuilder();
 }
 
 void	Response::handleDELETE()
@@ -217,7 +217,7 @@ std::string	Response::headersBuilder()
 			<< "Host: " << this->_headers["hostname"] << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
 			<< "Connection: " << this->_request->getHeader("Connection") << "\r\n"
 			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
-			<< "Content-Length: " << strToInt(this->_headers["Content-Length"]) << "\r\n";
+			<< "Content-Length: " << atoi(this->_headers["Content-Length"].c_str()) << "\r\n";
 			if (this->_code >= 300 && this->_code < 400)
 				header << "Location: " << this->_request->getPath() << "\r\n";
 			header << "\r\n";	//empty newline to seperate header and body
@@ -244,6 +244,7 @@ void	Response::bodyBuilder()
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	std::string body = buffer.str();
+	replaceAll(body, "{{UPLOAD_BLOCK}}", _request->getUploadDir()["location"]);
 	ss << body.size();
 
 	std::cout << "Bytes read: " << ss.str() << std::endl;
@@ -268,13 +269,17 @@ std::string Response::getMimeType(const std::string &path)
 	if (ext == "gif") return "image/gif";
 	if (ext == "cgi") return "text/html";
 	if (ext == "py") return "text/html";
+	if (ext == "php") return "text/html";
 	//we can add more types here
 	return "application/octet-stream";
 }
 
 bool Response::isUploadsDir(const std::string &path)
 {
-	if (path.find("/uploads/") != std::string::npos) { return true; }
+	if (path.find(_request->getUploadDir()["location"]) != std::string::npos)
+		return true;
+	//if (path == _request->getUploadDir()["root"]) //COMMENT FOR LATER: double check here if this works / or if it has to be compared to location only
+		//return true;
 	return (false);
 }
 
@@ -283,6 +288,70 @@ bool Response::isCGI(const std::string &path)
 	if (path.find("/cgi-bin/") != std::string::npos) { return true; }
 	if (path.find(".cgi") != std::string::npos) { return true; }		//this would allow to execute scripts which are not in the cgi/bin folder? Maybe we add both conditions in one if?
 	return (false);
+}
+
+void Response::POSTBodyBuilder()
+{
+	std::string boundary;
+	std::string content_type = _request->getHeader("Content-Type");
+
+	if (content_type.find("multipart/form-data") != std::string::npos)
+	{
+		size_t boundPos = content_type.find("boundary=");
+		if (boundPos == std::string::npos) // no boundary
+		{
+			handleERROR(400);
+			return;
+		}
+		boundary = content_type.substr(boundPos + 9);
+		std::string body = _request->getBody();
+		std::vector<std::string> parts = parseMultipartBody(body, boundary);
+
+		std::string filePart;
+		bool foundFilePart = false;
+
+		for (size_t i = 0; i < parts.size(); ++i)
+		{
+			if (parts[i].find("Content-Disposition: form-data;") != std::string::npos &&
+				parts[i].find("filename=\"") != std::string::npos)
+			{
+				filePart = parts[i];
+				foundFilePart = true;
+				break;
+			}
+		}
+		if (!foundFilePart)
+		{
+			handleERROR(400);
+			return;
+		}
+		std::string filename = getFilename(filePart);
+		std::string fileContent = getFileContent(filePart);
+
+		if (filename.empty())
+		{
+			std::cout << "No file selected for upload\n";
+			handleERROR(400);
+			return;
+		}
+		std::string saveTo = _request->getUploadDir()["root"] + "/" + filename;
+		std::ofstream outFile(saveTo.c_str(), std::ios::binary);
+		if (!outFile)
+		{
+			handleERROR(500);
+			return;
+		}
+		outFile.write(fileContent.data(), fileContent.size());
+		outFile.close();
+
+		this->_headers["Content-Type"] = "text/html";
+		std::stringstream ss;
+		ss << "<html><body><h1>File uploaded successfully!</h1><p>Saved as: " << filename << "</p></body></html>";
+		this->_body = ss.str();
+		this->_headers["Content-Length"] = intToString(this->_body.size());
+	}
+	else 	// if not image, then handle how else
+		handleERROR(415);
 }
 
 std::string formatTime(std::time_t t)

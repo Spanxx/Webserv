@@ -5,13 +5,15 @@
 
 Server::Server(std::string &serverConfig)
 {
+	std::cout << "Server created\n";
 	try
 	{
 		if (this->createConfig(serverConfig) == 1)
 			throw ServerException("Creating Config failed!");
-		this->extractName();
-		this->extractPorts();
-		this->extractHost();
+		this->extractVariables();
+		//this->extractName();
+		//this->extractPorts();
+		//this->extractHost();
 
 		this->storeServerConfig();
 		// this->createDirStructure();
@@ -33,11 +35,13 @@ Server::Server(std::string &serverConfig)
 			std::cout << "From constructor Server socket fd: " << sock << " created and bound\n";
 			++it;
 		}
+		assignUploadDir();
+		checkScriptsExecutable();
 	}
 	catch (std::exception &e)
 	{
 		std::cout << "Server exception: " << e.what() << std::endl;
-		return ;
+		exit(1) ; // COMMENT FOR LATER: should we exit when exception is caught?
 	}
 }
 
@@ -87,3 +91,6 @@ Server::ServerException::ServerException(const std::string &error) : std::runtim
 size_t	Server::getMaxBodySize() { return _maxBodySize; }
 std::string	Server::getName() { return _name; }
 std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}
+
+std::map<std::string, std::string> Server::getUploadDir() { return _uploadDir; }
+std::string Server::getErrorPage() { return _errorPage; };

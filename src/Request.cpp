@@ -2,7 +2,8 @@
 #include "../incl/Request.hpp"
 #include "../incl/Utils.hpp"
 
-Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), _server(server)
+Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), _uploadDir(server->getUploadDir()), 
+	_errorPage(server->getErrorPage()), _server(server)
 {
 	std::cout << "Request constructed\n";
 }
@@ -51,10 +52,11 @@ std::ostream &operator<<(std::ostream &os, Request &request)
 {
 	os << "Method: " << request._method << ", URI: " << request._path << ", VERSION: " << request._version << std::endl;
 	os << "Headers:\n";
-	for (std::map<std::string, std::string>::const_iterator it = request._headers.begin(); it != request._headers.end(); ++it) {
+	for (std::map<std::string, std::string>::const_iterator it = request._headers.begin(); it != request._headers.end(); ++it)
+	{
 		os << "  " << it->first << ": " << it->second << "\n";
-	    }
-	    os << "Body:\n" << request._body << "\n";
+	}
+	//os << "Body:\n" << request._body << "\n";
 	//os << "CODE: " << request._code << std::endl;
 	return os;
 }
@@ -72,6 +74,8 @@ std::string Request::getBody() { return _body; }
 std::string Request::getQuery() { return _query; }
 int 	Request::getContentLength() { return _content_length; }
 size_t Request::getParsePos() const { return _parse_pos; }
+std::map<std::string, std::string> Request::getUploadDir() { return _uploadDir; }
+std::string Request::getErrorPage() { return _errorPage; };
 bool 	Request::getConnection()
 {
 	// if (_headers["Connection"] == "keep-alive")
