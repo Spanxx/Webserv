@@ -8,7 +8,7 @@
         "type": "tabs",
         "children": [
           {
-            "id": "a8a648abaced861c",
+            "id": "c90af6e7662afb25",
             "type": "leaf",
             "state": {
               "type": "pdf",
@@ -17,6 +17,34 @@
               },
               "icon": "lucide-file-text",
               "title": "webserv.subject"
+            }
+          },
+          {
+            "id": "06db12f6f12a9d50",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Webserv_notes/03 - Steph/Links to check.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Links to check"
+            }
+          },
+          {
+            "id": "37ec934d1858db51",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Webserv_notes/03 - Steph/TODO.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "TODO"
             }
           },
           {
@@ -31,7 +59,8 @@
               "title": "webserv.subject"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -179,41 +208,43 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "a8a648abaced861c",
+  "active": "37ec934d1858db51",
   "lastOpenFiles": [
-    "obj/src/Router-0e9f9ca0.o.tmp",
-    "obj/src/Router-b96a270d.o.tmp",
-    "obj/src/Router-cf69ec2b.o.tmp",
-    "obj/src/Router-7a51e194.o.tmp",
-    "obj/src/Response-09bd028a.o.tmp",
-    "obj/src/Response-69e3c81b.o.tmp",
-    "obj/src/Response-15a7e682.o.tmp",
-    "obj/src/Response-9cd4fd98.o.tmp",
-    "obj/src/Response-17292f66.o.tmp",
-    "obj/src/Response-af71681b.o.tmp",
-    "obj/src/Response-a467c733.o.tmp",
-    "www/webserv42/files/image.png",
-    "www/BackupServer/files/image.png",
+    "www/webserv42/files/uploads/IMG_2537 Medium.jpeg",
+    "www/webserv42/files/uploads/This-week-menu_1.pdf",
+    "www/webserv42/files/uploads/IMG_7409.jpg",
+    "www/webserv42/files/uploads/This-week-menu.pdf",
+    "obj/src/Response-8dad57cb.o.tmp",
+    "obj/src/Response-da342c1e.o.tmp",
+    "obj/src/Response-374b7d4f.o.tmp",
+    "www/webserv42/files/IMG_7409.jpg",
+    "obj/src/Response.o",
+    "obj/src/Response-9f9ee63a.o.tmp",
+    "obj/src/Response-9263b4d9.o.tmp",
+    "obj/src/Router-ce074466.o.tmp",
+    "obj/src/Router-bd257b47.o.tmp",
+    "www/webserv42/files/uploads/car sign (1).png",
+    "www/webserv42/files/uploads/IMG_7371.jpg",
+    "Webserv_notes/01 - Chris/TODO.md",
+    "Webserv_notes/To DOs.md",
+    "Webserv_notes/03 - Steph/TODO.md",
+    "www/webserv42/files/uploads/Screenshot from 2024-12-13 15-11-30.png",
+    "Webserv_notes/🐙 02 - Henri/POST without CGI.md",
     "src/www/webserv42/files/uploads/Atlassian_logo_2.png",
     "src/www/webserv42/files/uploads/Atlassian_logo_1.png",
     "src/www/webserv42/files/uploads/Atlassian_logo.png",
+    "Webserv_notes/01 - Chris/Stresstest Server with \"siege\".md",
+    "www/webserv42/files/image.png",
+    "www/BackupServer/files/image.png",
     "Webserv_notes/🐙 02 - Henri/Package loss simulation test & Chunking.md",
     "Webserv_notes/conflict-files-obsidian-git.md",
-    "Webserv_notes/To DOs.md",
     "Webserv_notes/03 - Steph/Response notes/Some possible functions to use in the response.md",
     "Webserv_notes/03 - Steph/Response notes/HTTP responses.md",
     "Webserv_notes/03 - Steph/Delete notes/Sending DELETE request.md",
-    "Webserv_notes/03 - Steph/TODO.md",
     "Webserv_notes/03 - Steph/Plan for location blocks.md",
-    "Webserv_notes/03 - Steph/Links to check.md",
     "Webserv_notes/01 - Chris/Tester from 42 for webserv.md",
     "Webserv_notes/01 - Chris/NGINX.md",
-    "www/files/image.png",
     "Webserv_notes/Subject summary and thoughts.md",
-    "www/BackupServer/files/uploads/IMG_7409_1.jpg",
-    "www/BackupServer/files/uploads/IMG_7409.jpg",
-    "www/webserv42/files/uploads/IMG_7380.jpg",
-    "www/webserv42/files/uploads/IMG_7371.jpg",
     "Webserv_notes/Obsidian Basics.md",
     "Webserv_notes/04 - Files/Excalidraw/Hello World!.md",
     "Webserv_notes/06 - Allowed functions/Explicitly named (C) functions.md",
@@ -223,9 +254,6 @@
     "Webserv_notes/🐙 02 - Henri/request parsing.md",
     "Webserv_notes/03 - Steph/HTTP Response.md",
     "Webserv_notes/04 - Files/Excalidraw/Procecss_drawing.md",
-    "Webserv_notes/01 - Chris/Config File.md",
-    "Webserv_notes/01 - Chris/Basic planning.md",
-    "Webserv_notes/🐙 02 - Henri/details.md",
-    "Webserv_notes/🐙 02 - Henri/general research.md"
+    "Webserv_notes/01 - Chris/Config File.md"
   ]
 }

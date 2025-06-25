@@ -167,8 +167,6 @@ void	Response::handlePOST()
 void	Response::handleDELETE()
 {
 	std::string uri = this->_request->getPath();
-	if (isUploadsDir(uri))
-	{
 		if (access(uri.c_str(), F_OK) != 0)
 		{
 			handleERROR(404);
@@ -181,12 +179,6 @@ void	Response::handleDELETE()
 		}
 		this->setCode(200);
 		this->_headers["Content-Length"] = "0";
-	}
-	else
-	{
-		handleERROR(404);
-		return;
-	}
 }
 
 std::string Response::responseBuilder()
@@ -334,7 +326,7 @@ void Response::POSTBodyBuilder()
 			handleERROR(400);
 			return;
 		}
-		std::string saveTo = _request->getUploadDir()["root"] + "/" + filename;
+		std::string saveTo = _request->getUploadDir()["root"] + _request->getUploadDir()["location"] + filename;
 		std::ofstream outFile(saveTo.c_str(), std::ios::binary);
 		if (!outFile)
 		{

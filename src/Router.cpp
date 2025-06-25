@@ -194,6 +194,14 @@ void	Router::setDirForType()
 	if (dotPos != std::string::npos) {
 		type = this->_requestedFile.substr(dotPos);
 	}
+
+	if (_request->getMethod() == "DELETE")
+	{
+		this->_request->setPath(_dirConfig["root"] + this->_requestedPath); //TODO
+		std::cout << "DELETE request, returning full path: " << fullPath << '\n';
+		return;
+	}
+
 	if ((type == ".html" || type == ".css") && this->_requestedFile != "status_page.html")
 		fullPath += "/html" + this->_requestedPath;
 	if (type == ".py" || type == ".php" || type == ".js")

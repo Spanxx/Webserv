@@ -37,32 +37,34 @@ def main():
         upload_block = os.environ.get('UPLOAD_BLOCK', '')
         match = re.search(r'boundary=(.*)', content_type)
         if not match:
-            sys.exit(1)
+            sys.exit(2)
 
         boundary = b'--' + match.group(1).encode()
         raw_data = sys.stdin.buffer.read(content_length)
         filename, file_data = parse_multipart(raw_data, boundary)
 
         if file_data:
-            os.makedirs(upload_dir, exist_ok=True)
+            upload_block = upload_block.lstrip('/')
+            upload_path = os.path.join(upload_dir, upload_block)
+            os.makedirs(upload_path, exist_ok=True)
             filename = sanitize_filename(filename)
-            unique_filename = get_unique_filename(upload_dir, filename)
-            full_path = os.path.join(upload_dir, unique_filename)
+            unique_filename = get_unique_filename(upload_path, filename)
+            full_path = os.path.join(upload_path, unique_filename)
 
             with open(full_path, "wb") as f:
                 f.write(file_data)
 
-            index_path = "www/BackupServer/html/index.html"
+            index_path = "www/webserv42/html/index.html"
             with open(index_path, "r", encoding="utf-8") as f:
                 html_content = f.read()
 
-            insertion = f'\n<img src="{upload_block}{unique_filename}" alt="Uploaded Image" style="max-width:100%; margin-top:20px;">\n'
+            insertion = f'\n<img src="/{upload_block}{unique_filename}" alt="Uploaded Image" style="max-width:100%; margin-top:20px;">\n'
             html_content = html_content.replace("</form>", "</form>" + insertion, 1)
 
             print("Content-Type: text/html\r\n")
             print(html_content)
         else:
-            sys.exit(1)
+            sys.exit(3)
 
     except Exception as e:
         sys.exit(1)
