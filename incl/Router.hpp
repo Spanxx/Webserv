@@ -33,6 +33,9 @@ private:
 	std::string													_requestedFile;
 	std::string													_extractedPath;
 	std::string													_mimeType;
+	std::string													_locationBlockIndex;
+	std::string													_locationBlockRoot;
+	std::string													_location;
 	std::map<std::string, std::string>							_dirConfig;
 	std::map<std::string, std::map<std::string, std::string> >	*_locationBlocks;
 };

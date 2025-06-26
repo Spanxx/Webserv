@@ -11,6 +11,7 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	this->_locationBlocks = this->_server->getLocationBlocks();
 
 	extractPathAndFile();
+	checkMethods();
 	findDirConfig();
 	// checkDirPermission();
 	checkForDirRequest();
@@ -18,7 +19,6 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	handleFavicon();
 	// handleAutoIndex();
 	// handleRedir();
-	checkMethods();
 }
 
 Router::Router(Router &other)
@@ -83,7 +83,6 @@ std::string	Router::checkCwd()
 void	Router::extractPathAndFile()
 {
 	std::cout << "Requested Path: " << this->_requestedPath << '\n';
-	// "/index.html"
 
 	int 		dotPos 		= -1;
 	int 		lastSlashPos = -1;
@@ -94,12 +93,9 @@ void	Router::extractPathAndFile()
 
 	if (lastSlashPos == -1)
 	{
-		std::cout << "Invalid Request (no slash), redirect to index.html\n";
-
+		std::cout << "Invalid Request (no slash), code 404\n";
 		this->_request->setCode(404);
-
-		dotPos = this->_requestedPath.find_last_of('.');
-		lastSlashPos = this->_requestedPath.find_last_of('/');
+		return;
 	}
 
 	this->_extractedPath = this->_requestedPath.substr(0, lastSlashPos + 1);
@@ -114,12 +110,22 @@ void	Router::findDirConfig()
 {
 	std::map<std::string, std::map<std::string, std::string> >::iterator it = this->_locationBlocks->begin();
 
+	//std::cout << "Searching for _extractedPath= "<< this->_extractedPath << std::endl;
 	while (it != this->_locationBlocks->end())
 	{
 		if (this->_extractedPath == it->first)
 		{
 			_dirConfig = it->second;
-			std::cout << "Locationblock for routing found!\n";
+			this->_location = it->first;
+			//std::cout << "Location === "<< _location << std::endl;
+			this->_locationBlockIndex = it->second["index"];
+			if (this->_locationBlockIndex.empty())
+			{
+				std::cout << "No index file defined in location block\n";
+				this->_locationBlockIndex = "none";
+			}
+			this->_locationBlockRoot = it->second["root"];
+			std::cout << "Locationblock for routing found!\n ROOT = " << this->_locationBlockRoot << std::endl;
 			return ;
 		}
 		++it;
@@ -147,19 +153,20 @@ void	Router::checkForDirRequest()
 			//this->_request->setAutoindex(true);
 			this->_request->setPath(this->_serverName + this->_requestedPath + "autoindex.html");
 			std::cout << "PATHHHh: " << this->_request->getPath() << "\n";
-			this->_requestedFile = "autoindex.html"
-			// this->_request->setPath("www/" + _serverName + "/cgi-bin/autoindex.py");	// path to script for listing files in folder
-			// this->_requestedFile = "autoindex.py";
-			// if (this->_requestedPath == "/") // TODO Confirm if is the best way to do it?
-			// 	this->_requestedPath = "/autoindex.py";
+			this->_requestedFile = "autoindex.html";
 		}
 		else
 		{
-			std::string indexFile = "index.html"; // make it dynamic?
-
-			std::cout << "Directory request (autoindex: off) → redirect to index.html "  << "\n";
-			this->_requestedFile = indexFile; // set the requested file to index.html
-			this->_requestedPath = "/index.html"; //TODO: dynamic
+			if (this->_locationBlockIndex == "none")
+			{
+				std::cout << "No index file defined in location block, returning 403\n";
+				this->_request->setCode(403);
+				return ;
+			}
+			std::cout << "Directory request (autoindex: off) → redirect to corresponding index of the location block "  << "\n";
+			this->_requestedFile = this->_locationBlockIndex;
+			// this->_request->setPath(this->_locationBlockRoot + this->_requestedPath + this->_requestedFile);
+			// this->_mimeType = "text/html";
 		}
 	}
 }
@@ -202,17 +209,18 @@ void	Router::setDirForType()
 		return;
 	}
 
-	if ((type == ".html" || type == ".css") && this->_requestedFile != "status_page.html")
-		fullPath += "/html" + this->_requestedPath;
-	if (type == ".py" || type == ".php" || type == ".js")
-		fullPath += "/cgi-bin" + this->_requestedPath;
-	if (type == ".png" || type == ".jpg" || type == ".jpeg")
-		fullPath += "/files" + this->_requestedPath;
+	// if ((type == ".html" || type == ".css") && this->_requestedFile != "status_page.html")
+	// 	fullPath += "/html" + this->_requestedPath;
+	// if (type == ".py" || type == ".php" || type == ".js")
+	// 	fullPath += "/cgi-bin" + this->_requestedPath;
+	// if (type == ".png" || type == ".jpg" || type == ".jpeg")
+	// 	fullPath += "/files" + this->_requestedPath;
 
 
 
-	std::cout << "FullPath = " << fullPath << '\n';
-	this->_request->setPath(fullPath);
+	// std::cout << "FullPath = " << fullPath << '\n';
+	//this->_request->setPath(fullPath);
+	this->_request->setPath(this->_locationBlockRoot + this->_location + this->_requestedFile);
 }
 
 void	Router::handleFavicon()
