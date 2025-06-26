@@ -127,10 +127,14 @@ private:
 	Server& operator=(Server &other);
 };
 
-void	createConfigList(std::string configPath, std::vector<std::string> &configList);
-int		checkforSocketDuplicates(std::vector<std::string> &configList);
+int							checkforSocketDuplicates(std::vector<std::string> &configList);
+std::vector<std::string>	extractPorts(std::string &line);
+std::string					extractHost(std::string &line);
+int							createAndCheckCombinations(std::string &host, std::vector<std::string> &ports, std::map<std::string, int> *combinations);
 
-int		mkdir_p(const std::string fullPath, mode_t mode);
+void						createConfigList(std::string configPath, std::vector<std::string> &configList);
+
+int							mkdir_p(const std::string fullPath, mode_t mode);
 
 
 #endif //SERVER_HPP
