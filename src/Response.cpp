@@ -417,7 +417,7 @@ std::vector<FileEntry> Response::getDirectoryEntries(const std::string& path)
 
 void		Response::autoindexBuilder(const std::string &path, const std::vector<FileEntry>& entries)
 {
-	std::ifstream file("www/autoindex/autoindex.html");
+	std::ifstream file("www/html/autoindex.html");
 	if (!file)
 	{
 		std::cerr << "Error opening autoindex template file\n";
