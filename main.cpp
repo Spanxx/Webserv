@@ -70,17 +70,27 @@ int main(int ac, char **av)
 	std::vector<std::string>	configList;
 	std::vector<Server*>		serverList;
 	
-	createConfigList(configPath, configList);
-	if (configList.size() < 1)
+	try
 	{
-		std::cerr << "Loading server configuration failed!\n";
-		return (1);
+		createConfigList(configPath, configList);
+		if (configList.size() < 1)
+		{
+			throw std::runtime_error("Loading server configuration failed!");
+			// std::cerr << "Loading server configuration failed!\n";
+			// return (1);
+		}
+		
+		if (checkforSocketDuplicates(configList) == 1)
+		{
+			throw std::runtime_error("Socket duplicate (Host + Port) found!\nServer creation aborted.");
+			// std::cerr << "Socket duplicate (Host + Port) found!\n"
+			// << "Server creation aborted.\n";
+			// return (1);
+		}
 	}
-
-	if (checkforSocketDuplicates(configList) == 1)
+	catch (std::exception &e)
 	{
-		std::cerr << "Socket duplicate (Host + Port) found!\n"
-				<< "Server creation aborted.\n";
+		std::cerr << e.what() << std::endl;
 		return (1);
 	}
 

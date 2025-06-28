@@ -25,6 +25,11 @@ public:
 	void	checkDirPermission();
 	void	checkMethods();
 
+	class RouterException : public std::runtime_error {
+	public:
+		RouterException(const std::string &error);
+	};
+
 private:
 	Server 														*_server;
 	Request 													*_request;

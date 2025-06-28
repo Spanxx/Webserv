@@ -12,13 +12,20 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	this->_serverName = this->_server->getName();
 	this->_locationBlocks = this->_server->getLocationBlocks();
 
-	extractPath();
-	extractFile();
-	findDirConfig();
-	checkForDirRequest();
-	setDirForType();
-	handleFavicon();
-	checkMethods();
+	try
+	{
+		extractPath();
+		extractFile();
+		findDirConfig();
+		checkForDirRequest();
+		setDirForType();
+		handleFavicon();
+		checkMethods();
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Router exception: " << e.what() << std::endl;
+	}
 }
 
 Router::Router(Router &other)
@@ -59,6 +66,8 @@ Router::~Router()
 	std::cout << "Router deconstructed\n";
 }
 
+Router::RouterException::RouterException(const std::string &error) : std::runtime_error(error) {}
+
 void	Router::extractPath()
 {
 	std::cout << "Requested Path: " << this->_requestedPath << '\n';
@@ -92,17 +101,15 @@ void	Router::extractFile()
 	dotPos = this->_requestedPath.find_last_of('.');
 	lastSlashPos = this->_requestedPath.find_last_of('/');
 
-
-	this->_requestedFile = this->_requestedPath.substr(lastSlashPos + 1);
 	//check if directory was set to requested file
 	if (dotPos == -1)
 	{
-		if (this->_requestedFile == "files" || this->_requestedFile == "cgi-bin"
-			|| this->_requestedFile == "html" || this->_requestedFile == uploadDir)
-		{
-			this->_requestedFile = "";
-		}
+		this->_request->setPath("www/error/status_page.html");
+		this->_request->setCode(404);
+		throw RouterException("Router exception: Files need an extension!");
 	}
+
+	this->_requestedFile = this->_requestedPath.substr(lastSlashPos + 1);
 }
 
 void	Router::findDirConfig()
@@ -126,6 +133,7 @@ void	Router::findDirConfig()
 		std::cout << "No locationblock for routing found!\n";
 		this->_request->setPath("www/error/status_page.html");
 		this->_request->setCode(404);
+		throw RouterException("Router exception: No Locationblock for routing found!");
 	}
 }
 
@@ -184,46 +192,11 @@ void	Router::assignFileWithExtension(std::string &type)
 		++it;
 	}
 	if (it == config->end())
-		this->_request->setCode(405);
-}
-
-std::string	checkMultiDeclaration(std::string &type)
-{
-	int			spacePos = 0;
-	std::string	value;
-	std::string trimmed = trim(type);
-
-	spacePos = trimmed.find_first_of(" ");
-	
-	if (spacePos > 0)
-		value = trimmed.substr(0, spacePos);
-	else
-		value = trimmed;
-	
-	return (value);
-}
-
-void	Router::assignFileWithoutExtension()
-{
-	std::string type = ".";
-	
-	std::map<std::string, std::string> *config =  this->_server->getConfigMap("mimeConfig");
-	std::map<std::string, std::string>::iterator it = config->begin();
-
-	while (it != config->end())
 	{
-		if (it->first == this->_mimeType)
-		{
-			// get filetype by mimetype from config/mime.types
-			type += checkMultiDeclaration(it->second);
-			assignFileWithExtension(type);
-			return ;
-		}
-		++it;
-	}
-
-	if (it == config->end())
 		this->_request->setCode(405);
+		this->_request->setPath("www/error/status_page.html");
+		throw RouterException("Invalid Filetype requested!");
+	}
 }
 
 void	Router::setDirForType()
@@ -245,8 +218,6 @@ void	Router::setDirForType()
 		type = this->_requestedFile.substr(dotPos);
 		assignFileWithExtension(type);
 	}
-	else if (dotPos == std::string::npos && !this->_requestedFile.empty())
-		assignFileWithoutExtension();
 }
 
 void	Router::handleFavicon()
@@ -278,6 +249,7 @@ void	Router::checkMethods()
 	}
 	// Method not found
 	this->_request->setCode(405);
+	throw RouterException("Method is not allowed!");
 }
 
 // void	Router::checkMethods()

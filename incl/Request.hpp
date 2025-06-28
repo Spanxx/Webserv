@@ -49,6 +49,11 @@ class Request
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 
+		class RequestException : public std::runtime_error
+		{
+			RequestException(std::string error);
+		};
+	
 	private:
 		std::string 						_method;
 		std::string 						_path;

@@ -55,7 +55,7 @@ int	createAndCheckCombinations(std::string &host, std::vector<std::string> &port
 	while (it != ports.end())
 	{
 		socketString = host + " | " + *it;
-		std::cout << socketString << '\n';
+		// std::cout << socketString << '\n';
 		
 		if (combinations->find(socketString) != combinations->end())
 			return (1);
@@ -65,14 +65,14 @@ int	createAndCheckCombinations(std::string &host, std::vector<std::string> &port
 
 		if (host == "0.0.0.0")
 		{
-			std::map<std::string, int>::iterator it_comb = combinations->begin();
+			std::map<std::string, int>::iterator it_combinations = combinations->begin();
 
-			while (it_comb != combinations->end())
+			while (it_combinations != combinations->end())
 			{
-				if (it_comb->second == port)
+				if (it_combinations->second == port)
 					return (1);
 				
-				++it_comb;
+				++it_combinations;
 			}
 		}
 		

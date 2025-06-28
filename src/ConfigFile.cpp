@@ -11,8 +11,9 @@ void	createConfigList(std::string configPath, std::vector<std::string> &configLi
 	std::ifstream	iss(configPath.c_str());
 	if (!iss)
 	{
-		std::cerr << "Creating config list failed!\n";
-		return;
+		throw std::runtime_error("Creating coinfg list failed!");
+		// std::cerr << "Creating config list failed!\n";
+		// return;
 	}
 
 	while (getline(iss, line))
@@ -68,12 +69,12 @@ void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &
 		if (key == "location" && value != "")
 			*locationPath = value;
 
-		// std::cout << "config key: " << key << " || value: " << value << '\n';	//debug for config values
 		//check for key duplicates
 		if (targetMap.find(key) != targetMap.end())
 		{
-			//std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
-					//<< "new Value don't overwrites existing Value!\n";
+			std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+					<< "new Value overwrites existing Value!\n";
+			targetMap[key] = value;	//new values overrides existing one (nginx is handling it like this)
 		}
 		else
 			targetMap[key] = value;

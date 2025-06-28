@@ -23,16 +23,20 @@
 - [x] router umbauen: if path is directory + method is POST, then it's correct (check what case is for DELETE) 
 - [x] delete negative number check
 - [ ] check timeout conditions for big files (how it works with child killing)
-- [ ] make check for duplicate in host:port combination or port duplicates
-	- [ ] check with 2 browser (1 upload / 1 load index, is it blocking?)
-- [ ] add exceptions
+- [x] make check for duplicate in host:port combination or port duplicates
+- [ ] check with 2 browser (1 upload / 1 load index, is it blocking?)
+- [x] add exceptions
 - [x] check memleaks
 - [ ] check files without filetypes / get mimetype and handle file
+	- [ ] logic in cgi/py script need to be changed
 - [ ] hello.php script is not working on linux...
 
 
 ## Chris notes:
-- when uploading a file(cgi) --> server changes background color
+- [ ] when uploading a file(cgi) --> server changes background color
+- [ ] when exception is triggered the response is always 400 , even when i set it to a different value --> why?
+- [ ] Exceptions for Request and response needed? Or is the handle Error function enoug/better?
+- [ ] ServerDirStruct.cpp still needed?
 
 # Henri:
 - [x] change host to iphost for config logic

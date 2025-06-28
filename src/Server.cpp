@@ -40,10 +40,6 @@ Server::Server(std::string &serverConfig)
 	}
 }
 
-// Copy and assignment operator
-// Server::Server(Server &other) {}			//a server should not be copyied or assigned to another one.
-// Server&	Server::operator=(Server &other) {}	//so we just declare the CC and AC, but not implement them
-
 Server::~Server()
 {
 	for (size_t i = 0; i < this->_serverSockets.size(); ++i)
@@ -79,9 +75,8 @@ void Server::closeServer()
 }
 
 const std::vector<struct pollfd>& Server::getpollFdArray() const { return this->_pollFdArray; }
-const std::vector<int>& Server::getServerSockets() const { return this->_serverSockets; }
 
-Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
+const std::vector<int>& Server::getServerSockets() const { return this->_serverSockets; }
 
 std::string	Server::getName() { return _name; }
 
@@ -94,3 +89,5 @@ std::map<std::string, std::string> Server::getUploadDir() { return _uploadDir; }
 std::string Server::getErrorPage() { return _errorPage; };
 
 std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}
+
+Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}

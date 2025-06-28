@@ -18,16 +18,6 @@ const std::string intToString(int num)
 	return oss.str();
 }
 
-// int strToInt(std::string &value)
-// {
-// 	int	num = 0;
-// 	std::stringstream oss;
-// 	oss << value;
-// 	oss >> num;
-
-// 	return (num);
-// }
-
 void replaceAll(std::string &str, const std::string &placeholder, const std::string &goal)
 {
 	size_t start = 0;
