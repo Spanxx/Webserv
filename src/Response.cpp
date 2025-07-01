@@ -150,33 +150,21 @@ void	Response::handlePOST()
 		POSTBodyBuilder();
 }
 
-void	Response::handleDELETE() //Pending handle the files with space in the name
+void	Response::handleDELETE()
 {
 	std::string uri = this->_request->getPath();
-	if (isUploadsDir(uri))
-	{
 		if (access(uri.c_str(), F_OK) != 0)
 		{
-			//this->setCode(404);
 			handleERROR(404);
 			return;
 		}
 		if (std::remove(uri.c_str()) != 0)
 		{
-			//this->setCode(500);
 			handleERROR(500);
 			return;
 		}
 		this->setCode(200);
-		// this->setCode(301);
-		// this->_request->setPath("/index.html");
 		this->_headers["Content-Length"] = "0";
-	}
-	else
-	{
-		handleERROR(404);
-		return;
-	}
 }
 
 std::string Response::responseBuilder()
@@ -270,7 +258,7 @@ std::string Response::getMimeType(const std::string &path)
 
 bool Response::isUploadsDir(const std::string &path)
 {
-	if (path.find(_request->getUploadDir()["location"]) != std::string::npos) 
+	if (path.find(_request->getUploadDir()["location"]) != std::string::npos)
 		return true;
 	//if (path == _request->getUploadDir()["root"]) //COMMENT FOR LATER: double check here if this works / or if it has to be compared to location only
 		//return true;
@@ -328,7 +316,7 @@ void Response::POSTBodyBuilder()
 			handleERROR(400);
 			return;
 		}
-		std::string saveTo = _request->getUploadDir()["root"] + "/" + filename; 
+		std::string saveTo = _request->getUploadDir()["root"] + _request->getUploadDir()["location"] + filename;
 		std::ofstream outFile(saveTo.c_str(), std::ios::binary);
 		if (!outFile)
 		{

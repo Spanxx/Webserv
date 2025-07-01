@@ -44,10 +44,12 @@ def main():
         filename, file_data = parse_multipart(raw_data, boundary)
 
         if file_data:
-            os.makedirs(upload_dir, exist_ok=True)
+            upload_block = upload_block.lstrip('/')
+            upload_path = os.path.join(upload_dir, upload_block)
+            os.makedirs(upload_path, exist_ok=True)
             filename = sanitize_filename(filename)
-            unique_filename = get_unique_filename(upload_dir, filename)
-            full_path = os.path.join(upload_dir, unique_filename)
+            unique_filename = get_unique_filename(upload_path, filename)
+            full_path = os.path.join(upload_path, unique_filename)
 
             with open(full_path, "wb") as f:
                 f.write(file_data)
@@ -56,7 +58,7 @@ def main():
             with open(index_path, "r", encoding="utf-8") as f:
                 html_content = f.read()
 
-            insertion = f'\n<img src="{upload_block}{unique_filename}" alt="Uploaded Image" style="max-width:100%; margin-top:20px;">\n'
+            insertion = f'\n<img src="/{upload_block}{unique_filename}" alt="Uploaded Image" style="max-width:100%; margin-top:20px;">\n'
             html_content = html_content.replace("</form>", "</form>" + insertion, 1)
 
             print("Content-Type: text/html\r\n")
