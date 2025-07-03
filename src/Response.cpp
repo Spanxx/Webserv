@@ -130,7 +130,7 @@ void	Response::handleGET()
 	}
 	else if (isAutoindex(uri))
 	{
-		std::string autoindexPath = uri.substr(0, uri.find("autoindex.html"));
+		std::string autoindexPath = uri.substr(0, uri.find("/__AUTO_INDEX__"));
 		std::cout << "Autoindex requested for: " << autoindexPath << std::endl;
 		std::vector<FileEntry> entries = getDirectoryEntries(autoindexPath);
 		if (entries.empty())
@@ -373,7 +373,7 @@ std::string formatSize(off_t size)
 
 bool Response::isAutoindex(const std::string &path)
 {
-	if (path.find("autoindex.html") != std::string::npos)
+	if (path.find("__AUTO_INDEX__") != std::string::npos)
 		return true;
 	return false;
 }

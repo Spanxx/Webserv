@@ -151,9 +151,9 @@ void	Router::checkForDirRequest()
 			std::cout << "Autoindex is on → updating path to autoindex\n";
 
 			//this->_request->setAutoindex(true);
-			this->_request->setPath(this->_serverName + this->_requestedPath + "autoindex.html");
+			//this->_request->setPath(this->_serverName + this->_requestedPath + "autoindex.html");
 			std::cout << "PATHHHh: " << this->_request->getPath() << "\n";
-			this->_requestedFile = "autoindex.html";
+			this->_requestedFile = "__AUTO_INDEX__";
 		}
 		else
 		{
@@ -181,9 +181,9 @@ void	Router::setDirForType()
 	std::string	fullPath;
 	fullPath = checkCwd();
 
-	if (this->_requestedFile == "autoindex.html")
+	if (this->_requestedFile == "__AUTO_INDEX__")
 	{
-		this->_request->setPath(fullPath + this->_requestedPath+ "/autoindex.html");
+		this->_request->setPath(fullPath + this->_requestedPath+ "/__AUTO_INDEX__");
 		this->_mimeType = "text/html";
 		return;
 	}
