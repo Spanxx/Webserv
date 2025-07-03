@@ -113,7 +113,8 @@ void	Router::findDirConfig()
 	//std::cout << "Searching for _extractedPath= "<< this->_extractedPath << std::endl;
 	while (it != this->_locationBlocks->end())
 	{
-		if (this->_extractedPath == it->first)
+		std::cout << "EXTRACTED PATH: " << this->_extractedPath <<std::endl;
+		if (this->_requestedPath == it->first)
 		{
 			_dirConfig = it->second;
 			this->_location = it->first;

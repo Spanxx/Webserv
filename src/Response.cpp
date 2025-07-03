@@ -2,6 +2,7 @@
 #include "../incl/Response.hpp"
 #include "../incl/Utils.hpp"
 #include "../incl/Libraries.hpp"
+#include <ctime>
 
 Response::Response(Request *request, std::string &hostName): _request(request), _code(request->getCode())
 {
@@ -346,7 +347,7 @@ void Response::POSTBodyBuilder()
 		handleERROR(415);
 }
 
-std::string formatTime(std::time_t t)
+std::string formatTime(time_t t)
 {
 	char buf[256];
 	std::tm* tm = std::localtime(&t);
