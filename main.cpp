@@ -82,7 +82,7 @@ int main(int ac, char **av)
 		
 		if (checkforSocketDuplicates(configList) == 1)
 		{
-			throw std::runtime_error("Socket duplicate (Host + Port) found!\nServer creation aborted.");
+			throw std::runtime_error("Duplicate Port found!\nServer creation aborted.");
 			// std::cerr << "Socket duplicate (Host + Port) found!\n"
 			// << "Server creation aborted.\n";
 			// return (1);
