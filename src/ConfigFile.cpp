@@ -12,8 +12,9 @@ void	createConfigList(std::string configPath, std::vector<std::string> &configLi
 	std::ifstream	iss(configPath.c_str());
 	if (!iss)
 	{
-		std::cerr << "Creating config list failed!\n";
-		return;
+		throw std::runtime_error("Creating coinfg list failed!");
+		// std::cerr << "Creating config list failed!\n";
+		// return;
 	}
 
 	while (getline(iss, line))
@@ -47,35 +48,10 @@ std::map<std::string, std::string>* Server::getConfigMap(const std::string &conf
 		return(&this->_dirConfig);
 	if (configName == "mimeConfig")
 		return(&this->_mimetypeConfig);
+	if (configName == "typeDirConfig")
+		return(&this->_typeDirConfig);
 
 	return (NULL);
-}
-
-int	Server::checkConfigFile(std::ifstream &conFile)
-{
-	std::string	line;
-	while(std::getline(conFile, line))
-	{
-		for(int i = 0; line[i] != '\n' && line[i]; ++i)
-		{
-			if (line[0] == '#')
-				break ;
-			if (line[i] == 32)	//space
-			{
-				std::cerr << "Error: Forbidden char <space> found in config file!\n";
-				return (1);
-			}
-			if (line[i] == '=' && line[i + 1] == '-')	//negative value found //  must be changed for new version 111,222,333
-			{
-				std::cerr << "Error: Non-positive value found in config file!\n";
-				return (1);
-			}
-		}
-		// maybe add more checks?
-	}
-	conFile.clear();                // Clear any error flags
-	conFile.seekg(0, std::ios::beg); // Go back to the beginning
-	return (0);
 }
 
 void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &targetMap, std::string *host, std::string *locationPath)
@@ -94,12 +70,12 @@ void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &
 		if (key == "location" && value != "")
 			*locationPath = value;
 
-		// std::cout << "config key: " << key << " || value: " << value << '\n';	//debug for config values
 		//check for key duplicates
 		if (targetMap.find(key) != targetMap.end())
 		{
-			//std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
-					//<< "new Value don't overwrites existing Value!\n";
+			std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+					<< "new Value overwrites existing Value!\n";
+			targetMap[key] = value;	//new values overrides existing one (nginx is handling it like this)
 		}
 		else
 			targetMap[key] = value;
@@ -193,38 +169,45 @@ void	Server::doesRootExist(std::map<std::string, std::string> &targetMap)
 		throw ServerException("Path " + path + " does not exist");
 }
 
-void	Server::loadMimeTypes()
+void	Server::doesRootExist(std::map<std::string, std::string> &targetMap)
 {
-	std::string line;
-	std::string mimeConfig;
-	std::string fullPath;
-	std::string cwd;
-	char* rawCwd = getcwd(NULL, 0);
-
-	if (rawCwd)
+	struct stat st;
+	std::string path = findRoot(targetMap);
+	//std::cout << "ROOT: " << path << std::endl;
+	if (stat(path.c_str(), &st) == 0) // returns 0 if path exists
 	{
-		cwd = rawCwd;
-		free(rawCwd);
+		if (S_ISDIR(st.st_mode) == 0)
+			throw ServerException("Path " + path + " is not a directory");
 	}
 	else
-		throw ServerException("Loading mime.types failed!");
-	if (cwd.find("/src") == std::string::npos)
-		fullPath = "www/config/mime.types";
-	else
-		fullPath = "../www/config/mime.types";
+		throw ServerException("Path " + path + " does not exist");
+}
+
+void	Server::loadTypeFiles(std::string fileName, std::string keyword)
+{
+	std::string line;
+	std::string config;
+	std::string fullPath;
+
+	fullPath = checkCwd(this->_serverRoot, true);
+
+	fullPath += "/" + fileName;
 	std::ifstream file(fullPath.c_str());
 	if (!file)
-		throw ServerException("Loading mime.types failed!");
+		throw ServerException("Loading Typefile failed!");
 
 	while(getline(file, line))
 	{
 		if (line.empty() || line.find('#') != std::string::npos)
 			continue;
 		line += '\n';
-		mimeConfig.append(line);
-
+		config.append(line);
 	}
-	this->extractConfigMap(mimeConfig, _mimetypeConfig, "types");
+
+	if (fileName == "mime.types")
+		this->extractConfigMap(config, _mimetypeConfig, keyword);
+	else if (fileName == "typeDir.conf")
+		this->extractConfigMap(config, _typeDirConfig, keyword);
 }
 
 // int	Server::createConfig(char *av, std::string &serverConfig)
@@ -236,5 +219,7 @@ void	Server::createConfig(std::string &serverConfig)
 
 	this->extractConfigMap(serverConfig, _serverConfig, "server");
 	this->extractConfigMap(serverConfig, _dirConfig, "location");
-	this->loadMimeTypes();
+	this->loadTypeFiles("mime.types", "types");
+	this->loadTypeFiles("typeDir.conf", "typeDir");
+	return (0);
 }

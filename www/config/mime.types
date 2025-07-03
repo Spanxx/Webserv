@@ -1,6 +1,6 @@
 
 types {
-	text/html = html htm shtml
+	text/html = html
 	text/css = css
 	text/xml = xml
 	image/gif = gif

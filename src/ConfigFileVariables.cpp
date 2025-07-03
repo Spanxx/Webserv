@@ -16,7 +16,9 @@ void	Server::extractVariables()
 		else if (it->first.find("host") != std::string::npos)
 			extractHost(it->second);
 		else if (it->first.find("name") != std::string::npos)
-			extractName(it->second);	
+			extractName(it->second);
+		else if (it->first.find("root") != std::string::npos)
+			extractRoot(it->second);
 		else if (it->first.find("maxbodysize") != std::string::npos)
 			extractMaxBody(it->second);
 		else if (it->first.find("errorPage") != std::string::npos)
@@ -25,6 +27,7 @@ void	Server::extractVariables()
 	}
 	checkCompletes();
 }
+
 void	Server::extractPorts(const std::string &ports)
 {
 	int			port = 0;
@@ -44,7 +47,7 @@ void	Server::extractPorts(const std::string &ports)
 	std::vector<int>::iterator iPorts = this->_ports.begin();
 	while (iPorts != this->_ports.end())
 	{
-		//std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
+		std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
 		++iPorts;
 	}
 }
@@ -78,6 +81,16 @@ void	Server::extractName(const std::string &name)
 {
 	this->_name = name;
 	std::cout << "Server Name: " << this->_name << '\n';
+}
+
+void	Server::extractRoot(const std::string &root)
+{
+	if (root.find("www/") == std::string::npos)
+		throw ServerException("Root path usage: www/<ServerName>\n");
+	if (root.find(this->_name) == std::string::npos)
+		throw ServerException("Root path usage: www/<ServerName>\n");
+	
+	this->_serverRoot = root;
 }
 
 void	Server::checkCompletes()

@@ -47,7 +47,7 @@ Response& Response::operator=(Response &other)
 void Response::setCode(int code) { _code = code; }
 int Response::getCode() { return _code; }
 
-std::string Response::process_request(int client_fd) // Every handler shoudl update _body, _code and the headers are built in the end
+std::string	Response::process_request(int client_fd) // Every handler shoudl update _body, _code and the headers are built in the end
 {
 	(void)client_fd;
 	this->assign_status_phrase();
@@ -111,7 +111,6 @@ void	Response::handleERROR(int statusCode)
 	this->_headers["Content-Length"] = ss.str();
 	this->_headers["Content-Type"] = "text/html";
 	this->_body = html;
-	//return html;
 }
 
 void	Response::handleGET()

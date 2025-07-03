@@ -19,17 +19,28 @@
 - [ ] DELETE request make work with files other than images
 - [ ] different style css / background color per server also for error files?
 
-Chris:
+# Chris:
 - [x] creating the mandatory folders if there is a new server
 - [x] create top map for the dir maps. with path as key and map as value == Should work, needs recheck tommorow
-- [ ] check autoindex, if on, provide a list with the files inside requested directory
-	- [ ] response with file links and code 301 for redirecting
-- [ ] router umbauen: if path is directory + method is POST, then it's correct (check what case is for DELETE) 
-- [ ] delete negative number check
+- [x] router umbauen: if path is directory + method is POST, then it's correct (check what case is for DELETE) 
+- [x] delete negative number check
 - [ ] check timeout conditions for big files (how it works with child killing)
-- [ ] make check for duplicate in host:port combination or port duplicates 
+- [x] make check for duplicate in host:port combination or port duplicates
+- [ ] check with 2 browser (1 upload / 1 load index, is it blocking?)
+- [x] add exceptions
+- [x] check memleaks
+- [ ] check files without filetypes / get mimetype and handle file
+	- [ ] logic in cgi/py script need to be changed
+- [ ] hello.php script is not working on linux...
 
-Henri:
+
+## Chris notes:
+- [ ] when uploading a file(cgi) --> server changes background color
+- [ ] when exception is triggered the response is always 400 , even when i set it to a different value --> why?
+- [ ] Exceptions for Request and response needed? Or is the handle Error function enoug/better?
+- [ ] ServerDirStruct.cpp still needed?
+
+# Henri:
 - [x] change host to iphost for config logic
 - [x] check for range of host
 - [x] port range
@@ -46,10 +57,16 @@ Henri:
 - [ ] implement max height of uploaded images on index
 - [ ] add number increment for filenames in POST request without CGI
 
-Steph:
+# Steph:
+ - [ ] check autoindex, if on, provide a list with the files inside requested directory
+	- [ ] response with file links and code 301 for redirecting
+- [ ] create index for each location block
 
+# Bonus:
 
-
+- [ ] Cookies
+- [ ] Session management
+- [ ] multiple CGI scripts
 
 
 

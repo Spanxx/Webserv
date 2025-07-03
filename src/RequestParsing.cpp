@@ -53,20 +53,25 @@ int Request::split_headers(std::istringstream &rstream)
 		size_t pos = line.find(": ");
 		if (pos == std::string::npos || line[pos - 1] == ' ') //if no colon or extra whitespace
 			return 0;
+		
 		std::string key = line.substr(0, pos);
 		std::string value = line.substr(pos + 2);
+		
 		trim(key);
 		trim(value);
-		// std::cout << "key: " << key << " // value: " << value << '\n';	//header values for debugging
+		
 		if (key.empty() || value.empty())
 			return 0;
+		
 		_headers[key] = value;
+		
 		if (key == "Content-Length")
 		{
 			if (!safeAtoi(value, _content_length) || _content_length < 0 || _content_length > INT_MAX)
 				return (std::cout << "Content length should be between 0 and INT MAX bytes\n", 0); // COMMENT FOR LATER: ADD EXCEPTION SO PROGRAM QUITS HERE 
 			std::cout << "Content-Length: " << _content_length << "*****" << std::endl;
 		}
+		
 		if (key == "Transfer-Encoding" && value == "chunked")
 			_chunked = true;
 	}

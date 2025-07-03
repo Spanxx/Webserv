@@ -108,3 +108,4 @@ void	Request::splitURI()
 
 }
 
+Request::RequestException::RequestException(std::string error)  : std::runtime_error(error) {}

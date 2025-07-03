@@ -4,6 +4,7 @@
 #include "Server.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "Libraries.hpp"
 
 class Router
 {
@@ -13,17 +14,21 @@ public:
 	Router& operator=(Router &other);
 	~Router();
 
-	void		extractPathAndFile();
-	void		findDirConfig();
-	void		checkForDirRequest();
-	void		handleFavicon();
-	void		setDirForType();
-	void		checkDirPermission();
-	void		handleRedir();
-	void		handleAutoIndex();
-	void		checkMethods();
-	std::string	checkCwd();
+	void	extractPath();
+	void	extractFile();
+	void	findDirConfig();
+	void	checkForDirRequest();
+	void	handleFavicon();
+	void	setDirForType();
+	void	assignFileWithExtension(std::string &type);
+	void	assignFileWithoutExtension();
+	void	checkDirPermission();
+	void	checkMethods();
 
+	class RouterException : public std::runtime_error {
+	public:
+		RouterException(const std::string &error);
+	};
 
 private:
 	Server 														*_server;

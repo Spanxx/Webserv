@@ -1,12 +1,6 @@
 
 #include "../incl/Utils.hpp"
-#include <cctype>  // for isxdigit
-#include <cstdio>  // for sscanf
-#include <cerrno>
-#include <climits>
-#include <iostream>
-#include <cstdlib>
-#include <vector>
+#include "../incl/Libraries.hpp"
 
 std::string trim(const std::string &str)
 {
@@ -24,16 +18,6 @@ const std::string intToString(int num)
 	return oss.str();
 }
 
-// int strToInt(std::string &value)
-// {
-// 	int	num = 0;
-// 	std::stringstream oss;
-// 	oss << value;
-// 	oss >> num;
-
-// 	return (num);
-// }
-
 void replaceAll(std::string &str, const std::string &placeholder, const std::string &goal)
 {
 	size_t start = 0;
@@ -43,7 +27,6 @@ void replaceAll(std::string &str, const std::string &placeholder, const std::str
 		start += goal.length();
 	}
 }
-
 
 std::string urlDecode(const std::string &str)
 {
@@ -125,6 +108,7 @@ bool safeAtoi(const std::string& str, int& result)
 	result = static_cast<int>(val);
 	return true;
 }
+
 std::vector<std::string> parseMultipartBody(std::string& body, const std::string& boundary)
 {
 	std::vector<std::string> parts;
@@ -187,4 +171,34 @@ std::string getFileContent(std::string& part)
 	if (headerEnd == std::string::npos)
 		return "";
 	return part.substr(headerEnd + 4); // +4 to skip \r\n\r\n
+}
+
+std::string	checkCwd(std::string &serverRoot, bool serverConf)
+{
+	std::string cwd;
+	std::string path;
+
+	char* rawCwd = getcwd(NULL, 0);
+	if (!rawCwd)
+		return ("");
+
+	cwd = rawCwd;
+	free(rawCwd);
+
+	if (serverConf == false)
+	{
+		if (cwd.find("/src") != std::string::npos)
+			path = "../" + serverRoot;
+		else
+			path = serverRoot;
+	}
+	else
+	{
+		if (cwd.find("/src") != std::string::npos)
+			path = "../www/config";
+		else
+			path = "www/config";
+	}
+
+	return (path);
 }

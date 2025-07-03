@@ -3,31 +3,35 @@ import os
 import sys
 import re
 
+def filename_has_extension(filename):
+	dot_pos = filename.rfind('.')
+	return dot_pos > 0
+
 def sanitize_filename(filename):
-    return os.path.basename(filename)
+	return os.path.basename(filename)
 
 def get_unique_filename(directory, filename):
-    base, ext = os.path.splitext(filename)
-    counter = 1
-    candidate = filename
-    while os.path.exists(os.path.join(directory, candidate)):
-        candidate = f"{base}_{counter}{ext}"
-        counter += 1
-    return candidate
+	base, ext = os.path.splitext(filename)
+	counter = 1
+	candidate = filename
+	while os.path.exists(os.path.join(directory, candidate)):
+		candidate = f"{base}_{counter}{ext}"
+		counter += 1
+	return candidate
 
 def parse_multipart(data, boundary):
-    parts = data.split(boundary)
-    for part in parts:
-        if b'Content-Disposition' in part and b'filename="' in part:
-            header_end = part.find(b'\r\n\r\n')
-            if header_end == -1:
-                continue
-            headers = part[:header_end].decode(errors='ignore')
-            filename_match = re.search(r'filename="([^"]+)"', headers)
-            filename = filename_match.group(1) if filename_match else "unnamed_file"
-            file_content = part[header_end + 4:].rstrip(b'\r\n-')
-            return filename, file_content
-    return None, None
+	parts = data.split(boundary)
+	for part in parts:
+		if b'Content-Disposition' in part and b'filename="' in part:
+			header_end = part.find(b'\r\n\r\n')
+			if header_end == -1:
+				continue
+			headers = part[:header_end].decode(errors='ignore')
+			filename_match = re.search(r'filename="([^"]+)"', headers)
+			filename = filename_match.group(1) if filename_match else "unnamed_file"
+			file_content = part[header_end + 4:].rstrip(b'\r\n-')
+			return filename, file_content
+	return None, None
 
 def main():
     try:
@@ -70,4 +74,4 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+	main()

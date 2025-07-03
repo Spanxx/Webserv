@@ -2,9 +2,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <string>
-#include <sstream>
-#include <vector>
+#include "Libraries.hpp"
 
 std::string trim(const std::string &str);
 
@@ -25,6 +23,6 @@ bool safeAtoi(const std::string& str, int& result);
 std::vector<std::string> parseMultipartBody(std::string& body, const std::string& boundary);
 std::string getFileContent(std::string& part);
 std::string getFilename(std::string& part);
-
+std::string	checkCwd(std::string &serverRoot, bool serverConf);
 
 #endif

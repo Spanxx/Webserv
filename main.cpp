@@ -1,6 +1,8 @@
 
 #include "incl/Server.hpp"
+#include "incl/Libraries.hpp"
 #include "incl/Cluster.hpp"
+#include "incl/Utils.hpp"
 
 volatile sig_atomic_t stopSignal = 0;
 
@@ -69,7 +71,10 @@ int main(int ac, char **av)
 		if (configList.size() < 1)
 			throw Server::ServerException("Loading server configuration failed");
 
-		
+		if (checkforSocketDuplicates(configList) == 1)
+		{
+			throw Server::ServerException("Duplicate Port found!\nServer creation aborted.");
+		}
 		cluster.initializeServers(configList);
 		cluster.run();
 	}
