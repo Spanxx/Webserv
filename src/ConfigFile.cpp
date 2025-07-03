@@ -169,20 +169,6 @@ void	Server::doesRootExist(std::map<std::string, std::string> &targetMap)
 		throw ServerException("Path " + path + " does not exist");
 }
 
-void	Server::doesRootExist(std::map<std::string, std::string> &targetMap)
-{
-	struct stat st;
-	std::string path = findRoot(targetMap);
-	//std::cout << "ROOT: " << path << std::endl;
-	if (stat(path.c_str(), &st) == 0) // returns 0 if path exists
-	{
-		if (S_ISDIR(st.st_mode) == 0)
-			throw ServerException("Path " + path + " is not a directory");
-	}
-	else
-		throw ServerException("Path " + path + " does not exist");
-}
-
 void	Server::loadTypeFiles(std::string fileName, std::string keyword)
 {
 	std::string line;
@@ -221,5 +207,4 @@ void	Server::createConfig(std::string &serverConfig)
 	this->extractConfigMap(serverConfig, _dirConfig, "location");
 	this->loadTypeFiles("mime.types", "types");
 	this->loadTypeFiles("typeDir.conf", "typeDir");
-	return (0);
 }

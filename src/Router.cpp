@@ -179,45 +179,47 @@ void	Router::checkForDirRequest()
 	}
 }
 
-void	Router::assignFileWithExtension(std::string &type)
-{
-	std::string	serverRoot = this->_server->getRoot();
-	std::string	fullPath = checkCwd(serverRoot, false);
+// void	Router::assignFileWithExtension(std::string &type)
+// {
+// 	std::string	serverRoot = this->_server->getRoot();
+// 	std::string	fullPath = checkCwd(serverRoot, false);
 	
-	std::map<std::string, std::string> *config =  this->_server->getConfigMap("typeDirConfig");
-	std::map<std::string, std::string>::iterator it = config->begin();
+// 	std::map<std::string, std::string> *config =  this->_server->getConfigMap("typeDirConfig");
+// 	std::map<std::string, std::string>::iterator it = config->begin();
 
-	while (it != config->end())
-	{
-		if (type == it->first)
-		{
-			if (it->second == "/files/")
-			{
-				std::map<std::string, std::string> uploadDir = this->_server->getUploadDir();
-				fullPath = uploadDir["root"] + "/" + this->_requestedFile;
-				std::cout << "Filetype found, redirects to: " << fullPath << '\n';
-			}
-			else
-				fullPath += it->second + this->_requestedFile;
+// 	while (it != config->end())
+// 	{
+// 		if (type == it->first)
+// 		{
+// 			if (it->second == "/files/")
+// 			{
+// 				std::map<std::string, std::string> uploadDir = this->_server->getUploadDir();
+// 				fullPath = uploadDir["root"] + "/" + this->_requestedFile;
+// 				std::cout << "Filetype found, redirects to: " << fullPath << '\n';
+// 			}
+// 			else
+// 				fullPath += it->second + this->_requestedFile;
 			
-			std::cout << "Filetype found, redirects to: " << fullPath << '\n';
-			this->_request->setPath(fullPath);
-			return ;
-		}
-		++it;
-	}
-	if (it == config->end())
-	{
-		this->_request->setCode(405);
-		this->_request->setPath("www/error/status_page.html");
-		throw RouterException("Invalid Filetype requested!");
-	}
-}
+// 			std::cout << "Filetype found, redirects to: " << fullPath << '\n';
+// 			this->_request->setPath(fullPath);
+// 			return ;
+// 		}
+// 		++it;
+// 	}
+// 	if (it == config->end())
+// 	{
+// 		this->_request->setCode(405);
+// 		this->_request->setPath("www/error/status_page.html");
+// 		throw RouterException("Invalid Filetype requested!");
+// 	}
+// }
 
 void	Router::setDirForType()
 {
 	std::string	fullPath;
-	fullPath = checkCwd();
+	std::string type;
+	std::string root = this->_server->getRoot();
+	fullPath = checkCwd(root, true);
 
 	if (this->_requestedFile == "__AUTO_INDEX__")
 	{
