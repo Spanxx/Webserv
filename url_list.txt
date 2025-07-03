@@ -3,3 +3,8 @@
 127.0.0.1:8080/hello.py
 127.0.0.1:8080/status_page.html
 127.0.0.1:8080/indux.html
+127.0.0.1:8080/hello.php
+0.0.0.0:9090/indux.html
+0.0.0.0:9090/hello.php
+0.0.0.0:9090/upload.py
+192.168.122.1:9090/index.html
