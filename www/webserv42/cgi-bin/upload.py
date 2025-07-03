@@ -58,7 +58,7 @@ def main():
             with open(index_path, "r", encoding="utf-8") as f:
                 html_content = f.read()
 
-            insertion = f'\n<img src="/{upload_block}{unique_filename}" alt="Uploaded Image" style="max-width:100%; margin-top:20px;">\n'
+            insertion = f'\n<img src="/{upload_block}/{unique_filename}" alt="Uploaded Image" style="max-width:100%; margin-top:20px;">\n'
             html_content = html_content.replace("</form>", "</form>" + insertion, 1)
 
             print("Content-Type: text/html\r\n")

@@ -235,7 +235,7 @@ void	Router::setDirForType()
 
 	// std::cout << "FullPath = " << fullPath << '\n';
 	//this->_request->setPath(fullPath);
-	this->_request->setPath(this->_locationBlockRoot + this->_location + this->_requestedFile);
+	this->_request->setPath(this->_locationBlockRoot + this->_location + "/"+ this->_requestedFile);
 }
 
 void	Router::handleFavicon()
