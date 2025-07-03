@@ -16,6 +16,8 @@
 - [ ] check if we need to handle piped requests? --> adjust server loop
 - [ ] check cgi with cgi tester --> does cgi routing work and miscellaneous scripts?
 	- [ ] make cgi extension check seperate from other file type checks
+- [ ] DELETE request make work with files other than images
+- [ ] different style css / background color per server also for error files?
 
 Chris:
 - [x] creating the mandatory folders if there is a new server
@@ -33,7 +35,7 @@ Henri:
 - [x] port range
 - [x] upload dir dynamic
 - [x] maxbodysize range check
-- [ ] query string? 
+- [x] query string use
 - [x] separate css stylesheet test
 - [ ] script types check 
 - [x] method check 
@@ -42,6 +44,7 @@ Henri:
 - [x] make checks ob permission ok ist fuer cgi script 
 - [ ] make index dynamic inside upload script (after index has been passed as variable by Chris)
 - [ ] implement max height of uploaded images on index
+- [ ] add number increment for filenames in POST request without CGI
 
 Steph:
 

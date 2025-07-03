@@ -65,7 +65,7 @@ void	Server::createDirStructure()
 	if (mkdir_p(error, 0400) == 1)
 		throw ServerException("Creating directory " + error + " failed!\n");
 	if (mkdir_p(files, 0755) == 1)
-		throw ServerException("CCreating directory " + files + " failed!\n");
+		throw ServerException("Creating directory " + files + " failed!\n");
 	if (mkdir_p(html, 0400) == 1)
-		throw ServerException("CCreating directory " + html + " failed!\n");
+		throw ServerException("Creating directory " + html + " failed!\n");
 }

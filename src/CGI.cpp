@@ -262,7 +262,10 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		else
 		{
 			std::cerr << "CGI script exited with status: " << exitStatus << "\n";
-			handleERROR(500);
+			if (exitStatus == 2)
+				handleERROR(400);
+			else
+				handleERROR(500);
 		}
 	}
 	else

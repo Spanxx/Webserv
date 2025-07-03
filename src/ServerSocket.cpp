@@ -20,7 +20,7 @@ void	Server::checkPortDuplicates(int &port)
 	while (it != this->_ports.end())
 	{
 		if (port == *it)
-			throw ServerException("Port duplicate found!");
+			throw ConfigException("Port duplicate found!");
 
 		++it;
 	}
@@ -51,7 +51,7 @@ void	Server::storeServerConfig()
 	std::map<std::string, std::string> *config = getConfigMap("serverConfig");
 
 	if (!config)
-		throw ServerException("Extracting serverConfig map failed!");
+		throw ConfigException("Extracting serverConfig map failed!");
 
 	std::map<std::string, std::string>::iterator it = config->begin();
 	while (it != config->end())
@@ -66,7 +66,7 @@ void	Server::storeServerConfig()
 		{
 			int size;
 			if (!safeAtoi(it->second, size) || size < 0)
-				throw ServerException("Max body size needs to be between 0 and INT MAX");
+				throw ConfigException("Max body size needs to be between 0 and INT MAX");
 			_maxBodySize = static_cast<size_t>(size);
 		}
 

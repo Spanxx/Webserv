@@ -6,42 +6,28 @@
 Server::Server(std::string &serverConfig)
 {
 	std::cout << "Server created\n";
-	try
+	this->createConfig(serverConfig);
+	this->extractVariables();
+	this->storeServerConfig();
+	this->assignUploadDir();
+	this->checkScriptsExecutable();
+
+	//set default port if none in config file
+	if (this->_numPorts == 0)
 	{
-		if (this->createConfig(serverConfig) == 1)
-			throw ServerException("Creating Config failed!");
-		this->extractVariables();
-		//this->extractName();
-		//this->extractPorts();
-		//this->extractHost();
-
-		this->storeServerConfig();
-		// this->createDirStructure();
-
-		//set default port if none in config file
-		if (this->_numPorts == 0)
-		{
-			std::cout << "No port in config file, default set to 8080!\n";
-			this->_ports.push_back(8080);
-		}
-
-		std::vector<int>::iterator it = this->_ports.begin();
-
-		while (it != this->_ports.end())	// maybe change to for with index
-		{
-			int sock = this->createServerSocket(*it); //create a server socket and bind it to the port
-			this->_serverSockets.push_back(sock);
-			startListen(sock); //start listening on the socket and push it to the pollfd array _socketArray
-			std::cout << "From constructor Server socket fd: " << sock << " created and bound\n";
-			++it;
-		}
-		assignUploadDir();
-		checkScriptsExecutable();
+		std::cout << "No port in config file, default set to 8080!\n";
+		this->_ports.push_back(8080);
 	}
-	catch (std::exception &e)
+
+	std::vector<int>::iterator it = this->_ports.begin();
+
+	while (it != this->_ports.end())	// maybe change to for with index
 	{
-		std::cout << "Server exception: " << e.what() << std::endl;
-		exit(1) ; // COMMENT FOR LATER: should we exit when exception is caught?
+		int sock = this->createServerSocket(*it); //create a server socket and bind it to the port
+		this->_serverSockets.push_back(sock);
+		startListen(sock); //start listening on the socket and push it to the pollfd array _socketArray
+		std::cout << "Server socket fd: " << sock << " created and bound\n";
+		++it;
 	}
 }
 
@@ -54,7 +40,7 @@ Server::~Server()
 	for (size_t i = 0; i < this->_serverSockets.size(); ++i)
 	{
 		close(this->_serverSockets[i]);
-		std::cout << "From destructor Server socket fd: " << this->_serverSockets[i] << " closed\n";
+		std::cout << "Server socket fd: " << this->_serverSockets[i] << " closed\n";
 	}
 }
 
@@ -87,6 +73,7 @@ const std::vector<struct pollfd>& Server::getpollFdArray() const { return this->
 const std::vector<int>& Server::getServerSockets() const { return this->_serverSockets; }
 
 Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
+Server::ConfigException::ConfigException(const std::string &error) : std::runtime_error(error) {}
 
 size_t	Server::getMaxBodySize() { return _maxBodySize; }
 std::string	Server::getName() { return _name; }

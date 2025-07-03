@@ -1,7 +1,7 @@
 #ifndef CLUSTER_HPP
 #define CLUSTER_HPP
 
-#include "libraries.hpp"
+#include "Libraries.hpp"
 #include "Server.hpp"
 
 class Cluster {
@@ -22,6 +22,11 @@ public:
 	void handleNewConnection(int serverSocketFd, Server* server); // Handles new client connections
 	void removeConnection(int fd); // Removes fd from _pollfds, _responseCollector, _keepAlive, _lastActive and _fdToServerMap
 	void removePollFd(int fd); // Removes fd from _pollfds and _fdToServerMap
+
+	class ClusterException : public std::runtime_error {
+		public:
+			ClusterException(const std::string &error);
+	};
 };
 
 #endif // CLUSTER_HPP

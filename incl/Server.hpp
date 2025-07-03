@@ -20,7 +20,7 @@
 #include <csignal>
 #include <arpa/inet.h> // need for inet_aton
 #include "Utils.hpp"
-#include "libraries.hpp"
+#include "Libraries.hpp"
 
 extern volatile sig_atomic_t stopSignal;
 
@@ -44,7 +44,7 @@ public:
 	void	sendResponse(int client_fd);
 	void	closeServer();
 
-	int		createConfig(std::string &serverConfig);
+	void		createConfig(std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
 	void	allowedMethods(std::string &trimmed);
@@ -72,6 +72,7 @@ public:
 	void	extractMaxBody(const std::string &maxbody);
 	void	extractErrorPage(const std::string &path);
 	void	checkCompletes();
+	void	doesRootExist(std::map<std::string, std::string> &targetMap);
 
 	int		createServerSocket(int port);
 
@@ -94,8 +95,13 @@ public:
 	std::string findRoot(std::map<std::string, std::string> configblock);
 
 	class ServerException : public std::runtime_error {
-	public:
-		ServerException(const std::string &error);
+		public:
+			ServerException(const std::string &error);
+	};
+
+	class ConfigException : public std::runtime_error {
+		public:
+			ConfigException(const std::string &error);
 	};
 
 private:

@@ -1,7 +1,6 @@
 #include	"../incl/Server.hpp"
-//#include	"../incl/Request.hpp"
-//#include	"../incl/Response.hpp"
-//#include	"../incl/Utils.hpp"
+#include <sys/stat.h>
+#include <sys/types.h>
 
 void	createConfigList(std::string configPath, std::vector<std::string> &configList)
 {
@@ -136,7 +135,7 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 
 	std::istringstream iss(configFile);
 	if (!iss)
-		throw ServerException("Extracting config file failed!\n");
+		throw ConfigException("Extracting config file failed!\n");
 
 	while (getline(iss, line))
 	{
@@ -163,6 +162,7 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 					if (target == "location" && !targetMap.empty())
 					{
 						this->_locationBlocks[locationPath] = targetMap;
+						doesRootExist(targetMap);
 						targetMap.clear();
 						break;
 					}
@@ -177,6 +177,20 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 
 		}
 	}
+}
+
+void	Server::doesRootExist(std::map<std::string, std::string> &targetMap)
+{
+	struct stat st;
+	std::string path = findRoot(targetMap);
+	//std::cout << "ROOT: " << path << std::endl;
+	if (stat(path.c_str(), &st) == 0) // returns 0 if path exists
+	{
+		if (S_ISDIR(st.st_mode) == 0)
+			throw ServerException("Path " + path + " is not a directory");
+	}
+	else
+		throw ServerException("Path " + path + " does not exist");
 }
 
 void	Server::loadMimeTypes()
@@ -214,7 +228,7 @@ void	Server::loadMimeTypes()
 }
 
 // int	Server::createConfig(char *av, std::string &serverConfig)
-int	Server::createConfig(std::string &serverConfig)
+void	Server::createConfig(std::string &serverConfig)
 {
 	// std::string filePath = checkFilePath(av);
 
@@ -223,5 +237,4 @@ int	Server::createConfig(std::string &serverConfig)
 	this->extractConfigMap(serverConfig, _serverConfig, "server");
 	this->extractConfigMap(serverConfig, _dirConfig, "location");
 	this->loadMimeTypes();
-	return (0);
 }
