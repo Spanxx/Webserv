@@ -16,11 +16,11 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	{
 		extractPath();
 		extractFile();
-		checkMethods();
 		findDirConfig();
 		checkForDirRequest();
 		setDirForType();
 		handleFavicon();
+		checkMethods();
 	}
 	catch (std::exception &e)
 	{
@@ -101,12 +101,12 @@ void	Router::extractFile()
 	lastSlashPos = this->_requestedPath.find_last_of('/');
 
 	//check if directory was set to requested file
-	if (dotPos == -1)
-	{
-		this->_request->setPath("www/error/status_page.html");
-		this->_request->setCode(404);
-		throw RouterException("Router exception: Files need an extension!");
-	}
+	// if (dotPos == -1)
+	// {
+	// 	this->_request->setPath("www/error/status_page.html");
+	// 	this->_request->setCode(404);
+	// 	throw RouterException("Router exception: Files need an extension!");
+	// }
 
 	this->_requestedFile = this->_requestedPath.substr(lastSlashPos + 1);
 }
@@ -119,7 +119,7 @@ void	Router::findDirConfig()
 	while (it != this->_locationBlocks->end())
 	{
 		std::cout << "EXTRACTED PATH: " << this->_extractedPath <<std::endl;
-		if (this->_requestedPath == it->first)
+		if (this->_extractedPath == it->first)
 		{
 			_dirConfig.clear();
 			_dirConfig = it->second;
