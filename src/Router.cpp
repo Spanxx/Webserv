@@ -21,6 +21,9 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 		setDirForType();
 		handleFavicon();
 		checkMethods();
+		std::cout << "FULL PATH from routing ==> " << this->_request->getPath() << std::endl;
+		std::cout << "CODE from routing ==> " << this->_request->getCode() << std::endl;
+
 	}
 	catch (std::exception &e)
 	{
@@ -101,14 +104,15 @@ void	Router::extractFile()
 	lastSlashPos = this->_requestedPath.find_last_of('/');
 
 	//check if directory was set to requested file
-	// if (dotPos == -1)
-	// {
-	// 	this->_request->setPath("www/error/status_page.html");
-	// 	this->_request->setCode(404);
-	// 	throw RouterException("Router exception: Files need an extension!");
-	// }
+	if (dotPos == -1)
+	{
+		std::cout << "No dot in the requested path" << std::endl;
+		this->_requestedFile = "none";
+		return;
+	}
 
 	this->_requestedFile = this->_requestedPath.substr(lastSlashPos + 1);
+	std::cout << "Requested file found = " << this->_requestedFile << std::endl;
 }
 
 void Router::findDirConfig()
@@ -127,7 +131,7 @@ void Router::findDirConfig()
 
 		if (loc_path.length() > 1)
 			loc_path = loc_path.substr(0, loc_path.length() - 1);
-		std::cout << "new loc_path for matching " << loc_path << std::endl;
+		//std::cout << "new loc_path for matching " << loc_path << std::endl;
 		length = loc_path.length();
 
 		if (this->_requestedPath.compare(0, length, loc_path) == 0)
@@ -164,11 +168,23 @@ void Router::findDirConfig()
 
 	this->_locationBlockRoot = this->_dirConfig["root"];
 	std::cout << "Locationblock for routing found!\nROOT = " << this->_locationBlockRoot << std::endl;
+
+	if (this->_requestedFile == "none")
+	{
+		if (this->_requestedPath.find_last_of("/") != this->_requestedPath.size() - 1)
+		{
+			std::cout << "Setting path to _location from findDirConfig" << std::endl;
+			this->_request->setPath(_location);
+			//this->_request->setCode(301);
+			this->_requestedPath += '/';
+		}
+	}
+
 }
 
 void	Router::checkForDirRequest()
 {
-	if (_request->getMethod() == "GET" && ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/') || this->_requestedFile.empty()))
+	if (_request->getMethod() == "GET" && ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/') || this->_requestedFile == "none"))
 	{
 		std::cout << "Detected a directory request or missing file.\n";
 
@@ -242,7 +258,7 @@ void	Router::setDirForType()
 
 	if (this->_requestedFile == "__AUTO_INDEX__")
 	{
-		std::cout << "FULL PATH --> " << fullPath << std::endl;
+		std::cout << "Setting path with autoindex" << std::endl;
 		this->_request->setPath(fullPath + this->_requestedPath + "/__AUTO_INDEX__");
 		this->_mimeType = "text/html";
 		return;
@@ -264,7 +280,8 @@ void	Router::setDirForType()
 
 	if (_request->getMethod() == "DELETE")
 	{
-		this->_request->setPath(_dirConfig["root"] + this->_requestedPath); //TODO
+		std::cout << "Setting path for DELETE" << std::endl;
+		this->_request->setPath(this->_locationBlockRoot + this->_requestedPath); //TODO
 		std::cout << "DELETE request, returning full path: " << fullPath << '\n';
 		return;
 	}
@@ -280,7 +297,10 @@ void	Router::setDirForType()
 
 	// std::cout << "FullPath = " << fullPath << '\n';
 	//this->_request->setPath(fullPath);
-	this->_request->setPath(this->_locationBlockRoot + this->_location + this->_requestedFile);
+	std::cout << "Location block Root = " << this->_locationBlockRoot << std::endl;
+	std::cout << "Requested Path = " << this->_requestedPath << std::endl;
+	this->_request->setPath(this->_locationBlockRoot + this->_requestedPath);
+	std::cout << "FROM setDirForType Setting Path to: " << this->_request->getPath() << std::endl;
 }
 
 void	Router::handleFavicon()
