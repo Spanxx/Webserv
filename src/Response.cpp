@@ -130,15 +130,16 @@ void	Response::handleGET()
 	}
 	else if (isAutoindex(uri))
 	{
-		std::string autoindexPath = uri.substr(0, uri.find("/__AUTO_INDEX__"));
-		std::cout << "Autoindex requested for: " << autoindexPath << std::endl;
-		std::vector<FileEntry> entries = getDirectoryEntries(autoindexPath);
+		uri = uri.substr(0, uri.find("__AUTO_INDEX__"));
+		std::cout << "Autoindex requested for: " << uri << std::endl;
+		std::vector<FileEntry> entries = getDirectoryEntries(uri);
 		if (entries.empty())
 		{
 			handleERROR(404);
 			return;
 		}
-		autoindexBuilder(autoindexPath, entries);
+		autoindexBuilder(uri, entries);
+		this->_request->setPath(uri);
 		return;
 	}
 	else

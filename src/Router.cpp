@@ -17,10 +17,10 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 		extractPath();
 		extractFile();
 		findDirConfig();
+		checkMethods();
 		checkForDirRequest();
 		setDirForType();
 		handleFavicon();
-		checkMethods();
 		std::cout << "FULL PATH from routing ==> " << this->_request->getPath() << std::endl;
 		std::cout << "CODE from routing ==> " << this->_request->getCode() << std::endl;
 
@@ -174,9 +174,9 @@ void Router::findDirConfig()
 		if (this->_requestedPath.find_last_of("/") != this->_requestedPath.size() - 1)
 		{
 			std::cout << "Setting path to _location from findDirConfig" << std::endl;
-			this->_request->setPath(_location);
-			//this->_request->setCode(301);
+			this->_request->setCode(301);
 			this->_requestedPath += '/';
+			this->_request->setPath(_requestedPath);
 		}
 	}
 
@@ -188,94 +188,48 @@ void	Router::checkForDirRequest()
 	{
 		std::cout << "Detected a directory request or missing file.\n";
 
+		if (this->_locationBlockIndex != "none")
+		{
+			std::cout << "Index found for directory → serving to corresponding index of the location block "  << "\n";
+			this->_requestedFile = this->_locationBlockIndex;
+			this->_requestedPath +=_requestedFile;
+			return;
+		}
 		if (_dirConfig["autoindex"] == "on")
 		{
-
-			std::cout << "Autoindex is on → updating path to autoindex\n";
-
+			std::cout << "Autoindex is on → updating path to autoindex\n";		
 			//this->_request->setAutoindex(true);
-			//this->_request->setPath(this->_serverName + this->_requestedPath + "autoindex.html");
 			std::cout << "PATHHHh: " << this->_request->getPath() << "\n";
 			this->_requestedFile = "__AUTO_INDEX__";
+			this->_requestedPath +=_requestedFile;
 		}
 		else
-		{
-			if (this->_locationBlockIndex == "none")
-			{
-				std::cout << "No index file defined in location block, returning 403\n";
-				this->_request->setCode(403);
-				return ;
-			}
-			std::cout << "Directory request (autoindex: off) → redirect to corresponding index of the location block "  << "\n";
-			this->_requestedFile = this->_locationBlockIndex;
-			// this->_request->setPath(this->_locationBlockRoot + this->_requestedPath + this->_requestedFile);
-			// this->_mimeType = "text/html";
+		{	
+			std::cout << "No index file defined in location block and autooindex off, returning 403\n";
+			this->_request->setCode(403);
 		}
 	}
 }
 
-// void	Router::assignFileWithExtension(std::string &type)
-// {
-// 	std::string	serverRoot = this->_server->getRoot();
-// 	std::string	fullPath = checkCwd(serverRoot, false);
-	
-// 	std::map<std::string, std::string> *config =  this->_server->getConfigMap("typeDirConfig");
-// 	std::map<std::string, std::string>::iterator it = config->begin();
-
-// 	while (it != config->end())
-// 	{
-// 		if (type == it->first)
-// 		{
-// 			if (it->second == "/files/")
-// 			{
-// 				std::map<std::string, std::string> uploadDir = this->_server->getUploadDir();
-// 				fullPath = uploadDir["root"] + "/" + this->_requestedFile;
-// 				std::cout << "Filetype found, redirects to: " << fullPath << '\n';
-// 			}
-// 			else
-// 				fullPath += it->second + this->_requestedFile;
-			
-// 			std::cout << "Filetype found, redirects to: " << fullPath << '\n';
-// 			this->_request->setPath(fullPath);
-// 			return ;
-// 		}
-// 		++it;
-// 	}
-// 	if (it == config->end())
-// 	{
-// 		this->_request->setCode(405);
-// 		this->_request->setPath("www/error/status_page.html");
-// 		throw RouterException("Invalid Filetype requested!");
-// 	}
-// }
-
 void	Router::setDirForType()
 {
 	std::string	fullPath;
-	std::string type;
 	std::string root = this->_server->getRoot();
-	fullPath = checkCwd(root, false);
+	fullPath = checkCwd(root, false); // TODO check the root maybe it can be locationBlockRoot instead?
 
-	if (this->_requestedFile == "__AUTO_INDEX__")
-	{
-		std::cout << "Setting path with autoindex" << std::endl;
-		this->_request->setPath(fullPath + this->_requestedPath + "/__AUTO_INDEX__");
-		this->_mimeType = "text/html";
-		return;
-	}
+	// if (this->_requestedFile == "__AUTO_INDEX__")
+	// {
+	// 	std::cout << "Setting path with autoindex" << std::endl;
+	// 	this->_request->setPath(fullPath + this->_requestedPath + "__AUTO_INDEX__");
+	// 	this->_mimeType = "text/html";
+	// 	return;
+	// }
 
 	if (this->_requestedFile == "" && _request->getMethod() == "GET")
 	{
 		this->_request->setCode(403);
 		this->_mimeType = "text/html";
 		return; // needs to return because otherwise the substr(dotPos) was provoking a crash
-	}
-
-	size_t 		dotPos = this->_requestedFile.find_last_of(".");
-
-	if (dotPos != std::string::npos && !this->_requestedFile.empty())
-	{
-		type = this->_requestedFile.substr(dotPos);
 	}
 
 	if (_request->getMethod() == "DELETE")
@@ -286,21 +240,13 @@ void	Router::setDirForType()
 		return;
 	}
 
-	// if ((type == ".html" || type == ".css") && this->_requestedFile != "status_page.html")
-	// 	fullPath += "/html" + this->_requestedPath;
-	// if (type == ".py" || type == ".php" || type == ".js")
-	// 	fullPath += "/cgi-bin" + this->_requestedPath;
-	// if (type == ".png" || type == ".jpg" || type == ".jpeg")
-	// 	fullPath += "/files" + this->_requestedPath;
-
-
-
-	// std::cout << "FullPath = " << fullPath << '\n';
-	//this->_request->setPath(fullPath);
 	std::cout << "Location block Root = " << this->_locationBlockRoot << std::endl;
 	std::cout << "Requested Path = " << this->_requestedPath << std::endl;
-	this->_request->setPath(this->_locationBlockRoot + this->_requestedPath);
-	std::cout << "FROM setDirForType Setting Path to: " << this->_request->getPath() << std::endl;
+	if (this->_request->getCode() != 301)
+	{
+		this->_request->setPath(this->_locationBlockRoot + this->_requestedPath);
+		std::cout << "FROM setDirForType Setting Path to: " << this->_request->getPath() << std::endl;
+	}
 }
 
 void	Router::handleFavicon()
