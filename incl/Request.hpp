@@ -42,6 +42,7 @@ class Request
 		std::string 						getHeader(const std::string &key);
 		int 								getContentLength();
 		std::map<std::string, std::string>	getUploadDir();
+		std::map<std::string, std::string>	getCGIDir();
 		std::string 						getErrorPage();
 		size_t								getBodySize();
 		size_t								getParsePos() const;
@@ -67,6 +68,7 @@ class Request
 		bool 								_chunked;
 		size_t 								_parse_pos;
 		std::map<std::string, std::string>	_uploadDir;
+		std::map<std::string, std::string>	_cgiDir;
 		std::string	_errorPage;
 		Server 								*_server;
 };

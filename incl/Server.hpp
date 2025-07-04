@@ -62,9 +62,12 @@ public:
 	std::map<std::string, std::string>* getConfigMap(const std::string &configName);
 
 	std::map<std::string, std::string>	getUploadDir();
+	std::map<std::string, std::string>	getCGIDir();
+	std::vector<std::string>	getAllowedScripts();
 	std::string 						getErrorPage();
 	std::string							getRoot();
 	void								checkScriptsExecutable();
+	void	assignCGIDir();
 
 	void	extractVariables();
 	void	extractPorts(const std::string &ports);
@@ -129,6 +132,8 @@ private:
 	std::map<std::string, std::string>													_typeDirConfig;
 	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 	std::map<std::string, std::string>													_uploadDir;
+	std::map<std::string, std::string>	_cgiDir;
+	std::vector<std::string>	_allowedScripts;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

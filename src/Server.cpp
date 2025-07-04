@@ -10,6 +10,7 @@ Server::Server(std::string &serverConfig)
 	this->extractVariables();
 	this->storeServerConfig();
 	this->assignUploadDir();
+	this->assignCGIDir();
 	this->checkScriptsExecutable();
 
 	//set default port if none in config file
@@ -83,3 +84,6 @@ std::map<std::string, std::string> Server::getUploadDir() { return _uploadDir; }
 std::string Server::getErrorPage() { return _errorPage; };
 
 std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}
+
+std::map<std::string, std::string>	Server::getCGIDir() { return _cgiDir; }
+std::vector<std::string>	Server::getAllowedScripts() { return _allowedScripts; }

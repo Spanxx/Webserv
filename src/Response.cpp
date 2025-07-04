@@ -277,7 +277,7 @@ bool Response::isUploadsDir(const std::string &path)
 
 bool Response::isCGI(const std::string &path)
 {
-	if (path.find("/cgi-bin/") != std::string::npos) { return true; }
+	if (path.find(_request->getCGIDir()["location"]) != std::string::npos) { return true; }
 	if (path.find(".cgi") != std::string::npos) { return true; }		//this would allow to execute scripts which are not in the cgi/bin folder? Maybe we add both conditions in one if?
 	return (false);
 }

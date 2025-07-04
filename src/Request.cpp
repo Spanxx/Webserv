@@ -3,7 +3,7 @@
 #include "../incl/Utils.hpp"
 
 Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), _uploadDir(server->getUploadDir()), 
-	_errorPage(server->getErrorPage()), _server(server)
+	_cgiDir(server->getCGIDir()), _errorPage(server->getErrorPage()), _server(server)
 {
 	std::cout << "Request constructed\n";
 }
@@ -108,4 +108,5 @@ void	Request::splitURI()
 
 }
 
+std::map<std::string, std::string>	Request::getCGIDir() { return _cgiDir; }
 Request::RequestException::RequestException(std::string error)  : std::runtime_error(error) {}
