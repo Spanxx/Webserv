@@ -111,40 +111,59 @@ void	Router::extractFile()
 	this->_requestedFile = this->_requestedPath.substr(lastSlashPos + 1);
 }
 
-void	Router::findDirConfig()
+void Router::findDirConfig()
 {
 	std::map<std::string, std::map<std::string, std::string> >::iterator it = this->_locationBlocks->begin();
+	std::map<std::string, std::map<std::string, std::string> >::iterator bestIt = this->_locationBlocks->end();
 
-	//std::cout << "Searching for _extractedPath= "<< this->_extractedPath << std::endl;
+	size_t longestMatch = 0;
+	std::string bestMatch;
+	size_t length = 0;
+
+	//std::cout << "Searching Location Block matching requested path = " << this->_requestedPath << std::endl;
 	while (it != this->_locationBlocks->end())
 	{
-		std::cout << "EXTRACTED PATH: " << this->_extractedPath <<std::endl;
-		if (this->_extractedPath == it->first)
+		std::string loc_path = it->first;
+
+		if (loc_path.length() > 1)
+			loc_path = loc_path.substr(0, loc_path.length() - 1);
+		std::cout << "new loc_path for matching " << loc_path << std::endl;
+		length = loc_path.length();
+
+		if (this->_requestedPath.compare(0, length, loc_path) == 0)
 		{
-			_dirConfig.clear();
-			_dirConfig = it->second;
-			this->_location = it->first;
-			//std::cout << "Location === "<< _location << std::endl;
-			this->_locationBlockIndex = it->second["index"];
-			if (this->_locationBlockIndex.empty())
+			if (loc_path.length() > longestMatch)
 			{
-				std::cout << "No index file defined in location block\n";
-				this->_locationBlockIndex = "none";
+				longestMatch = loc_path.length();
+				bestMatch = it->first;
+				bestIt = it;
 			}
-			this->_locationBlockRoot = it->second["root"];
-			std::cout << "Locationblock for routing found!\n ROOT = " << this->_locationBlockRoot << std::endl;
-			return ;
 		}
 		++it;
 	}
-
-	if (it == this->_locationBlocks->end())
+	if (bestIt == this->_locationBlocks->end())
 	{
 		std::cout << "No locationblock for routing found!\n";
 		this->_request->setPath("www/error/status_page.html");
 		this->_request->setCode(404);
 		throw RouterException("Router exception: No Locationblock for routing found!");
 	}
+
+	this->_location = bestMatch;
+	this->_dirConfig.clear();
+	this->_dirConfig = bestIt->second;
+
+	std::cout << "Location Block ===> " << _location << std::endl;
+
+	this->_locationBlockIndex = this->_dirConfig["index"];
+	if (this->_locationBlockIndex.empty())
+	{
+		std::cout << "No index file defined in location block\n";
+		this->_locationBlockIndex = "none";
+	}
+
+	this->_locationBlockRoot = this->_dirConfig["root"];
+	std::cout << "Locationblock for routing found!\nROOT = " << this->_locationBlockRoot << std::endl;
 }
 
 void	Router::checkForDirRequest()
