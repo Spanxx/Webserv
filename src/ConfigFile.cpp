@@ -73,8 +73,8 @@ void	saveKeyValuePair(std::string &trimmed, std::map<std::string, std::string> &
 		//check for key duplicates
 		if (targetMap.find(key) != targetMap.end())
 		{
-			std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
-					<< "new Value overwrites existing Value!\n";
+			// std::cout << "Warning: Duplicate key found " << key << '\n'	// check how nginx handles it
+			// 		<< "new Value overwrites existing Value!\n";
 			targetMap[key] = value;	//new values overrides existing one (nginx is handling it like this)
 		}
 		else
