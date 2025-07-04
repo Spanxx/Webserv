@@ -120,7 +120,7 @@ void Router::findDirConfig()
 	std::string bestMatch;
 	size_t length = 0;
 
-	//std::cout << "Searching Location Block matching requested path = " << this->_requestedPath << std::endl;
+	std::cout << "Searching Location Block matching requested path = " << this->_requestedPath << std::endl;
 	while (it != this->_locationBlocks->end())
 	{
 		std::string loc_path = it->first;
@@ -164,6 +164,11 @@ void Router::findDirConfig()
 
 	this->_locationBlockRoot = this->_dirConfig["root"];
 	std::cout << "Locationblock for routing found!\nROOT = " << this->_locationBlockRoot << std::endl;
+	if (this->_requestedPath.find_last_of("/") != this->_requestedPath.size())
+	{
+		this->_request->setPath(_location);
+		this->_request->setCode(301);
+	}
 }
 
 void	Router::checkForDirRequest()
@@ -243,7 +248,8 @@ void	Router::setDirForType()
 	if (this->_requestedFile == "__AUTO_INDEX__")
 	{
 		std::cout << "FULL PATH --> " << fullPath << std::endl;
-		this->_request->setPath(fullPath + this->_requestedPath + "/__AUTO_INDEX__");
+		//if (this->_request->getCode() != 301)
+			this->_request->setPath(fullPath + this->_requestedPath + "/__AUTO_INDEX__");
 		this->_mimeType = "text/html";
 		return;
 	}
@@ -280,7 +286,8 @@ void	Router::setDirForType()
 
 	// std::cout << "FullPath = " << fullPath << '\n';
 	//this->_request->setPath(fullPath);
-	this->_request->setPath(this->_locationBlockRoot + this->_location + this->_requestedFile);
+	//if (this->_request->getCode() != 301)
+		this->_request->setPath(this->_locationBlockRoot + this->_location + this->_requestedFile);
 }
 
 void	Router::handleFavicon()
