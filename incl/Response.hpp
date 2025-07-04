@@ -16,7 +16,7 @@
 
 class Response {
 	public:
-		Response(Request *request, std::string &hostName);
+		Response(Request *request, Server *server, std::string &hostName);
 		Response(Response &other);
 		~Response();
 		Response& operator=(Response &other);
@@ -49,6 +49,7 @@ class Response {
 
 	private:
 		Request *_request;
+		Server 	*_server;
 		int _code;
 		std::map<std::string, std::string> _status;
 		std::map<std::string, std::string> _headers;

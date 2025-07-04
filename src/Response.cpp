@@ -4,7 +4,7 @@
 #include "../incl/Libraries.hpp"
 #include <ctime>
 
-Response::Response(Request *request, std::string &hostName): _request(request), _code(request->getCode())
+Response::Response(Request *request, Server *server, std::string &hostName): _request(request), _server(server), _code(request->getCode())
 {
 	std::cout << "Response constructed\n";
 	this->_headers["hostname"] = hostName;
@@ -237,7 +237,8 @@ void	Response::bodyBuilder()
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	std::string body = buffer.str();
-	replaceAll(body, "{{UPLOAD_BLOCK}}", _request->getUploadDir()["location"]);
+	replaceAll(body, "{{UPLOAD_BLOCK}}", _server->getUploadDir()["location"]);
+	replaceAll(body, "{{CGI_BIN}}", _server->getCGIDir()["location"].substr(1));
 	ss << body.size();
 
 	std::cout << "Bytes read: " << ss.str() << std::endl;
@@ -269,7 +270,7 @@ std::string Response::getMimeType(const std::string &path)
 
 bool Response::isUploadsDir(const std::string &path)
 {
-	if (path.find(_request->getUploadDir()["location"]) != std::string::npos)
+	if (path.find(_server->getUploadDir()["location"]) != std::string::npos)
 		return true;
 	//if (path == _request->getUploadDir()["root"]) //COMMENT FOR LATER: double check here if this works / or if it has to be compared to location only
 		//return true;
@@ -278,10 +279,35 @@ bool Response::isUploadsDir(const std::string &path)
 
 bool Response::isCGIdir(const std::string &path)
 {
-	if (path.find(_request->getCGIDir()["location"]) != std::string::npos) { return true; }
-	if (path.find(".cgi") != std::string::npos) { return true; }		//this would allow to execute scripts which are not in the cgi/bin folder? Maybe we add both conditions in one if?
+	if (path.find(_server->getCGIDir()["location"]) != std::string::npos)
+	{
+		std::vector<std::string> buff = _server->getAllowedScripts();
+		std::string ext = findExt(path.c_str());
+		std::cout << "PATH INSIDE CGI CHECK: " << path << std::endl;
+		for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
+		{
+			//std::cout << "ALLOWED SCRIPT: " << *it << std::endl;
+			if (ext == *it)
+				return true;
+		}
+	}
+	this->_request->setCode(403);
 	return (false);
 }
+// void	Router::checkScriptTypes()
+// {
+	
+// 	std::cout << "REQUESTED FILE: " << _requestedFile << std::endl;
+// 	std::string ext = findExt(_requestedFile.c_str());
+// 	for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
+// 	{
+// 		//std::cout << "ALLOWED SCRIPT: " << *it << std::endl;
+// 		if (ext == *it)
+// 			return;
+// 	}
+// 	this->_request->setCode(403);
+// 	throw RouterException("Script type " + ext + " is not allowed!");
+// }
 
 void Response::POSTBodyBuilder()
 {
@@ -327,7 +353,7 @@ void Response::POSTBodyBuilder()
 			handleERROR(400);
 			return;
 		}
-		std::string saveTo = _request->getUploadDir()["root"] + _request->getUploadDir()["location"] + filename;
+		std::string saveTo = _server->getUploadDir()["root"] + _server->getUploadDir()["location"] + filename;
 		std::ofstream outFile(saveTo.c_str(), std::ios::binary);
 		if (!outFile)
 		{

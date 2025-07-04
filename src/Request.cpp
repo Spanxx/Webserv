@@ -2,8 +2,8 @@
 #include "../incl/Request.hpp"
 #include "../incl/Utils.hpp"
 
-Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), _uploadDir(server->getUploadDir()), 
-	_cgiDir(server->getCGIDir()), _errorPage(server->getErrorPage()), _server(server)
+Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), 
+	_errorPage(server->getErrorPage()), _server(server)
 {
 	std::cout << "Request constructed\n";
 }
@@ -74,7 +74,6 @@ std::string Request::getBody() { return _body; }
 std::string Request::getQuery() { return _query; }
 int 	Request::getContentLength() { return _content_length; }
 size_t Request::getParsePos() const { return _parse_pos; }
-std::map<std::string, std::string> Request::getUploadDir() { return _uploadDir; }
 std::string Request::getErrorPage() { return _errorPage; };
 bool 	Request::getConnection()
 {
@@ -105,8 +104,10 @@ void	Request::splitURI()
 		_query = _path.substr(pos + 1);
 		_path = _path.substr(0, pos);
 	}
-
+	
+	pos = 0;
+	while ((pos = _path.find("//", pos)) != std::string::npos) //COMMENT FOR LATER: ADD EXCEPTION FOR HTTP:// AND MAKE REDIRECTION
+		_path.replace(pos, 2, "/");
 }
 
-std::map<std::string, std::string>	Request::getCGIDir() { return _cgiDir; }
 Request::RequestException::RequestException(std::string error)  : std::runtime_error(error) {}

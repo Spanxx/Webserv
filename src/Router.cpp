@@ -21,7 +21,6 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 		setDirForType();
 		handleFavicon();
 		checkMethods();
-		checkScriptTypes();
 		std::cout << "FULL PATH from routing ==> " << this->_request->getPath() << std::endl;
 		std::cout << "CODE from routing ==> " << this->_request->getCode() << std::endl;
 
@@ -299,20 +298,6 @@ void	Router::checkMethods()
 	// Method not found
 	this->_request->setCode(405);
 	throw RouterException("Method is not allowed!");
-}
-void	Router::checkScriptTypes()
-{
-	std::vector<std::string> buff = _server->getAllowedScripts();
-	std::cout << "REQUESTED FILE: " << _requestedFile << std::endl;
-	std::string ext = findExt(_requestedFile.c_str());
-	for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
-	{
-		std::cout << "ALLOWED SCRIPT: " << *it << std::endl;
-		if (ext == *it)
-			return;
-	}
-	this->_request->setCode(403);
-	throw RouterException("Script type " + ext + " is not allowed!");
 }
 
 // void	Router::checkMethods()
