@@ -113,23 +113,28 @@ void Router::findDirConfig()
 
 	size_t longestMatch = 0;
 	std::string bestMatch;
+	size_t length = 0;
 
 	std::cout << "Searching Location Block matching requested path = " << this->_requestedPath << std::endl;
 	while (it != this->_locationBlocks->end())
 	{
-		const std::string& loc_path = it->first;
-		if (this->_requestedPath.compare(0, loc_path.length(), loc_path) == 0)
+		std::string loc_path = it->first;
+
+		if (loc_path.length() > 1)
+			loc_path.pop_back();
+		length = loc_path.length();
+
+		if (this->_requestedPath.compare(0, length, loc_path) == 0)
 		{
 			if (loc_path.length() > longestMatch)
 			{
 				longestMatch = loc_path.length();
-				bestMatch = loc_path;
+				bestMatch = it->first;
 				bestIt = it;
 			}
 		}
 		++it;
 	}
-
 	if (bestIt == this->_locationBlocks->end())
 	{
 		std::cout << "No locationblock for routing found!\n";
@@ -235,7 +240,7 @@ void	Router::setDirForType()
 
 	// std::cout << "FullPath = " << fullPath << '\n';
 	//this->_request->setPath(fullPath);
-	this->_request->setPath(this->_locationBlockRoot + this->_location + "/"+ this->_requestedFile);
+	this->_request->setPath(this->_locationBlockRoot + this->_location + this->_requestedFile);
 }
 
 void	Router::handleFavicon()
