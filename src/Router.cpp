@@ -100,6 +100,7 @@ void	Router::extractFile()
 	dotPos = this->_requestedPath.find_last_of('.');
 	lastSlashPos = this->_requestedPath.find_last_of('/');
 
+	(void)dotPos;
 	//check if directory was set to requested file
 	// if (dotPos == -1)
 	// {
@@ -164,16 +165,17 @@ void Router::findDirConfig()
 
 	this->_locationBlockRoot = this->_dirConfig["root"];
 	std::cout << "Locationblock for routing found!\nROOT = " << this->_locationBlockRoot << std::endl;
-	if (this->_requestedPath.find_last_of("/") != this->_requestedPath.size())
+	if (this->_requestedPath.find_last_of("/") != this->_requestedPath.size() - 1)
 	{
 		this->_request->setPath(_location);
 		this->_request->setCode(301);
+		this->_requestedPath += '/';
 	}
 }
 
 void	Router::checkForDirRequest()
 {
-	if (_request->getMethod() == "GET" && ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/') || this->_requestedFile.empty()))
+	if (_request->getMethod() == "GET" && ((!this->_requestedPath.empty() && *(this->_requestedPath.end() - 1) == '/')))
 	{
 		std::cout << "Detected a directory request or missing file.\n";
 
@@ -248,8 +250,8 @@ void	Router::setDirForType()
 	if (this->_requestedFile == "__AUTO_INDEX__")
 	{
 		std::cout << "FULL PATH --> " << fullPath << std::endl;
-		//if (this->_request->getCode() != 301)
-			this->_request->setPath(fullPath + this->_requestedPath + "/__AUTO_INDEX__");
+		if (this->_request->getCode() != 301)
+			this->_request->setPath(fullPath + this->_requestedPath + "__AUTO_INDEX__");
 		this->_mimeType = "text/html";
 		return;
 	}
