@@ -119,15 +119,8 @@ void	Response::handleGET()
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
 	std::cout << "Response File type: " << fileType << std::endl;
-	if (isCGI(uri))
-	{
-		// std::string exec_path = "./" + uri;
-		std::string exec_path = uri;
-		std::cout << "EXEC PATH: " << exec_path << std::endl;
-		std::string query_string = this->_request->getQuery();
-		std::cout << "QUERY STRING: " << query_string << std::endl;
-		cgiExecuter(exec_path, query_string);
-	}
+	if (isScript(uri))
+		handleCGI(uri);
 	else if (isAutoindex(uri))
 	{
 		std::string autoindexPath = uri.substr(0, uri.find("/__AUTO_INDEX__"));
@@ -145,21 +138,29 @@ void	Response::handleGET()
 		bodyBuilder();
 }
 
+void	Response::handleCGI(std::string &uri)
+{
+	if (!isCGIdir(uri))
+	{
+		handleERROR(403);
+		return;
+	}
+		// std::string exec_path = "./" + uri;
+		std::string exec_path = uri;
+		//std::cout << "EXEC PATH: " << exec_path << std::endl;
+		std::string query_string = this->_request->getQuery();
+		//std::cout << "QUERY STRING: " << query_string << std::endl;
+		cgiExecuter(exec_path, query_string);
+}
+
 void	Response::handlePOST()
 {
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
 	std::cout << "Response File type: " << fileType << std::endl;
-	if (isCGI(uri))
-	{
-		std::string exec_path = "./" + uri;
-		std::cout << "EXEC PATH: " << exec_path << std::endl;
-		std::string query_string = this->_request->getQuery();
-		std::cout << "QUERY STRING: " << query_string << std::endl;
-		cgiExecuter(exec_path, query_string);
-		return;
-	}
+	if (isScript(uri))
+		handleCGI(uri);
 	else
 		POSTBodyBuilder();
 }
@@ -275,7 +276,7 @@ bool Response::isUploadsDir(const std::string &path)
 	return (false);
 }
 
-bool Response::isCGI(const std::string &path)
+bool Response::isCGIdir(const std::string &path)
 {
 	if (path.find(_request->getCGIDir()["location"]) != std::string::npos) { return true; }
 	if (path.find(".cgi") != std::string::npos) { return true; }		//this would allow to execute scripts which are not in the cgi/bin folder? Maybe we add both conditions in one if?

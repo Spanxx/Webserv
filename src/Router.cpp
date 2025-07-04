@@ -16,11 +16,12 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 	{
 		extractPath();
 		extractFile();
-		checkMethods();
 		findDirConfig();
 		checkForDirRequest();
 		setDirForType();
 		handleFavicon();
+		checkMethods();
+		checkScriptTypes();
 	}
 	catch (std::exception &e)
 	{
@@ -118,8 +119,8 @@ void	Router::findDirConfig()
 	//std::cout << "Searching for _extractedPath= "<< this->_extractedPath << std::endl;
 	while (it != this->_locationBlocks->end())
 	{
-		std::cout << "EXTRACTED PATH: " << this->_extractedPath <<std::endl;
-		if (this->_requestedPath == it->first)
+		//std::cout << "EXTRACTED PATH: " << this->_extractedPath <<std::endl;
+		if (this->_extractedPath == it->first)
 		{
 			_dirConfig.clear();
 			_dirConfig = it->second;
@@ -178,41 +179,6 @@ void	Router::checkForDirRequest()
 		}
 	}
 }
-
-// void	Router::assignFileWithExtension(std::string &type)
-// {
-// 	std::string	serverRoot = this->_server->getRoot();
-// 	std::string	fullPath = checkCwd(serverRoot, false);
-	
-// 	std::map<std::string, std::string> *config =  this->_server->getConfigMap("typeDirConfig");
-// 	std::map<std::string, std::string>::iterator it = config->begin();
-
-// 	while (it != config->end())
-// 	{
-// 		if (type == it->first)
-// 		{
-// 			if (it->second == "/files/")
-// 			{
-// 				std::map<std::string, std::string> uploadDir = this->_server->getUploadDir();
-// 				fullPath = uploadDir["root"] + "/" + this->_requestedFile;
-// 				std::cout << "Filetype found, redirects to: " << fullPath << '\n';
-// 			}
-// 			else
-// 				fullPath += it->second + this->_requestedFile;
-			
-// 			std::cout << "Filetype found, redirects to: " << fullPath << '\n';
-// 			this->_request->setPath(fullPath);
-// 			return ;
-// 		}
-// 		++it;
-// 	}
-// 	if (it == config->end())
-// 	{
-// 		this->_request->setCode(405);
-// 		this->_request->setPath("www/error/status_page.html");
-// 		throw RouterException("Invalid Filetype requested!");
-// 	}
-// }
 
 void	Router::setDirForType()
 {
@@ -293,6 +259,20 @@ void	Router::checkMethods()
 	// Method not found
 	this->_request->setCode(405);
 	throw RouterException("Method is not allowed!");
+}
+void	Router::checkScriptTypes()
+{
+	std::vector<std::string> buff = _server->getAllowedScripts();
+	std::cout << "REQUESTED FILE: " << _requestedFile << std::endl;
+	std::string ext = findExt(_requestedFile.c_str());
+	for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
+	{
+		std::cout << "ALLOWED SCRIPT: " << *it << std::endl;
+		if (ext == *it)
+			return;
+	}
+	this->_request->setCode(403);
+	throw RouterException("Script type " + ext + " is not allowed!");
 }
 
 // void	Router::checkMethods()

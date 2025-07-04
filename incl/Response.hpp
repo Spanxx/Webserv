@@ -33,13 +33,14 @@ class Response {
 		void		handleGET();
 		void		handlePOST();
 		void		handleDELETE();
+		void		handleCGI(std::string &uri);
 		void 		assign_status_phrase();
 
 		void 		sendResponse(int client_fd);
 		void 		cgiExecuter(std::string path, const std::string &query);
 		void 		parseCGIOutput(const std::string &output);
 		std::string getMimeType(const std::string &path);
-		bool 		isCGI(const std::string &path);
+		bool 		isCGIdir(const std::string &path);
 		bool		isUploadsDir(const std::string &path);
 
 		bool		isAutoindex(const std::string &path);
