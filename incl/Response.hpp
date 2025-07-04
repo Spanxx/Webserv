@@ -16,7 +16,7 @@
 
 class Response {
 	public:
-		Response(Request *request, std::string &hostName);
+		Response(Request *request, Server *server, std::string &hostName);
 		Response(Response &other);
 		~Response();
 		Response& operator=(Response &other);
@@ -33,13 +33,14 @@ class Response {
 		void		handleGET();
 		void		handlePOST();
 		void		handleDELETE();
+		void		handleCGI(std::string &uri);
 		void 		assign_status_phrase();
 
 		void 		sendResponse(int client_fd);
 		void 		cgiExecuter(std::string path, const std::string &query);
 		void 		parseCGIOutput(const std::string &output);
 		std::string getMimeType(const std::string &path);
-		bool 		isCGI(const std::string &path);
+		bool 		isCGIdir(const std::string &path);
 		bool		isUploadsDir(const std::string &path);
 
 		bool		isAutoindex(const std::string &path);
@@ -48,6 +49,7 @@ class Response {
 
 	private:
 		Request *_request;
+		Server 	*_server;
 		int _code;
 		std::map<std::string, std::string> _status;
 		std::map<std::string, std::string> _headers;

@@ -17,11 +17,12 @@ void	Request::check_headers(const std::string &headers_raw)
 			return;
 		}
 	}
-	
+
 	// make extra check for header too long for buffer --> code 431
 	// URI to long
 	_path = urlDecode(_path);
-	replaceAll(_path, "{{UPLOAD_BLOCK}}", _uploadDir["location"].substr(1));
+	replaceAll(_path, "{{UPLOAD_BLOCK}}", _server->getUploadDir()["location"].substr(1));
+	replaceAll(_path, "{{CGI_BIN}}", _server->getCGIDir()["location"].substr(1));
 	if (_path.empty())
 	{
 		this->_code = 400;
@@ -31,7 +32,14 @@ void	Request::check_headers(const std::string &headers_raw)
 	std::cout << "PATH: " << _path << ", QUERY: " << _query << std::endl;
 
 	if (split_headers(rstream) == 1 || checkURILength() == 1 || checkPathChars() == 1)
+	{
+		std::cout << "Returning in check headers\n";
+		std::cout << "Code: " << _code << std::endl;
+		std::cout << "splitheaders returned" << split_headers(rstream) << std::endl;
+		std::cout << "checkURILength returned" << checkURILength() << std::endl;
+		std::cout << "checkPathChars returned" << checkPathChars()	<< std::endl;
 		return ;
+	}
 	Router Router(this->_server, this);
 }
 
@@ -68,7 +76,7 @@ int Request::split_headers(std::istringstream &rstream)
 		if (key == "Content-Length")
 		{
 			if (!safeAtoi(value, _content_length) || _content_length < 0 || _content_length > INT_MAX)
-				return (std::cout << "Content length should be between 0 and INT MAX bytes\n", 0); // COMMENT FOR LATER: ADD EXCEPTION SO PROGRAM QUITS HERE 
+				return (std::cout << "Content length should be between 0 and INT MAX bytes\n", 0); // COMMENT FOR LATER: ADD EXCEPTION SO PROGRAM QUITS HERE
 			std::cout << "Content-Length: " << _content_length << "*****" << std::endl;
 		}
 		

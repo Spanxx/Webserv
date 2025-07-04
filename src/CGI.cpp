@@ -38,8 +38,8 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		std::string querySTR		= "QUERY_STRING=" + query;
 		std::string contentTypeSTR	= "CONTENT_TYPE=" + _request->getHeader("Content-Type");
 		std::string contentLenSTR	= "CONTENT_LENGTH=" + _request->getHeader("Content-Length");
-		std::string uploadDirSTR	= "UPLOAD_DIR=" + _request->getUploadDir()["root"];
-		std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + _request->getUploadDir()["location"];
+		std::string uploadDirSTR	= "UPLOAD_DIR=" + _server->getUploadDir()["root"];
+		std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + _server->getUploadDir()["location"];
 		std::string redirectStatus	= "REDIRECT_STATUS=200";
 		std::string gatewayInterface	= "GATEWAY_INTERFACE=CGI/1.1";
 		std::string serverProtocol	= "SERVER_PROTOCOL=HTTP/1.1";

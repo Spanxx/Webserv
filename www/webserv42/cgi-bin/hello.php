@@ -1,5 +1,4 @@
-#!/usr/bin/env php-cgi -->linux
-#!/usr/local/bin/php-cgi -->Mac
+#!/usr/bin/env php-cgi
 <?php
 
 header("Content-Type: text/html");
