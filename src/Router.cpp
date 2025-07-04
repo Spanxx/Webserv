@@ -238,11 +238,12 @@ void	Router::setDirForType()
 	std::string	fullPath;
 	std::string type;
 	std::string root = this->_server->getRoot();
-	fullPath = checkCwd(root, true);
+	fullPath = checkCwd(root, false);
 
 	if (this->_requestedFile == "__AUTO_INDEX__")
 	{
-		this->_request->setPath(fullPath + this->_requestedPath+ "/__AUTO_INDEX__");
+		std::cout << "FULL PATH --> " << fullPath << std::endl;
+		this->_request->setPath(fullPath + this->_requestedPath + "/__AUTO_INDEX__");
 		this->_mimeType = "text/html";
 		return;
 	}
