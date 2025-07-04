@@ -115,13 +115,14 @@ void Router::findDirConfig()
 	std::string bestMatch;
 	size_t length = 0;
 
-	std::cout << "Searching Location Block matching requested path = " << this->_requestedPath << std::endl;
+	//std::cout << "Searching Location Block matching requested path = " << this->_requestedPath << std::endl;
 	while (it != this->_locationBlocks->end())
 	{
 		std::string loc_path = it->first;
 
 		if (loc_path.length() > 1)
-			loc_path.pop_back();
+			loc_path = loc_path.substr(0, loc_path.length() - 1);
+		std::cout << "new loc_path for matching " << loc_path << std::endl;
 		length = loc_path.length();
 
 		if (this->_requestedPath.compare(0, length, loc_path) == 0)
