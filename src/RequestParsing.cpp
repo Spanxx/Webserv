@@ -21,7 +21,8 @@ void	Request::check_headers(const std::string &headers_raw)
 	// make extra check for header too long for buffer --> code 431
 	// URI to long
 	_path = urlDecode(_path);
-	replaceAll(_path, "{{UPLOAD_BLOCK}}", _uploadDir["location"].substr(1));
+	replaceAll(_path, "{{UPLOAD_BLOCK}}", _server->getUploadDir()["location"].substr(1));
+	replaceAll(_path, "{{CGI_BIN}}", _server->getCGIDir()["location"].substr(1));
 	if (_path.empty())
 	{
 		this->_code = 400;

@@ -41,6 +41,36 @@ void Server::assignUploadDir()
 		throw ConfigException("Must assign one upload directory. Set in location block 'upload_dir = yes'");
 }
 
+void Server::assignCGIDir()
+{
+	for (std::map<std::string, std::map<std::string, std::string> >::iterator it = _locationBlocks.begin(); it != _locationBlocks.end(); ++it)
+	{
+
+		std::map<std::string, std::string>::iterator it_dir = it->second.find("allowed_scripts");
+		if (it_dir != it->second.end())
+		{
+			if (_cgiDir.empty() )
+			{
+				std::stringstream ss(it_dir->second);
+				std::string buffer;
+				while (std::getline(ss, buffer, ','))
+				{
+					_allowedScripts.push_back(buffer);
+					std::cout << "BUFFER: " << buffer << std::endl;
+				}
+				_cgiDir ["root"] = findRoot(it->second);
+				_cgiDir["location"] = it->first;
+				std::cout << "Assigned cgi dir location: " << _cgiDir["location"] << std::endl;
+			}
+			else
+				throw ConfigException("Can only assign one cgi dir");
+
+		}
+	}
+	if (_cgiDir.empty())
+		throw ConfigException("Must assign one cgi directory. Set in location block 'allowed_scripts = [allowed script types]'");
+}
+
 bool Server::checkPOST(std::map<std::string, std::string> configblock)
 {
 	std::map<std::string, std::string>::iterator it = configblock.find("methods");

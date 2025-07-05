@@ -202,3 +202,21 @@ std::string	checkCwd(std::string &serverRoot, bool serverConf)
 
 	return (path);
 }
+
+bool	isScript(const std::string &path)
+{
+	std::string ext = findExt(path);
+	
+	if (ext == ".cgi" || ext == ".pl" || ext == ".py" || ext == ".php" || ext == ".rb" || ext == ".sh" || ext == ".js")
+		return true;
+	return false;
+}
+
+std::string	findExt(const std::string &path)
+{
+	size_t 		dotPos = path.find_last_of(".");
+
+	if (dotPos != std::string::npos && !path.empty())
+		return path.substr(dotPos);
+	return "";
+}

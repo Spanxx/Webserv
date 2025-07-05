@@ -24,6 +24,7 @@ public:
 	void	assignFileWithoutExtension();
 	void	checkDirPermission();
 	void	checkMethods();
+	void	checkScriptTypes();
 
 	class RouterException : public std::runtime_error {
 	public:

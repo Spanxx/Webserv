@@ -38,34 +38,34 @@ int	mkdir_p(const std::string fullPath, mode_t mode)
 	return (0);
 }
 
-void	Server::createDirStructure()
-{
-	if (this->_name == "")
-		this->_name = "defaultServer";
+// void	Server::createDirStructure()
+// {
+// 	if (this->_name == "")
+// 		this->_name = "defaultServer";
 
-	std::string	serverPath;
-	std::string cwd = getcwd(NULL, 0);
+// 	std::string	serverPath;
+// 	std::string cwd = getcwd(NULL, 0);
 
-	if (cwd != "")
-		std::cout << "CWD = " << cwd << std::endl;
+// 	if (cwd != "")
+// 		std::cout << "CWD = " << cwd << std::endl;
 	
-	if (cwd.find("/src") == std::string::npos)
-		serverPath = "www/" + this->_name;
-	else
-		serverPath = "../www/" + this->_name;
+// 	if (cwd.find("/src") == std::string::npos)
+// 		serverPath = "www/" + this->_name;
+// 	else
+// 		serverPath = "../www/" + this->_name;
 
-	std::string cgiBin = serverPath + "/cgi-bin";
-	std::string error = serverPath + "/error";
-	//std::string files = serverPath + "/files/uploads";
-	std::string files = _uploadDir["root"];
-	std::string html = serverPath + "/html";
+// 	std::string cgiBin = serverPath + "/cgi-bin";
+// 	std::string error = serverPath + "/error";
+// 	//std::string files = serverPath + "/files/uploads";
+// 	std::string files = _uploadDir["root"];
+// 	std::string html = serverPath + "/html";
 	
-	if (mkdir_p(cgiBin, 0755) == 1)
-		throw ServerException("Creating directory " + cgiBin + " failed!\n");
-	if (mkdir_p(error, 0400) == 1)
-		throw ServerException("Creating directory " + error + " failed!\n");
-	if (mkdir_p(files, 0755) == 1)
-		throw ServerException("Creating directory " + files + " failed!\n");
-	if (mkdir_p(html, 0400) == 1)
-		throw ServerException("Creating directory " + html + " failed!\n");
-}
+// 	if (mkdir_p(cgiBin, 0755) == 1)
+// 		throw ServerException("Creating directory " + cgiBin + " failed!\n");
+// 	if (mkdir_p(error, 0400) == 1)
+// 		throw ServerException("Creating directory " + error + " failed!\n");
+// 	if (mkdir_p(files, 0755) == 1)
+// 		throw ServerException("Creating directory " + files + " failed!\n");
+// 	if (mkdir_p(html, 0400) == 1)
+// 		throw ServerException("Creating directory " + html + " failed!\n");
+// }

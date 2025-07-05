@@ -228,7 +228,7 @@ if (_requestCollector.find(fd) == _requestCollector.end())
 void Server::prepare_response(int fd, std::map<int, std::string> &response_collector)
 {
 	Request *request = _requestCollector[fd];
-	Response *response = new Response(request, this->_name);
+	Response *response = new Response(request, this, this->_name);
 
 	response_collector[fd] = response->process_request(fd);
 
