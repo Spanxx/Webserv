@@ -19,7 +19,7 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 		findDirConfig();
 		checkMethods();
 		checkForDirRequest();
-		setDirForType();
+		resolvePath();
 		handleFavicon();
 		std::cout << "FULL PATH from routing ==> " << this->_request->getPath() << std::endl;
 		std::cout << "CODE from routing ==> " << this->_request->getCode() << std::endl;
@@ -92,13 +92,13 @@ void	Router::extractFile()
 {
 	int 		dotPos 		= -1;
 	int 		lastSlashPos = -1;
-	std::map<std::string, std::string> uploadLocationBlock = this->_server->getUploadDir();
+	// std::map<std::string, std::string> uploadLocationBlock = this->_server->getUploadDir();
 
-	std::string uploadDir = uploadLocationBlock["location"];
-	int start = uploadDir.find_first_of("/");
-	int end = uploadDir.find_last_of("/");
+	// std::string uploadDir = uploadLocationBlock["location"];
+	// int start = uploadDir.find_first_of("/");
+	// int end = uploadDir.find_last_of("/");
 
-	uploadDir = uploadDir.substr(start + 1, end - 1);
+	// uploadDir = uploadDir.substr(start + 1, end - 1);
 
 	dotPos = this->_requestedPath.find_last_of('.');
 	lastSlashPos = this->_requestedPath.find_last_of('/');
@@ -124,7 +124,6 @@ void Router::findDirConfig()
 	std::string bestMatch;
 	size_t length = 0;
 
-	//std::cout << "Searching Location Block matching requested path = " << this->_requestedPath << std::endl;
 	while (it != this->_locationBlocks->end())
 	{
 		std::string loc_path = it->first;
@@ -147,7 +146,7 @@ void Router::findDirConfig()
 	}
 	if (bestIt == this->_locationBlocks->end())
 	{
-		std::cout << "No locationblock for routing found!\n";
+		std::cout << "No location block for routing found!\n";
 		this->_request->setPath("www/error/status_page.html");
 		this->_request->setCode(404);
 		throw RouterException("Router exception: No Locationblock for routing found!");
@@ -167,7 +166,7 @@ void Router::findDirConfig()
 	}
 
 	this->_locationBlockRoot = this->_dirConfig["root"];
-	std::cout << "Locationblock for routing found!\nROOT = " << this->_locationBlockRoot << std::endl;
+	std::cout << "Location block for routing found!\nROOT = " << this->_locationBlockRoot << std::endl;
 
 	if (this->_requestedFile == "none")
 	{
@@ -179,7 +178,6 @@ void Router::findDirConfig()
 			this->_request->setPath(_requestedPath);
 		}
 	}
-
 }
 
 void	Router::checkForDirRequest()
@@ -197,21 +195,21 @@ void	Router::checkForDirRequest()
 		}
 		if (_dirConfig["autoindex"] == "on")
 		{
-			std::cout << "Autoindex is on → updating path to autoindex\n";		
+			std::cout << "Autoindex is on → updating path to autoindex\n";
 			//this->_request->setAutoindex(true);
 			std::cout << "PATHHHh: " << this->_request->getPath() << "\n";
 			this->_requestedFile = "__AUTO_INDEX__";
 			this->_requestedPath +=_requestedFile;
 		}
 		else
-		{	
+		{
 			std::cout << "No index file defined in location block and autooindex off, returning 403\n";
 			this->_request->setCode(403);
 		}
 	}
 }
 
-void	Router::setDirForType()
+void	Router::resolvePath()
 {
 	std::string	fullPath;
 	std::string root = this->_server->getRoot();
@@ -271,34 +269,15 @@ void	Router::checkMethods()
 		if (it->first == "methods")
 		{
 			if (it->second.find(method) != std::string::npos)
-				std::cout << "Request Method is allowed: "<< method << '\n'; 
-			return ;
+			{
+				std::cout << "Request Method is allowed: "<< method << '\n';
+				return ;
+			}
 		}
 		++it;
 	}
 	// Method not found
+	this->_request->setPath("www/error/status_page.html");
 	this->_request->setCode(405);
 	throw RouterException("Method is not allowed!");
 }
-
-// void	Router::checkMethods()
-// {
-// 	std::map<std::string, std::map<std::string, std::string> >::iterator it = this->_locationBlocks->begin();
-
-// 	while (it != this->_locationBlocks->end())
-// 	{
-// 		if (this->_extractedPath == it->first)
-// 		{
-// 			std::map<std::string, std::string>::iterator it_conf = it->second.find("methods");
-// 			if (it_conf != it->second.end())
-// 			{
-// 				if (it_conf->second.find(_request->getMethod()) == std::string::npos)
-// 					this->_request->setCode(405);
-// 				return ;
-// 			}
-// 		}
-// 		++it;
-// 	}
-// }
-
-

@@ -74,20 +74,22 @@ bool Server::readFromConnection(std::map<int, std::string> &response_collector, 
 	Request *request = _requestCollector[fd];
 	keepAlive[fd] = request->getConnection();
 
-	RequestState state = handleRequest(data, header_end, keepAlive, fd);
+	if (request->getCode() == 200)
+	{
+		RequestState state = handleRequest(data, header_end, keepAlive, fd);
 
-	if (state == REQUEST_INCOMPLETE)
-		return true; // Still waiting for body/chunks
+		if (state == REQUEST_INCOMPLETE)
+			return true; // Still waiting for body/chunks
 
-	// --- Clean body from socket buffer ---
-	size_t consumed = header_end + 4; // header + \r\n\r\n
-	if (request->isChunked()) {
-		consumed = request->getParsePos(); // parse_chunks sets it
-	} else {
-		consumed += request->getContentLength();
+		// --- Clean body from socket buffer ---
+		size_t consumed = header_end + 4; // header + \r\n\r\n
+		if (request->isChunked()) {
+			consumed = request->getParsePos(); // parse_chunks sets it
+		} else {
+			consumed += request->getContentLength();
+		}
+		_socketBuffers[fd] = data.substr(consumed); // remove consumed part
 	}
-	_socketBuffers[fd] = data.substr(consumed); // remove consumed part
-
 	// --- Prepare response ---
 	prepare_response(fd, response_collector);
 
