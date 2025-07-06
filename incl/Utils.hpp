@@ -22,7 +22,8 @@ bool safeAtoi(const std::string& str, int& result);
 
 std::vector<std::string> parseMultipartBody(std::string& body, const std::string& boundary);
 std::string getFileContent(std::string& part);
-std::string getFilename(std::string& part);
+std::string getFilename(std::string& part, std::string& upload_dir);
+std::string getUniqueFilename(const std::string& directory, const std::string& filename);
 std::string	checkCwd(std::string &serverRoot, bool serverConf);
 bool	isScript(const std::string &path);
 std::string	findExt(const std::string &path);

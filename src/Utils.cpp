@@ -137,7 +137,7 @@ std::vector<std::string> parseMultipartBody(std::string& body, const std::string
 }
 
 // Extract filename from Content-Disposition header of a part
-std::string getFilename(std::string& part)
+std::string getFilename(std::string& part, std::string& upload_dir)
 {
 	std::istringstream stream(part);
 	std::string line;
@@ -157,7 +157,10 @@ std::string getFilename(std::string& part)
 				filenamePos += 10; // length of 'filename="'
 				size_t endPos = line.find("\"", filenamePos);
 				if (endPos != std::string::npos)
-					return line.substr(filenamePos, endPos - filenamePos);
+				{
+					std::string filename = line.substr(filenamePos, endPos - filenamePos);
+					return getUniqueFilename(upload_dir, filename);
+				}
 			}
 		}
 	}
@@ -219,4 +222,46 @@ std::string	findExt(const std::string &path)
 	if (dotPos != std::string::npos && !path.empty())
 		return path.substr(dotPos);
 	return "";
+}
+
+
+bool fileExists(const std::string& path)
+{
+	return (access(path.c_str(), F_OK) == 0);
+}
+
+// Split filename into base and extension manually
+void splitFilename(const std::string& filename, std::string& base, std::string& ext)
+{
+	size_t pos = filename.rfind('.');
+	if (pos == std::string::npos || pos == 0)
+	{
+		base = filename;
+		ext = "";
+	}
+	else
+	{
+		base = filename.substr(0, pos);
+		ext = filename.substr(pos);
+	}
+}
+
+std::string getUniqueFilename(const std::string& directory, const std::string& filename)
+{
+	std::string base, ext;
+	splitFilename(filename, base, ext);
+	if (ext.empty())
+		return "";
+
+	std::string candidate = filename;
+	int counter = 1;
+
+	while (fileExists(directory + "/" + candidate))
+	{
+		std::ostringstream oss;
+		oss << base << "_" << counter << ext;
+		candidate = oss.str();
+		counter++;
+	}
+	return candidate;
 }

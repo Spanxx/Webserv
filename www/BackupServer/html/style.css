@@ -3,16 +3,16 @@
 		font-family: Arial, sans-serif;
 		text-align: center;
 		padding: 50px;
-		background-color: #e2d5ff;
+		background-color: #d8f8c2;
 		color: #333;
 		}
-		div {
+		/* div {
 		background-color: #ffffff;
 		border-radius: 10px;
 		box-shadow: 0 0 15px rgba(0,0,0,0.1);
 		width: 500px;
 		height: 200px;
-		}
+		} */
 		h1 {
 		font-size: 72px;
 		margin-bottom: 0;
@@ -21,6 +21,11 @@
 		font-size: 24px;
 		margin-top: 5px;
 		color: #666;
+		}
+		p2 {
+		font-size: 18px;
+		margin-top: 5px;
+		color: #ff2084;
 		}
 		form {
 		font-family: Georgia, 'Times New Roman', Times, serif;
@@ -36,4 +41,38 @@
 		display: inline-block;
 		box-shadow: 0 0 15px rgba(0,0,0,0.1);
 		width: 50%;
+		}
+		.box {
+		background-color: #ffffff;
+		border-radius: 10px;
+		box-shadow: 0 0 15px rgba(0,0,0,0.1);
+		width: auto;
+		padding: 10px;
+		display: inline-block;
+		}
+		#gallery {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 20px;
+		justify-content: center;
+		margin-top: 20px;
+		}
+		.gallery-item {
+		background: #fff;
+		border-radius: 10px;
+		box-shadow: 0 0 15px rgba(0,0,0,0.1);
+		padding: 10px;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: fit-content;
+		}
+		.gallery-item img {
+		width: 300px;
+		height: 380px;
+		display: block;
+		object-fit: cover;	/* crop to fit if necessary */
+		border-radius: 10px;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 		}
