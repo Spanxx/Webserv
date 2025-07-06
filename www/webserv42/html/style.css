@@ -37,3 +37,32 @@
 		box-shadow: 0 0 15px rgba(0,0,0,0.1);
 		width: 50%;
 		}
+
+		nav {
+	overflow: hidden; /* Clear floats */
+	display: inline-block;
+}
+
+nav ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+	nav li {
+	float: left; /* Make list items appear horizontally */
+	}
+
+	nav li a {
+	display: block;
+	color: rgb(69, 70, 83);
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	}
+
+	nav li a:hover {
+	background-color: #a8f773;
+	color: black;
+	}

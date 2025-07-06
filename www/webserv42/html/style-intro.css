@@ -1,0 +1,222 @@
+/* General Body Styles */
+body {
+		font-family: Arial, sans-serif;
+		text-align: center;
+		padding: 50px;
+		background-color: #d8f8c2;
+		color: #333;
+		line-height: 1.6;
+}
+
+/* Header Styles */
+header {
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+/* Main Content Area */
+main {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Introduction Section */
+.introduction {
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #e9f7ef; /* Light green for introduction */
+    /*border-left: 5px solid #28a745; /* Green border */
+    border-radius: 5px;
+}
+
+.introduction h2 {
+    color: #2c3e50;
+    font-size: 2em;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.introduction p {
+    font-size: 1.1em;
+    line-height: 1.8;
+}
+
+/* Concepts Section */
+.concepts h2 {
+    text-align: center;
+    color: #2c3e50;
+    font-size: 2em;
+    margin-bottom: 30px;
+}
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.card {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+    color: #3498db; /* Blue for card titles */
+    font-size: 1.5em;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 1em;
+    color: #555;
+}
+
+/* Footer Styles */
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #2c3e50;
+    color: #ffffff;
+    margin-top: 40px;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.configuration {
+	margin: 20px 0;
+	text-align: left;
+}
+.configuration img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 8px;
+	margin-top: 20px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.configuration h3 {
+      border-bottom: 2px solid #a8f773;
+      padding-bottom: 0.3rem;
+    }
+
+    pre {
+      background: #046d30;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #7fc351;
+      color: white;
+    }
+
+    ul {
+      margin-top: 0;
+    }
+
+    code {
+      background-color: #eee;
+      padding: 0 4px;
+      border-radius: 4px;
+    }
+
+nav {
+	overflow: hidden; /* Clear floats */
+	display: inline-block;
+}
+
+nav ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+	nav li {
+	float: left; /* Make list items appear horizontally */
+	}
+
+	nav li a {
+	display: block;
+	color: rgb(69, 70, 83);
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	}
+
+	nav li a:hover {
+	background-color: #a8f773;
+	color: black;
+	}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-container {
+        grid-template-columns: 1fr; /* Stack cards on smaller screens */
+    }
+
+    header h1 {
+        font-size: 1.8em;
+    }
+
+    .introduction h2,
+    .concepts h2 {
+        font-size: 1.6em;
+    }
+
+    .introduction p,
+    .card p {
+        font-size: 0.95em;
+    }
+}
+
+@media (max-width: 480px) {
+    main {
+        margin: 10px auto;
+        padding: 15px;
+    }
+
+    header h1 {
+        font-size: 1.5em;
+    }
+}
