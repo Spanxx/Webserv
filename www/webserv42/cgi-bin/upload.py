@@ -58,15 +58,18 @@ def main():
             with open(full_path, "wb") as f:
                 f.write(file_data)
 
-            index_path = "www/webserv42/html/index.html"
-            with open(index_path, "r", encoding="utf-8") as f:
-                html_content = f.read()
+            print("Status: 303 See Other")
+            print("Location: /index.html") 
+            print()
+            # index_path = "www/webserv42/html/index.html"
+            # with open(index_path, "r", encoding="utf-8") as f:
+            #     html_content = f.read()
 
-            insertion = f'\n<img src="/{upload_block}{unique_filename}" alt="Uploaded Image" style="max-width:100%; margin-top:20px;">\n'
-            html_content = html_content.replace("</form>", "</form>" + insertion, 1)
+            # insertion = f'\n<img src="/{upload_block}{unique_filename}" alt="Uploaded Image" style="max-width:100%; margin-top:20px;">\n'
+            # html_content = html_content.replace("</form>", "</form>" + insertion, 1)
 
-            print("Content-Type: text/html\r\n")
-            print(html_content)
+            # print("Content-Type: text/html\r\n")
+            # print(html_content)
         else:
             sys.exit(2)
 
