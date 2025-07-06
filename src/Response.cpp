@@ -297,7 +297,7 @@ bool Response::isCGIdir(const std::string &path)
 }
 // void	Router::checkScriptTypes()
 // {
-	
+
 // 	std::cout << "REQUESTED FILE: " << _requestedFile << std::endl;
 // 	std::string ext = findExt(_requestedFile.c_str());
 // 	for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
@@ -370,7 +370,7 @@ void Response::POSTBodyBuilder()
 		this->_body = ss.str();
 		this->_headers["Content-Length"] = intToString(this->_body.size());
 	}
-	else 
+	else
 		handleERROR(415);
 }
 
@@ -477,5 +477,5 @@ void		Response::autoindexBuilder(const std::string &path, const std::vector<File
 	this->_headers["Content-Type"] = "text/html";
 	this->_body = html;
 	this->_code = 200;
-	std::cout << "Autoindex built for path: " << path << std::endl;
+	//std::cout << "Autoindex built for path: " << path << std::endl;
 }
