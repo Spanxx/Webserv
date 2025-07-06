@@ -71,7 +71,7 @@
 			const filename = select.value;
 			if (!filename) return;
 
-			fetch(`{{UPLOAD_BLOCK}}${filename}`, {
+			fetch(`/{{UPLOAD_BLOCK}}${filename}`, {
 				method: 'DELETE'
 			})
 			.then(response => {
