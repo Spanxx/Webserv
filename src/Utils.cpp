@@ -250,6 +250,8 @@ std::string getUniqueFilename(const std::string& directory, const std::string& f
 {
 	std::string base, ext;
 	splitFilename(filename, base, ext);
+	if (ext.empty())
+		return "";
 
 	std::string candidate = filename;
 	int counter = 1;

@@ -351,7 +351,7 @@ void Response::POSTBodyBuilder()
 
 		if (filename.empty())
 		{
-			std::cout << "No file selected for upload\n";
+			std::cout << "No file selected for upload or file without extension selected\n";
 			handleERROR(400);
 			return;
 		}

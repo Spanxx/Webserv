@@ -111,8 +111,20 @@ void	Request::splitURI()
 	}
 	
 	pos = 0;
-	while ((pos = _path.find("//", pos)) != std::string::npos) //COMMENT FOR LATER: ADD EXCEPTION FOR HTTP:// AND MAKE REDIRECTION
-		_path.replace(pos, 2, "/");
+	if (_path.compare(0, 7, "http://") == 0)
+		pos = 7;
+	else if (_path.compare(0, 8, "https://") == 0)
+		pos = 8;
+	pos = _path.find("//", pos);
+	if (pos != std::string::npos)
+	{
+		while ((pos = _path.find("//", pos)) != std::string::npos) //COMMENT FOR LATER: ADD EXCEPTION FOR HTTP:// AND MAKE REDIRECTION
+		{
+			_path.replace(pos, 2, "/");
+		}
+		std::cout << "PATH NEW AFTER SLASHES: " << _path << std::endl;
+		_code = 303;
+	}
 }
 
 Request::RequestException::RequestException(std::string error)  : std::runtime_error(error) {}

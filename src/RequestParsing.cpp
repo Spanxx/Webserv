@@ -31,16 +31,19 @@ void	Request::check_headers(const std::string &headers_raw)
 	splitURI();
 	std::cout << "PATH: " << _path << ", QUERY: " << _query << std::endl;
 
-	if (split_headers(rstream) == 1 || checkURILength() == 1 || checkPathChars() == 1)
+	if (_code == 200)
 	{
-		std::cout << "Returning in check headers\n";
-		std::cout << "Code: " << _code << std::endl;
-		std::cout << "splitheaders returned" << split_headers(rstream) << std::endl;
-		std::cout << "checkURILength returned" << checkURILength() << std::endl;
-		std::cout << "checkPathChars returned" << checkPathChars()	<< std::endl;
-		return ;
+		if (split_headers(rstream) == 1 || checkURILength() == 1 || checkPathChars() == 1)
+		{
+			std::cout << "Returning in check headers\n";
+			std::cout << "Code: " << _code << std::endl;
+			std::cout << "splitheaders returned" << split_headers(rstream) << std::endl;
+			std::cout << "checkURILength returned" << checkURILength() << std::endl;
+			std::cout << "checkPathChars returned" << checkPathChars()	<< std::endl;
+			return ;
+		}
+		Router Router(this->_server, this);
 	}
-	Router Router(this->_server, this);
 }
 
 int Request::split_headers(std::istringstream &rstream)
