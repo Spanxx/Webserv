@@ -91,6 +91,11 @@ std::string Request::getHeader(const std::string &key)
 	std::cout << "Header " << key << " does not exist\n";
 	return "";
 }
+void	Request::setHeader(const std::string &key, const std::string &value)
+{
+	_headers[key] = value;
+}
+
 size_t Request::getBodySize() { return _body.size(); }
 bool Request::isChunked() { return _chunked; }
 

@@ -40,6 +40,7 @@ class Request
 		std::string 						getQuery();
 		bool 								getConnection();
 		std::string 						getHeader(const std::string &key);
+		void								setHeader(const std::string &key, const std::string &value);
 		int 								getContentLength();
 		std::string 						getErrorPage();
 		size_t								getBodySize();

@@ -156,6 +156,13 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			std::cerr << "CGI script exited with status: " << exitStatus << "\n";
 			if (exitStatus == 2)
 				handleERROR(400);
+			else if (exitStatus == 5)
+			{
+				_code = 303;
+				_request->setPath("/index_gallery.html");
+				_request->setHeader("Content-Type", "text/html");
+				
+			}
 			else
 				handleERROR(500);
 		}

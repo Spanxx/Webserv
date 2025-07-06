@@ -58,9 +58,7 @@ def main():
             with open(full_path, "wb") as f:
                 f.write(file_data)
 
-            print("Status: 303 See Other")
-            print("Location: /index.html") 
-            print()
+            sys.exit(5)
             # index_path = "www/webserv42/html/index.html"
             # with open(index_path, "r", encoding="utf-8") as f:
             #     html_content = f.read()
