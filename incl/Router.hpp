@@ -19,7 +19,7 @@ public:
 	void	findDirConfig();
 	void	checkForDirRequest();
 	void	handleFavicon();
-	void	setDirForType();
+	void	resolvePath();
 	void	assignFileWithExtension(std::string &type);
 	void	assignFileWithoutExtension();
 	void	checkDirPermission();

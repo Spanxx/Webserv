@@ -12,7 +12,7 @@
 	<br><br>
 
 	<h2>Please enter your name</h2>
-	<form action="{{CGI_BIN}}hello.php" method="GET">
+	<form action="/{{CGI_BIN}}hello.php" method="GET">
 		<input type="text" name="name" id="name">
 		<input type="submit" value="Say Hi">
 	</form>
@@ -21,7 +21,7 @@
 
 	<h2>Upload a File</h2>
 
-	<form action="{{CGI_BIN}}upload.py" method="POST" enctype="multipart/form-data">
+	<form action="/{{CGI_BIN}}upload.py" method="POST" enctype="multipart/form-data">
 		<input type="file" name="file">
 		<button type="submit">Upload</button>
 	</form>
@@ -40,7 +40,7 @@
 	</select>
 
 	<script>
-	fetch('{{CGI_BIN}}list_files.py')
+	fetch('/{{CGI_BIN}}list_files.py')
 		.then(res => res.json())
 		.then(files => {
 			const select = document.getElementById('fileSelect');
@@ -71,7 +71,7 @@
 			const filename = select.value;
 			if (!filename) return;
 
-			fetch(`{{UPLOAD_BLOCK}}${filename}`, {
+			fetch(`/{{UPLOAD_BLOCK}}${filename}`, {
 				method: 'DELETE'
 			})
 			.then(response => {
