@@ -345,7 +345,8 @@ void Response::POSTBodyBuilder()
 			handleERROR(400);
 			return;
 		}
-		std::string filename = getFilename(filePart);
+		std::string saveTo = _server->getUploadDir()["root"] + _server->getUploadDir()["location"];
+		std::string filename = getFilename(filePart, saveTo);
 		std::string fileContent = getFileContent(filePart);
 
 		if (filename.empty())
@@ -354,8 +355,8 @@ void Response::POSTBodyBuilder()
 			handleERROR(400);
 			return;
 		}
-		std::string saveTo = _server->getUploadDir()["root"] + _server->getUploadDir()["location"] + filename;
-		std::ofstream outFile(saveTo.c_str(), std::ios::binary);
+		std::string saveAs = saveTo + filename;
+		std::ofstream outFile(saveAs.c_str(), std::ios::binary);
 		if (!outFile)
 		{
 			handleERROR(500);
@@ -365,10 +366,12 @@ void Response::POSTBodyBuilder()
 		outFile.close();
 
 		this->_headers["Content-Type"] = "text/html";
-		std::stringstream ss;
-		ss << "<html><body><h1>File uploaded successfully!</h1><p>Saved as: " << filename << "</p></body></html>";
-		this->_body = ss.str();
-		this->_headers["Content-Length"] = intToString(this->_body.size());
+		_code = 303;
+		_request->setPath("/index.html");
+		// std::stringstream ss;
+		// ss << "<html><body><h1>File uploaded successfully!</h1><p>Saved as: " << filename << "</p></body></html>";
+		// this->_body = ss.str();
+		// this->_headers["Content-Length"] = intToString(this->_body.size());
 	}
 	else
 		handleERROR(415);

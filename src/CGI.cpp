@@ -159,7 +159,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			else if (exitStatus == 5)
 			{
 				_code = 303;
-				_request->setPath("/index_gallery.html");
+				_request->setPath("/index.html");
 				_request->setHeader("Content-Type", "text/html");
 				
 			}
