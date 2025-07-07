@@ -1,11 +1,13 @@
 
 #include "../incl/Request.hpp"
 #include "../incl/Utils.hpp"
+#include "../incl/Cluster.hpp"
 
 Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), 
 	_errorPage(server->getErrorPage()), _server(server)
 {
 	std::cout << "Request constructed\n";
+	_cluster = _server->getCluster();
 }
 
 Request::Request(Request &other)
@@ -98,6 +100,7 @@ void	Request::setHeader(const std::string &key, const std::string &value)
 
 size_t Request::getBodySize() { return _body.size(); }
 bool Request::isChunked() { return _chunked; }
+std::string	Request::getSessionID() { return _sessionID; }
 
 void	Request::splitURI()
 {
@@ -109,7 +112,12 @@ void	Request::splitURI()
 		_query = _path.substr(pos + 1);
 		_path = _path.substr(0, pos);
 	}
-	
+	if (_query == "login=true")
+	{
+		_cluster->setCookie(_sessionID, true);
+		_code = 303;
+		_path = "/index.html";
+	}
 	pos = 0;
 	if (_path.compare(0, 7, "http://") == 0)
 		pos = 7;
@@ -122,7 +130,7 @@ void	Request::splitURI()
 		{
 			_path.replace(pos, 2, "/");
 		}
-		std::cout << "PATH NEW AFTER SLASHES: " << _path << std::endl;
+		//std::cout << "PATH NEW AFTER SLASHES: " << _path << std::endl;
 		_code = 303;
 	}
 }

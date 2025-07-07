@@ -1,6 +1,7 @@
 #include "../incl/Router.hpp"
 #include "../incl/Request.hpp"
 #include "../incl/Utils.hpp"
+#include "../incl/Cluster.hpp"
 
 void	Request::check_headers(const std::string &headers_raw)
 {
@@ -50,6 +51,7 @@ int Request::split_headers(std::istringstream &rstream)
 {
 	std::string line;
 	bool blank = false;
+	bool cookie_found = false;
 	// _content_length = -1;
 	// _chunked = false;
 	while (std::getline(rstream, line))
@@ -82,9 +84,10 @@ int Request::split_headers(std::istringstream &rstream)
 				return (std::cout << "Content length should be between 0 and INT MAX bytes\n", 0); // COMMENT FOR LATER: ADD EXCEPTION SO PROGRAM QUITS HERE
 			std::cout << "Content-Length: " << _content_length << "*****" << std::endl;
 		}
-		
-		if (key == "Transfer-Encoding" && value == "chunked")
+		else if (key == "Transfer-Encoding" && value == "chunked")
 			_chunked = true;
+		else if (key == "Cookie")
+			checkCookie(value, cookie_found);
 	}
 
 	if (!blank)
@@ -94,5 +97,35 @@ int Request::split_headers(std::istringstream &rstream)
 	}
 	if (_content_length == -1 && _method != "POST") //check if only in GET and DELETE it's ok not to have content_length set
 		_content_length = 0;
+	if (cookie_found == false)
+		makeNewCookie();
 	return 0;
+}
+
+void Request::checkCookie(std::string &value, bool &cookie_found)
+{
+	size_t pos = 0;
+	size_t pos_sid = 0;
+	pos = value.find(";");
+	pos_sid = value.find("sid=");
+	if (pos_sid == std::string::npos)
+		makeNewCookie();
+	else
+	{
+		size_t start = pos_sid + 4;
+		std::string id = value.substr(start, pos - start);
+		std::cout << "STRING ID: " << id << std::endl;
+		if (!_cluster->hasSessionID(id))
+			makeNewCookie();
+		else
+			_sessionID = id;
+	}
+	cookie_found = true;
+}
+
+void	Request::makeNewCookie()
+{
+	std::string session_id = _cluster->makeSessionID();
+	_cluster->setCookie(session_id, false);
+	_sessionID = session_id;
 }

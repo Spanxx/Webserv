@@ -8,7 +8,6 @@ Response::Response(Request *request, Server *server, std::string &hostName): _re
 {
 	std::cout << "Response constructed\n";
 	this->_headers["hostname"] = hostName;
-	//status phrase + code here? or set to which default?
 }
 
 Response::Response(Response &other)
@@ -200,6 +199,7 @@ std::string Response::responseBuilder()
 std::string	Response::headersBuilder()
 {
 	std::ostringstream header;
+	std::string cookie;
 
 	if (_headers.find("Content-Type") == _headers.end())
 		_headers["Content-Type"] = "text/html";	// should we change these to text/html for the error pages
@@ -211,7 +211,8 @@ std::string	Response::headersBuilder()
 			<< "Host: " << this->_headers["hostname"] << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
 			<< "Connection: " << this->_request->getHeader("Connection") << "\r\n"
 			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
-			<< "Content-Length: " << atoi(this->_headers["Content-Length"].c_str()) << "\r\n";
+			<< "Content-Length: " << atoi(this->_headers["Content-Length"].c_str()) << "\r\n"
+			<< "Set-Cookie: " << "sid=" << _request->getSessionID() << "; Path=/;" << "\r\n";
 			if (this->_code >= 300 && this->_code < 400)
 				header << "Location: " << this->_request->getPath() << "\r\n";
 			header << "\r\n";	//empty newline to seperate header and body
