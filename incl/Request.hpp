@@ -47,6 +47,7 @@ class Request
 		size_t								getParsePos() const;
 		bool								isChunked();
 		std::string	getSessionID();
+		bool	getCookieStatus(std::string &id);
 
 
 		void	checkCookie(std::string &value, bool &cookie_found);

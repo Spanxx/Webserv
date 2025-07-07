@@ -101,6 +101,7 @@ void	Request::setHeader(const std::string &key, const std::string &value)
 size_t Request::getBodySize() { return _body.size(); }
 bool Request::isChunked() { return _chunked; }
 std::string	Request::getSessionID() { return _sessionID; }
+bool Request::getCookieStatus(std::string &id) { return _cluster->getCookie(id).logged_in; }
 
 void	Request::splitURI()
 {
