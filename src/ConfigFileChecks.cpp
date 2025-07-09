@@ -56,7 +56,7 @@ void Server::assignCGIDir()
 				while (std::getline(ss, buffer, ','))
 				{
 					_allowedScripts.push_back(buffer);
-					std::cout << "BUFFER: " << buffer << std::endl;
+					//std::cout << "BUFFER: " << buffer << std::endl;
 				}
 				_cgiDir ["root"] = findRoot(it->second);
 				_cgiDir["location"] = it->first;
