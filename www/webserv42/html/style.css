@@ -106,6 +106,7 @@ nav ul {
       background-color: #0a9e54;
       color: white;
       border: none;
+	  text-decoration: none; /* Remove underline */
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;

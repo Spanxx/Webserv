@@ -54,7 +54,6 @@ def logout(cursor, email, cookie):
 
 		print(json.dumps({
 			"status": "Logout succesfull",
-			"username": username,
 			"cookie": "removed"
 		}))
 
@@ -63,7 +62,7 @@ def login(cursor, email, hashed_password):
 	row = cursor.fetchone()
 
 	if row:
-		username = row[0]
+		username = row[2]
 
 		# Cookie generieren (z. B. UUID)
 		cookie = str(uuid.uuid4())
@@ -71,17 +70,21 @@ def login(cursor, email, hashed_password):
 		# Cookie setzen in der DB
 		cursor.execute("UPDATE users SET cookie = ? WHERE email = ?", (cookie, email))
 	
-		# print("Content-Type: application/json")
-		print("Status: 302 Found")
-		print("Location: /index.html")
-		print(f"Set-Cookie: session_id={cookie}; Path=/; HttpOnly")
-		print()
+		# print("Status: 303 See Other")
+		# print("Location: /index.html")
+		# print(f"Set-Cookie: session_id={cookie}; Path=/; HttpOnly")
+		# print()
 
+		print("Content-Type: application/json")
+		print()
 		print(json.dumps({
 			"status": "ok",
 			"username": username,
 			"cookie": cookie
 		}))
+
+		print(f"username={username}; login=true")
+		sys.exit(7)
 	else:
 		print("Content-Type: application/json\n")
 		print(json.dumps({
@@ -89,14 +92,16 @@ def login(cursor, email, hashed_password):
 			"message": "Username or password is wrong"
 		}))
 
+		print (f"username={username}; login=false")
+		sys.exit(7)
+
 def main():
-	# contentLength = int(os.environ.get('CONTENT_LENGTH', 0))
 	bodyString = os.environ.get('BODY_STRING', '')
 	dbPath = os.environ.get('ROOT_PATH', '') + "/user.db"
 	
 	params = urllib.parse.parse_qs(bodyString)
 
-	# Username & Passwort extrahieren
+	# extract Username & Password
 	email = params.get("email", [""])[0]
 	password = params.get("password", [""])[0]
 	username = params.get("username", [""])[0]
@@ -123,8 +128,8 @@ def main():
 			login(cursor, email, hashed_password)
 		elif authType == "create":
 			addUser(cursor, email, hashed_password, username)
-		elif authType == "delete":
-			deleteUser(cursor, email)
+		# elif authType == "delete":
+		# 	deleteUser(cursor, email)
 
 		conn.commit()
 	finally:
