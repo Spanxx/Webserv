@@ -48,15 +48,14 @@
 			},
 			body: formData.toString()
 		})
-		.then(response => response.json())
-		.then(data => {
-			if (data.status === "ok") {
-				alert("Login success: " + data.username);
-				console.log("Server response: ", data)
-			} else {
-				alert("Login failed: " + data.message);
-				console.log("Server response: ", data)
-			}
+		.then(response => {
+		if (response.redirected) {
+			// manually navigate the browser
+			window.location.href = response.url;
+		} else {
+			// optional: handle login error or show message
+			console.log('Login failed or no redirect.');
+		}
 		})
 		.catch(error => {
 			console.error("Send error: ", error);

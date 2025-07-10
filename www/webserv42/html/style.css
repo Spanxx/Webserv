@@ -98,8 +98,7 @@ nav ul {
   			border-radius: 10px;
   			box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
-	 #loginBtn {
-      position: fixed;      /* fixed position relative to viewport */
+	 #loginBtn,  #logoutBtn {
       top: 15px;            /* distance from top */
       right: 15px;          /* distance from right */
       padding: 10px 20px;

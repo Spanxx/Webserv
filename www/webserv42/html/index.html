@@ -9,21 +9,12 @@
 </head>
 
 <body>
-	<nav>
-		<ul>
-			<li><a href="/index.html">Index</a></li>
-			<li><a href="/concepts.html">Concepts</a></li>
-			<li><a href="/quizzes/">Quizzes</a></li>
-		</ul>
-	</nav>
-
-<div id="loginStatus">
-  <span id="status"></span>  
+	<div id="loginStatus" style="display: flex; align-items: center; font-size: 12px; gap: 10px; justify-content: flex-end; padding: 10px;">
+	 <span id="status"></span>  
   <a href="/html/login.html" style="display: none;" id="loginBtn" class="button-link">Login</a>
+  <a href="/html/index.html" style="display: none;" id="logoutBtn" class="button-link">Logout</a>
+	</div>
 
-  <span id="status"></span>  
-  <a href="/html/index.html" style="display: none;" id="logoutBtn" class="button-link">Login</a>
-</div>
 
 	<script>
 		
@@ -40,22 +31,30 @@
 			const loginBtn = document.getElementById('loginBtn');
 			
 			if (loggedIn === 'true') {
-				statusDiv.textContent = "Logged In";
-				loginBtn.style.display = 'none';
-				// loginBtn.textContent = "Logout";
+				statusDiv.textContent = "Logged in as {{USER}}";
+				logoutBtn.style.display = 'inline-block';
 			} else {
-				statusDiv.textContent = "Not logged in";
+				// statusDiv.textContent = "Not logged in";
 				loginBtn.style.display = 'inline-block';
-				loginBtn.textContent = "Login";
 			}
 		}
 		
-		document.getElementById('loginBtn').addEventListener('click', function() {
-			window.location.href = window.location.pathname + '?login=true';
+		document.getElementById('logoutBtn').addEventListener('click', function() {
+			window.location.href = window.location.pathname + '?login=false';
 		});
 		
-		showStatus(); // check cookie and update status on page load
+		showStatus(); 
 	</script>
+
+
+	<nav>
+		<ul>
+			<li><a href="/index.html">Index</a></li>
+			<li><a href="/concepts.html">Concepts</a></li>
+			<li><a href="/quizzes/">Quizzes</a></li>
+		</ul>
+	</nav>
+
 
 
   	<br><br><br><br>

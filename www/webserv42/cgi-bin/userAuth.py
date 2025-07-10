@@ -32,67 +32,18 @@ def addUser(cursor, email, password_hash, username):
 			"message": "User already exists"
 		}))
 
-def checkCookie(email, cookie):
-	conn = sqlite3.connect('users.db')
-	cursor = conn.cursor()
-	cursor.execute("SELECT username FROM users WHERE email = ? AND cookie = ?", (email, cookie))
-	result = cursor.fetchone()
-	conn.close()
-	return True if result else False
-
-def logout(cursor, email, cookie):
-	cursor.execute("SELECT username FROM users WHERE email = ? and cookie = ?", (email, cookie))
-	row = cursor.fetchone()
-
-	if row:
-		cursor.execut("UPDATE users SET cookie = ? WHERE email = ?", ("", email))
-
-		print("Status: 302 Found")
-		print("Location: /index.html")
-		print(f"Set-Cookie: session_id=""; Path=/; HttpOnly")
-		print()
-
-		print(json.dumps({
-			"status": "Logout succesfull",
-			"cookie": "removed"
-		}))
 
 def login(cursor, email, hashed_password):
 	cursor.execute("SELECT username FROM users WHERE email = ? AND password = ?", (email, hashed_password))
 	row = cursor.fetchone()
 
 	if row:
-		username = row[2]
+		username = row[0]
 
-		# Cookie generieren (z. B. UUID)
-		cookie = str(uuid.uuid4())
-
-		# Cookie setzen in der DB
-		cursor.execute("UPDATE users SET cookie = ? WHERE email = ?", (cookie, email))
-	
-		# print("Status: 303 See Other")
-		# print("Location: /index.html")
-		# print(f"Set-Cookie: session_id={cookie}; Path=/; HttpOnly")
-		# print()
-
-		print("Content-Type: application/json")
-		print()
-		print(json.dumps({
-			"status": "ok",
-			"username": username,
-			"cookie": cookie
-		}))
-
-		print(f"username={username}; login=true")
+		print(f"{username} login=true")
 		sys.exit(7)
 	else:
-		print("Content-Type: application/json\n")
-		print(json.dumps({
-			"status": "fail",
-			"message": "Username or password is wrong"
-		}))
-
-		print (f"username={username}; login=false")
+		print (f"{username} login=false")
 		sys.exit(7)
 
 def main():
@@ -119,7 +70,6 @@ def main():
 		email TEXT PRIMARY KEY,
 		password TEXT,
 		username TEXT,
-		cookie TEXT
 		)
 	''')
 
