@@ -2,6 +2,7 @@
 #include	"../incl/Server.hpp"
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
+#include	"../incl/UserAuthenticaton.hpp"
 
 Server::Server(std::string &serverConfig)
 {
@@ -86,4 +87,5 @@ std::string Server::getErrorPage() { return _errorPage; };
 std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}
 
 std::map<std::string, std::string>	Server::getCGIDir() { return _cgiDir; }
+
 std::vector<std::string>	Server::getAllowedScripts() { return _allowedScripts; }

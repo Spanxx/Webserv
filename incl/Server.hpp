@@ -21,6 +21,7 @@
 #include <arpa/inet.h> // need for inet_aton
 #include "Utils.hpp"
 #include "Libraries.hpp"
+#include "UserAuthenticaton.hpp"
 
 
 extern volatile sig_atomic_t stopSignal;
@@ -45,7 +46,7 @@ public:
 	void	sendResponse(int client_fd);
 	void	closeServer();
 
-	void		createConfig(std::string &serverConfig);
+	void	createConfig(std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
 	void	allowedMethods(std::string &trimmed);
@@ -99,6 +100,8 @@ public:
 	bool														checkPOST(std::map<std::string, std::string> configblock);
 	std::string													findRoot(std::map<std::string, std::string> configblock);
 
+	// UserAuthentication* 										getUserAuth();
+
 	class ServerException : public std::runtime_error {
 		public:
 			ServerException(const std::string &error);
@@ -132,8 +135,8 @@ private:
 	std::map<std::string, std::string>													_typeDirConfig;
 	std::map<std::map<std::string, std::string>, std::map<std::string, std::string> >	_serverMap;
 	std::map<std::string, std::string>													_uploadDir;
-	std::map<std::string, std::string>	_cgiDir;
-	std::vector<std::string>	_allowedScripts;
+	std::map<std::string, std::string>													_cgiDir;
+	std::vector<std::string>															_allowedScripts;
 
 	Server(Server &other);
 	Server& operator=(Server &other);

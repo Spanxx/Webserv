@@ -40,6 +40,7 @@ void	Request::check_headers(const std::string &headers_raw)
 		std::cout << "checkPathChars returned" << checkPathChars()	<< std::endl;
 		return ;
 	}
+
 	Router Router(this->_server, this);
 }
 
