@@ -189,6 +189,44 @@ nav ul {
 	color: black;
 	}
 
+ .quiz-list {
+            list-style: none;
+            padding: 0;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .quiz-list li {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .quiz-list li:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .quiz-list a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 1.1em;
+            font-weight: bold;
+            display: block;
+            padding: 10px 0;
+            transition: color 0.3s ease;
+        }
+        .quiz-list a:hover {
+            color: #0056b3;
+        }
+        .quiz-list p {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .card-container {
