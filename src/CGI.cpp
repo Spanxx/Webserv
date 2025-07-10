@@ -44,6 +44,8 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		std::string gatewayInterface	= "GATEWAY_INTERFACE=CGI/1.1";
 		std::string serverProtocol	= "SERVER_PROTOCOL=HTTP/1.1";
 		std::string scriptFilename	= "SCRIPT_FILENAME=" + path;
+		std::string bodySTR			= "BODY_STRING=" + this->_request->getBody();
+		std::string rootPath		= "ROOT_PATH=" + (this->_server->getRoot());
 
 		char *env[] = {
 			const_cast<char *>(methodSTR.c_str()),
@@ -56,6 +58,8 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			const_cast<char *>(gatewayInterface.c_str()),
 			const_cast<char *>(serverProtocol.c_str()),
 			const_cast<char *>(scriptFilename.c_str()),
+			const_cast<char *>(bodySTR.c_str()),
+			const_cast<char *>(rootPath.c_str()),
 			NULL
 		};
 

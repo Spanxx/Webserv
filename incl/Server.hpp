@@ -47,7 +47,7 @@ public:
 	void	sendResponse(int client_fd);
 	void	closeServer();
 
-	void		createConfig(std::string &serverConfig);
+	void	createConfig(std::string &serverConfig);
 	int		checkConfigFile(std::ifstream &conFile);
 	void	extractConfigMap(std::string &configFile, std::map<std::string, std::string> &targetMap, std::string target);
 	void	allowedMethods(std::string &trimmed);
@@ -101,6 +101,8 @@ public:
 	void														assignUploadDir();
 	bool														checkPOST(std::map<std::string, std::string> configblock);
 	std::string													findRoot(std::map<std::string, std::string> configblock);
+
+	// UserAuthentication* 										getUserAuth();
 
 	class ServerException : public std::runtime_error {
 		public:

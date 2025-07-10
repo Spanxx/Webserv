@@ -7,7 +7,7 @@ types {
 	image/jpeg = jpeg jpg
 	application/javascript = js
 	application/atom+xml = atom
-	application/rss+xml = 	rss
+	application/rss+xml = rss
 	text/mathml = mml
 	text/plain = txt
 	text/vnd.sun.j2me.app-descriptor = jad
@@ -61,6 +61,7 @@ types {
 	application/x-tcl = tcl tk
 	application/x-x509-ca-cert = der pem crt
 	application/x-xpinstall = xpi
+	application/x-www-form-urlencoded
 	application/xhtml+xml = xhtml
 	application/xspf+xml = xspf
 	application/zip = zip
