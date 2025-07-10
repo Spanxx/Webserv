@@ -5,7 +5,7 @@
 Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), 
 	_errorPage(server->getErrorPage()), _server(server)
 {
-	std::cout << "Request constructed\n";
+	//std::cout << "Request constructed\n";
 }
 
 Request::Request(Request &other)

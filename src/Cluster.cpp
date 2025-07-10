@@ -137,7 +137,7 @@ void Cluster::removeConnection(int fd)
 		if (_pollfds[i].fd == fd)
 		{
 			_pollfds.erase(_pollfds.begin() + i);
-			std::cout << "Removed fd " << fd << " from poll array." << std::endl;
+			//std::cout << "Removed fd " << fd << " from poll array." << std::endl;
 			return;
 		}
 	}
