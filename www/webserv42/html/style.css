@@ -37,3 +37,18 @@
 		box-shadow: 0 0 15px rgba(0,0,0,0.1);
 		width: 50%;
 		}
+
+    /* Button styles */
+    #loginBtn {
+      position: fixed;      /* fixed position relative to viewport */
+      top: 15px;            /* distance from top */
+      right: 15px;          /* distance from right */
+      padding: 10px 20px;
+      background-color: #0a9e54;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 1000;        /* stays on top */
+    }

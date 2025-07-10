@@ -11,11 +11,11 @@ import uuid
 
 # TestUser: hans@gmail.com,Test123,Hansbert42
 
-def deleteUser(cursor, email):
-	try:
-		cursor.execute("DELETE FROM users WHERE email = ?", (email))
-	except sqlite3.IntegrityError:
-		print("User deletion failed")
+# def deleteUser(cursor, email):
+# 	try:
+# 		cursor.execute("DELETE FROM users WHERE email = ?", (email))
+# 	except sqlite3.IntegrityError:
+# 		print("User deletion failed")
 
 def addUser(cursor, email, password_hash, username):
 	try:
@@ -39,6 +39,24 @@ def checkCookie(email, cookie):
 	result = cursor.fetchone()
 	conn.close()
 	return True if result else False
+
+def logout(cursor, email, cookie):
+	cursor.execute("SELECT username FROM users WHERE email = ? and cookie = ?", (email, cookie))
+	row = cursor.fetchone()
+
+	if row:
+		cursor.execut("UPDATE users SET cookie = ? WHERE email = ?", ("", email))
+
+		print("Status: 302 Found")
+		print("Location: /index.html")
+		print(f"Set-Cookie: session_id=""; Path=/; HttpOnly")
+		print()
+
+		print(json.dumps({
+			"status": "Logout succesfull",
+			"username": username,
+			"cookie": "removed"
+		}))
 
 def login(cursor, email, hashed_password):
 	cursor.execute("SELECT username FROM users WHERE email = ? AND password = ?", (email, hashed_password))
