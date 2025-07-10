@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webserv Project - 42 School</title>
+    <link rel="stylesheet" href="/html/style-intro.css">
+</head>
+<body>
+	<nav>
+		<ul>
+			<li><a href="/index.html">Index</a></li>
+			<li><a href="/concepts.html">Concepts</a></li>
+			<li><a href="/quizzes/">Quizzes</a></li>
+		</ul>
+	</nav>
+    <header>
+        <h1>Quiz</h1>
+    </header>
+	 <main>
+        <h1>HTTP Parsing (Request/Response) Quiz</h1>
+        <section class="quiz-section">
+            <h2>Test Your Knowledge on HTTP Message Parsing</h2>
+            <p>Challenge yourself on parsing HTTP headers, body, and constructing valid HTTP responses for your `webserv`.</p>
+        </section>
+        <form action="/cgi-bin/quiz.py" method="post">
+            <h3>1. What separates the HTTP headers from the message body in both requests and responses?</h3>
+            <label><input type="radio" name="q1" value="CRLFCRLF"> An empty line (CRLFCRLF)</label><br>
+            <label><input type="radio" name="q1" value="Single_CRLF"> A single CRLF</label><br>
+            <label><input type="radio" name="q1" value="Semicolon"> A semicolon (;)</label><br>
+            <label><input type="radio" name="q1" value="Space"> A space</label><br>
+
+            <h3>2. Which HTTP header indicates the size of the message body in bytes?</h3>
+            <label><input type="radio" name="q2" value="Content-Length"> `Content-Length`</label><br>
+            <label><input type="radio" name="q2" value="Transfer-Encoding"> `Transfer-Encoding`</label><br>
+            <label><input type="radio" name="q2" value="Content-Type"> `Content-Type`</label><br>
+            <label><input type="radio" name="q2" value="Accept"> `Accept`</label><br>
+
+            <h3>3. What is the first line of an HTTP request called?</h3>
+            <label><input type="radio" name="q3" value="Request_Line"> Request Line</label><br>
+            <label><input type="radio" name="q3" value="Status_Line"> Status Line</label><br>
+            <label><input type="radio" name="q3" value="Header_Line"> Header Line</label><br>
+            <label><input type="radio" name="q3" value="Body_Line"> Body Line</label><br>
+
+            <h3>4. In an HTTP response, what information does the Status Line typically contain? (Select all that apply)</h3>
+            <label><input type="checkbox" name="q4" value="HTTP_Version"> HTTP Version</label><br>
+            <label><input type="checkbox" name="q4" value="Status_Code"> Status Code</label><br>
+            <label><input type="checkbox" name="q4" value="Reason_Phrase"> Reason Phrase</label><br>
+            <label><input type="checkbox" name="q4" value="Request_Method"> Request Method</label><br>
+
+            <h3>5. When parsing an HTTP request, if the `Transfer-Encoding` header is set to `chunked`, what does it imply about the message body?</h3>
+            <label><input type="radio" name="q5" value="Length_unknown"> The body's length is not known in advance and is sent in a series of chunks.</label><br>
+            <label><input type="radio" name="q5" value="Compressed"> The body is compressed and needs decompression.</label><br>
+            <label><input type="radio" name="q5" value="Encrypted"> The body is encrypted.</label><br>
+            <label><input type="radio" name="q5" value="Fixed_length"> The body has a fixed length defined by `Content-Length`.</label><br>
+
+            <h3>6. Which character is used as a delimiter between a header field name and its value?</h3>
+            <label><input type="radio" name="q6" value="Colon"> Colon (:)</label><br>
+            <label><input type="radio" name="q6" value="Semicolon"> Semicolon (;)</label><br>
+            <label><input type="radio" name="q6" value="Equals"> Equals (=)</label><br>
+            <label><input type="radio" name="q6" value="Space"> Space</label><br>
+
+            <br><input type="submit" value="Submit Quiz">
+        </form>
+    </main>
+	<footer>
+		<p>&copy; 2025 Webserv Project</p>
+	</footer>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webserv Project - 42 School</title>
+    <link rel="stylesheet" href="/html/style-intro.css">
+</head>
+<body>
+	<nav>
+		<ul>
+			<li><a href="/index.html">Index</a></li>
+			<li><a href="/concepts.html">Concepts</a></li>
+			<li><a href="/quizzes/">Quizzes</a></li>
+		</ul>
+	</nav>
+    <header>
+        <h1>Quiz</h1>
+    </header>
+	  <main>
+        <h1>File Upload and Download Quiz</h1>
+        <section class="quiz-section">
+            <h2>Test Your Knowledge on File Uploads and Downloads</h2>
+            <p>Topics on handling multipart form data for file uploads and serving files for download in `webserv`.</p>
+        </section>
+        <form action="/cgi-bin/quiz.py" method="post">
+            <h3>1. What `enctype` attribute value is required on an HTML `form` tag for file uploads?</h3>
+            <label><input type="radio" name="q1" value="multipart/form-data"> `multipart/form-data`</label><br>
+            <label><input type="radio" name="q1" value="application/x-www-form-urlencoded"> `application/x-www-form-urlencoded`</label><br>
+            <label><input type="radio" name="q1" value="text/plain"> `text/plain`</label><br>
+            <label><input type="radio" name="q1" value="application/json"> `application/json`</label><br>
+
+            <h3>2. When a file is uploaded using `multipart/form-data`, how are the different parts (fields, files) separated in the HTTP request body?</h3>
+            <label><input type="radio" name="q2" value="Boundary_string"> By a unique "boundary string".</label><br>
+            <label><input type="radio" name="q2" value="Comma"> By commas (`,`).</label><br>
+            <label><input type="radio" name="q2" value="Newline"> By newlines (`\n`).</label><br>
+            <label><input type="radio" name="q2" value="Semicolon"> By semicolons (`;`).</label><br>
+
+            <h3>3. Which HTTP header is commonly used by a server to suggest a filename for a file being downloaded by the client?</h3>
+            <label><input type="radio" name="q3" value="Content-Disposition"> `Content-Disposition`</label><br>
+            <label><input type="radio" name="q3" value="Content-Type"> `Content-Type`</label><br>
+            <label><input type="radio" name="q3" value="Content-Length"> `Content-Length`</label><br>
+            <label><input type="radio" name="q3" value="Location"> `Location`</label><br>
+
+            <h3>4. What HTTP method is typically used to upload a file to a web server?</h3>
+            <label><input type="radio" name="q4" value="POST"> POST</label><br>
+            <label><input type="radio" name="q4" value="GET"> GET</label><br>
+            <label><input type="radio" name="q4" value="PUT"> PUT</label><br>
+            <label><input type="radio" name="q4" value="HEAD"> HEAD</label><br>
+
+            <h3>5. When serving a file for download, what `Content-Type` would be appropriate for a generic binary file whose type isn't known or shouldn't be executed by the browser?</h3>
+            <label><input type="radio" name="q5" value="application/octet-stream"> `application/octet-stream`</label><br>
+            <label><input type="radio" name="q5" value="text/html"> `text/html`</label><br>
+            <label><input type="radio" name="q5" value="image/jpeg"> `image/jpeg`</label><br>
+            <label><input type="radio" name="q5" value="application/json"> `application/json`</label><br>
+
+            <h3>6. True or False: For security reasons, a web server should validate file uploads (e.g., check file type, size) before saving them to disk.</h3>
+            <label><input type="radio" name="q6" value="True"> True</label><br>
+            <label><input type="radio" name="q6" value="False"> False</label><br>
+
+            <br><input type="submit" value="Submit Quiz">
+        </form>
+    </main>
+	<footer>
+		<p>&copy; 2025 Webserv Project</p>
+	</footer>

@@ -2,8 +2,9 @@
 #include	"../incl/Server.hpp"
 #include	"../incl/Request.hpp"
 #include	"../incl/Response.hpp"
+#include	"../incl/Cluster.hpp"
 
-Server::Server(std::string &serverConfig)
+Server::Server(std::string &serverConfig, Cluster *cluster) : _cluster(cluster)
 {
 	std::cout << "Server created\n";
 	this->createConfig(serverConfig);
@@ -87,3 +88,4 @@ std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationB
 
 std::map<std::string, std::string>	Server::getCGIDir() { return _cgiDir; }
 std::vector<std::string>	Server::getAllowedScripts() { return _allowedScripts; }
+Cluster*	Server::getCluster() { return _cluster; }

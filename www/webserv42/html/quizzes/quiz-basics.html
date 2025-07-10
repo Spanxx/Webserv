@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webserv Project - 42 School</title>
+    <link rel="stylesheet" href="/html/style-intro.css">
+</head>
+<body>
+	<nav>
+		<ul>
+			<li><a href="/index.html">Index</a></li>
+			<li><a href="/concepts.html">Concepts</a></li>
+			<li><a href="/quizzes/">Quizzes</a></li>
+		</ul>
+	</nav>
+    <header>
+        <h1>Quiz</h1>
+    </header>
+	 <main>
+        <h1>HTTP Basics Quiz</h1>
+        <section class="quiz-section">
+            <h2>Test Your Knowledge on HTTP Fundamentals</h2>
+            <p>Answer the following questions to test your understanding of fundamental HTTP concepts.</p>
+        </section>
+        <form action="/cgi-bin/quiz.py" method="post">
+            <h3>1. Which HTTP method is typically used to retrieve data from a server?</h3>
+            <label><input type="radio" name="q1" value="GET"> GET</label><br>
+            <label><input type="radio" name="q1" value="POST"> POST</label><br>
+            <label><input type="radio" name="q1" value="PUT"> PUT</label><br>
+            <label><input type="radio" name="q1" value="DELETE"> DELETE</label><br>
+
+            <h3>2. What does an HTTP status code 200 indicate?</h3>
+            <label><input type="radio" name="q2" value="OK"> OK</label><br>
+            <label><input type="radio" name="q2" value="Created"> Created</label><br>
+            <label><input type="radio" name="q2" value="Not Found"> Not Found</label><br>
+            <label><input type="radio" name="q2" value="Internal Server Error"> Internal Server Error</label><br>
+
+            <h3>3. Which of these are common components of an HTTP Request Line? (Select all that apply)</h3>
+            <label><input type="checkbox" name="q3" value="Method"> Method</label><br>
+            <label><input type="checkbox" name="q3" value="URI"> URI</label><br>
+            <label><input type="checkbox" name="q3" value="Body"> Body</label><br>
+            <label><input type="checkbox" name="q3" value="HTTP_Version"> HTTP Version</label><br>
+
+            <h3>4. What is the default port for HTTP traffic?</h3>
+            <label><input type="radio" name="q4" value="80"> 80</label><br>
+            <label><input type="radio" name="q4" value="443"> 443</label><br>
+            <label><input type="radio" name="q4" value="8080"> 8080</label><br>
+            <label><input type="radio" name="q4" value="21"> 21</label><br>
+
+            <h3>5. Which HTTP header is used by clients to tell the server what content types they can accept in the response?</h3>
+            <label><input type="radio" name="q5" value="Accept"> Accept</label><br>
+            <label><input type="radio" name="q5" value="Content-Type"> Content-Type</label><br>
+            <label><input type="radio" name="q5" value="Host"> Host</label><br>
+            <label><input type="radio" name="q5" value="User-Agent"> User-Agent</label><br>
+
+            <h3>6. True or False: HTTP is a stateless protocol.</h3>
+            <label><input type="radio" name="q6" value="True"> True</label><br>
+            <label><input type="radio" name="q6" value="False"> False</label><br>
+
+            <br><input type="submit" value="Submit Quiz">
+        </form>
+    </main>
+	<footer>
+		<p>&copy; 2025 Webserv Project</p>
+	</footer>

@@ -7,7 +7,42 @@
 	<link rel="stylesheet" href="/html/style.css"> <!-- this way the request is from root, otherwise will be relative, Ex = cgi-bin/html/style.css -->
 </head>
 <body>
-	<h1>Hello from C++ Server with created response!</h1>
+
+	 <div id="status"></div>
+  <button id="loginBtn" style="display:none;">Log In</button>
+
+  <script>
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    function showStatus() {
+      const loggedIn = getCookie('logged_in');
+      const statusDiv = document.getElementById('status');
+      const loginBtn = document.getElementById('loginBtn');
+
+      if (loggedIn === 'true') {
+        statusDiv.textContent = "Logged In";
+        loginBtn.style.display = 'none';
+      } else {
+        statusDiv.textContent = "Not logged in";
+        loginBtn.style.display = 'inline-block';
+      }
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', function() {
+         window.location.href = window.location.pathname + '?login=true';
+    });
+
+    showStatus(); // check cookie and update status on page load
+  </script>
+
+	<br><br><br><br>
+
+	<h1>Hello from C++ Server!</h1>
 	<p>"I used to be addicted to soap, but I'm clean now."</p>
 	<br><br>
 

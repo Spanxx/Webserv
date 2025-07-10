@@ -6,13 +6,6 @@
 		background-color: #d8f8c2;
 		color: #333;
 		}
-		/* div {
-		background-color: #ffffff;
-		border-radius: 10px;
-		box-shadow: 0 0 15px rgba(0,0,0,0.1);
-		width: 500px;
-		height: 200px;
-		} */
 		h1 {
 		font-size: 72px;
 		margin-bottom: 0;
@@ -42,6 +35,35 @@
 		box-shadow: 0 0 15px rgba(0,0,0,0.1);
 		width: 50%;
 		}
+
+		nav {
+	overflow: hidden; /* Clear floats */
+	display: inline-block;
+}
+
+nav ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+	nav li {
+	float: left; /* Make list items appear horizontally */
+	}
+
+	nav li a {
+	display: block;
+	color: rgb(69, 70, 83);
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	}
+
+	nav li a:hover {
+	background-color: #a8f773;
+	color: black;
+	}
 		.box {
 		background-color: #ffffff;
 		border-radius: 10px;
@@ -58,21 +80,34 @@
 		margin-top: 20px;
 		}
 		.gallery-item {
-		background: #fff;
-		border-radius: 10px;
-		box-shadow: 0 0 15px rgba(0,0,0,0.1);
-		padding: 10px;
-		box-sizing: border-box;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		width: fit-content;
-		}
-		.gallery-item img {
-		width: 300px;
-		height: 380px;
-		display: block;
-		object-fit: cover;	/* crop to fit if necessary */
-		border-radius: 10px;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-		}
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+}
+        .gallery-item img {
+            width: 300px;
+			height: 380px;
+			display: block;
+			object-fit: cover;      /* crop to fit if necessary */
+  			border-radius: 10px;
+  			box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+	 #loginBtn {
+      position: fixed;      /* fixed position relative to viewport */
+      top: 15px;            /* distance from top */
+      right: 15px;          /* distance from right */
+      padding: 10px 20px;
+      background-color: #0a9e54;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 1000;        /* stays on top */
+    }

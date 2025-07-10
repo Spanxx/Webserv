@@ -8,9 +8,28 @@ std::vector<struct pollfd> _socketArray; which is an array of pollfd of each ser
 So when a server is initialized, it creates a socket for each port in the config file, binds it to the port and the fd is pushed to the _serverSocket, then after is listens on the socket and the fd is pushed to the _socketArray.
 */
 
-Cluster::Cluster() {}
+Cluster::Cluster() : _session_counter(0) {}
 
 Cluster::ClusterException::ClusterException(const std::string &error) : std::runtime_error(error) {}
+
+t_cookie Cluster::getCookie(std::string &id) { return _sessionData[id]; }
+
+void	Cluster::setCookie(std::string &session_id, bool status)
+{
+	_sessionData[session_id].logged_in = status;
+	//populate other future elements of struct here
+}
+
+std::string	Cluster::makeSessionID()
+{ 
+	if (_session_counter == UINT_MAX - 1)
+		_session_counter = 0;
+	return intToString(++_session_counter);
+}
+bool Cluster::hasSessionID(const std::string& id)
+{
+	return _sessionData.find(id) != _sessionData.end();
+}
 
 void Cluster::initializeServers(std::vector<std::string> configList)
 {
@@ -18,7 +37,7 @@ void Cluster::initializeServers(std::vector<std::string> configList)
 		throw ClusterException("No server configurations provided.");
 	for (size_t i = 0; i < configList.size(); ++i)
 	{
-		Server* newServer = new Server(configList[i]); //Create a new Server instance, all its sockets according to the ports are initialized in the constructor and they bind and listen to the ports
+		Server* newServer = new Server(configList[i], this); //Create a new Server instance, all its sockets according to the ports are initialized in the constructor and they bind and listen to the ports
 		_servers.push_back(newServer);
 	}
 	setupPollFds();

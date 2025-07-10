@@ -22,6 +22,8 @@
 #include "Utils.hpp"
 #include "Libraries.hpp"
 
+class Cluster;
+
 
 extern volatile sig_atomic_t stopSignal;
 
@@ -37,7 +39,7 @@ class Server
 public:
 
 	// Server(char *av);
-	Server(std::string &serverConfig);
+	Server(std::string &serverConfig, Cluster *cluster);
 	~Server();
 
 	void	startListen(int socket);
@@ -91,6 +93,7 @@ public:
 	void 								close_erase(int fd);
 	const std::vector<struct pollfd>&	getpollFdArray() const;
 	const std::vector<int>&				getServerSockets() const;
+	Cluster*		getCluster();
 
 	size_t														getMaxBodySize();
 	std::string													getName();
@@ -134,6 +137,7 @@ private:
 	std::map<std::string, std::string>													_uploadDir;
 	std::map<std::string, std::string>	_cgiDir;
 	std::vector<std::string>	_allowedScripts;
+	Cluster *_cluster;
 
 	Server(Server &other);
 	Server& operator=(Server &other);
