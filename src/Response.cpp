@@ -243,6 +243,7 @@ void	Response::bodyBuilder()
 	std::string body = buffer.str();
 	replaceAll(body, "{{UPLOAD_BLOCK}}", _server->getUploadDir()["location"]);
 	replaceAll(body, "{{CGI_BIN}}", _server->getCGIDir()["location"].substr(1));
+	replaceAll(body, "{{USER}}", _request->getUserName());
 	ss << body.size();
 
 	std::cout << "Bytes read: " << ss.str() << std::endl;

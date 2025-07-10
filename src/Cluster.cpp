@@ -14,13 +14,20 @@ Cluster::ClusterException::ClusterException(const std::string &error) : std::run
 
 t_cookie Cluster::getCookie(std::string &id) { return _sessionData[id]; }
 
-void	Cluster::setCookie(std::string &session_id, bool status)
+void	Cluster::setCookie(std::string &session_id, bool status, std::string username)
 {
 	_sessionData[session_id].logged_in = status;
+	if (!username.empty())
+		_sessionData[session_id].username = username;
 	//populate other future elements of struct here
 }
 
-std::string	Cluster::makeSessionID() { return intToString(++_session_counter); }
+std::string	Cluster::makeSessionID()
+{ 
+	if (_session_counter == UINT_MAX - 1)
+		_session_counter = 0;
+	return intToString(++_session_counter);
+}
 bool Cluster::hasSessionID(const std::string& id)
 {
 	return _sessionData.find(id) != _sessionData.end();
@@ -151,7 +158,7 @@ void Cluster::removeConnection(int fd)
 		if (_pollfds[i].fd == fd)
 		{
 			_pollfds.erase(_pollfds.begin() + i);
-			std::cout << "Removed fd " << fd << " from poll array." << std::endl;
+			//std::cout << "Removed fd " << fd << " from poll array." << std::endl;
 			return;
 		}
 	}

@@ -63,7 +63,7 @@ bool Server::readFromConnection(std::map<int, std::string> &response_collector, 
 
 	if (header_end == std::string::npos)
 	{
-		std::cout << "[Incomplete headers] Still waiting for \\r\\n\\r\\n\n";
+		//std::cout << "[Incomplete headers] Still waiting for \\r\\n\\r\\n\n";
 		return true; // Wait for more header data
 	}
 
@@ -98,7 +98,7 @@ bool Server::readFromConnection(std::map<int, std::string> &response_collector, 
 		if (globalPollFds[i].fd == fd)
 		{
 			globalPollFds[i].events = POLLOUT;
-			std::cout << "Switched fd " << fd << " to POLLOUT\n";
+			//std::cout << "Switched fd " << fd << " to POLLOUT\n";
 			break;
 		}
 	}
@@ -109,7 +109,7 @@ int	Server::write_to_connection(std::map<int, std::string> &response_collector, 
 {
 	std::string &resp = response_collector[fd];
 
-	std::cout << "Writing response to fd " << fd << ": " << resp.size() << " bytes\n";
+	//std::cout << "Writing response to fd " << fd << ": " << resp.size() << " bytes\n";
 	ssize_t sent = send(fd, resp.c_str(), resp.size(), 0);
 	if (sent <= 0)
 	{
@@ -135,7 +135,7 @@ int	Server::write_to_connection(std::map<int, std::string> &response_collector, 
 			if (globalPollFds[i].fd == fd)
 			{
 				globalPollFds[i].events = POLLIN;
-				std::cout << "Switched fd " << fd << " to POLLIN\n";
+				//std::cout << "Switched fd " << fd << " to POLLIN\n";
 				return (SEND_COMPLETE);
 			}
 		}
@@ -167,7 +167,7 @@ void	Server::close_erase(int fd)
 void Server::initialize_request(int fd, const std::string &data, size_t header_end)
 {
 	std::string header_part = data.substr(0, header_end + 4);
-	std::cout << "Request from client fd " << fd << std::endl;
+	//std::cout << "Request from client fd " << fd << std::endl;
 	Request *request = new Request(this);
 	request->check_headers(header_part); // add check for header size
 	_requestCollector[fd] = request;
@@ -188,7 +188,7 @@ if (_requestCollector.find(fd) == _requestCollector.end())
 		int content_length = request->getContentLength();
 		if (content_length < 0)
 		{
-			std::cerr << "Missing or invalid Content-Length for fd " << fd << "\n";
+			//std::cerr << "Missing or invalid Content-Length for fd " << fd << "\n";
 			request->setCode(400); // Bad Request
 			// close connection!?
 			return REQUEST_ERROR_RESPOND; // Return true so prepare_response can set 400 response
@@ -234,6 +234,7 @@ void Server::prepare_response(int fd, std::map<int, std::string> &response_colle
 
 	delete request;
 	delete response;
+
 	_requestCollector.erase(fd);
 }
 

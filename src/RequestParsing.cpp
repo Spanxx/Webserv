@@ -7,7 +7,7 @@ void	Request::check_headers(const std::string &headers_raw)
 {
 	std::istringstream rstream(headers_raw); //turn string into stream so it can be read line by line with getline
 	std::string line;
-	std::cout << "HEADERS RAW: " << headers_raw << "UNTIL HERE" << std::endl;
+	//std::cout << "HEADERS RAW: " << headers_raw << "UNTIL HERE" << std::endl;
 	if (std::getline(rstream, line))
 	{
 		std::istringstream lstream(line); //splits with space as delimiter
@@ -30,7 +30,7 @@ void	Request::check_headers(const std::string &headers_raw)
 		return;
 	}
 	splitURI();
-	std::cout << "PATH: " << _path << ", QUERY: " << _query << std::endl;
+	//std::cout << "PATH: " << _path << ", QUERY: " << _query << std::endl;
 
 	if (_code == 200)
 	{
@@ -88,8 +88,15 @@ int Request::split_headers(std::istringstream &rstream)
 			_chunked = true;
 		else if (key == "Cookie")
 			checkCookie(value, cookie_found);
+		
 	}
-
+	if (_query == "login=false")
+	{
+		_cluster->setCookie(_sessionID, false, "");
+		_code = 303;
+		_path = "/index.html";
+		return (1);
+	}
 	if (!blank)
 	{
 		this->_code = 400;
@@ -99,6 +106,7 @@ int Request::split_headers(std::istringstream &rstream)
 		_content_length = 0;
 	if (cookie_found == false)
 		makeNewCookie();
+		
 	return 0;
 }
 
@@ -114,11 +122,15 @@ void Request::checkCookie(std::string &value, bool &cookie_found)
 	{
 		size_t start = pos_sid + 4;
 		std::string id = value.substr(start, pos - start);
-		std::cout << "STRING ID: " << id << std::endl;
+		//std::cout << "STRING ID: " << id << std::endl;
 		if (!_cluster->hasSessionID(id))
 			makeNewCookie();
 		else
+		{
 			_sessionID = id;
+			if (value.find("logged_in=") == std::string::npos)
+				setCookie(_sessionID, false, "");
+		}
 	}
 	cookie_found = true;
 }
@@ -126,6 +138,6 @@ void Request::checkCookie(std::string &value, bool &cookie_found)
 void	Request::makeNewCookie()
 {
 	std::string session_id = _cluster->makeSessionID();
-	_cluster->setCookie(session_id, false);
+	_cluster->setCookie(session_id, false, "");
 	_sessionID = session_id;
 }

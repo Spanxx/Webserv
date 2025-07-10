@@ -101,7 +101,12 @@ void	Request::setHeader(const std::string &key, const std::string &value)
 size_t Request::getBodySize() { return _body.size(); }
 bool Request::isChunked() { return _chunked; }
 std::string	Request::getSessionID() { return _sessionID; }
+std::string	Request::getUserName() { return _cluster->getCookie(_sessionID).username; }
+
 bool Request::getCookieStatus(std::string &id) { return _cluster->getCookie(id).logged_in; }
+void Request::setCookie(std::string &session_id, bool status, std::string username) {_cluster->setCookie(session_id, status, username);}
+
+
 
 void	Request::splitURI()
 {
@@ -112,12 +117,6 @@ void	Request::splitURI()
 	{
 		_query = _path.substr(pos + 1);
 		_path = _path.substr(0, pos);
-	}
-	if (_query == "login=true")
-	{
-		_cluster->setCookie(_sessionID, true);
-		_code = 303;
-		_path = "/index.html";
 	}
 	pos = 0;
 	if (_path.compare(0, 7, "http://") == 0)
