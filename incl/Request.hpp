@@ -46,6 +46,12 @@ class Request
 		size_t								getBodySize();
 		size_t								getParsePos() const;
 		bool								isChunked();
+		std::string	getSessionID();
+		bool	getCookieStatus(std::string &id);
+
+
+		void	checkCookie(std::string &value, bool &cookie_found);
+		void	makeNewCookie();
 
 		friend std::ostream &operator<<(std::ostream &os, Request &request); //double check that we're allowed to use friend keyword
 
@@ -68,7 +74,9 @@ class Request
 		size_t 								_parse_pos;
 		//std::map<std::string, std::string>	_uploadDir;
 		std::string	_errorPage;
+		std::string	_sessionID;
 		Server 								*_server;
+		Cluster	*_cluster;
 };
 
 #endif

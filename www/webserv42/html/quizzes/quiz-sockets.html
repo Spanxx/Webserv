@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webserv Project - 42 School</title>
+    <link rel="stylesheet" href="/html/style-intro.css">
+</head>
+<body>
+	<nav>
+		<ul>
+			<li><a href="/index.html">Index</a></li>
+			<li><a href="/concepts.html">Concepts</a></li>
+			<li><a href="/quizzes/">Quizzes</a></li>
+		</ul>
+	</nav>
+    <header>
+        <h1>Quiz</h1>
+    </header>
+	 <main>
+        <h1>Sockets and Networking Quiz</h1>
+        <section class="quiz-section">
+            <h2>Test Your Knowledge on Sockets and Networking</h2>
+            <p>Assess your understanding of TCP/IP, socket programming, and network communication for `webserv`.</p>
+        </section>
+        <form action="/cgi-bin/quiz.py" method="post">
+            <h3>1. Which protocol provides reliable, connection-oriented communication?</h3>
+            <label><input type="radio" name="q1" value="TCP"> TCP</label><br>
+            <label><input type="radio" name="q1" value="UDP"> UDP</label><br>
+            <label><input type="radio" name="q1" value="IP"> IP</label><br>
+            <label><input type="radio" name="q1" value="ICMP"> ICMP</label><br>
+
+            <h3>2. What is the purpose of the `bind()` system call in socket programming?</h3>
+            <label><input type="radio" name="q2" value="Assigns_address"> Assigns a local address (IP and port) to a socket</label><br>
+            <label><input type="radio" name="q2" value="Establishes_connection"> Establishes a connection to a remote host</label><br>
+            <label><input type="radio" name="q2" value="Listens_for_connections"> Listens for incoming connections</label><br>
+            <label><input type="radio" name="q2" value="Sends_data"> Sends data over the socket</label><br>
+
+            <h3>3. Which system call is used by a server to wait for an incoming client connection?</h3>
+            <label><input type="radio" name="q3" value="accept"> `accept()`</label><br>
+            <label><input type="radio" name="q3" value="connect"> `connect()`</label><br>
+            <label><input type="radio" name="q3" value="send"> `send()`</label><br>
+            <label><input type="radio" name="q3" value="recv"> `recv()`</label><br>
+
+            <h3>4. What is the typical flow for a server-side TCP socket program? (Order matters)</h3>
+            <label><input type="checkbox" name="q4" value="socket"> `socket()`</label><br>
+            <label><input type="checkbox" name="q4" value="bind"> `bind()`</label><br>
+            <label><input type="checkbox" name="q4" value="listen"> `listen()`</label><br>
+            <label><input type="checkbox" name="q4" value="accept"> `accept()`</label><br>
+            <label><input type="checkbox" name="q4" value="connect"> `connect()`</label><br> <h3>5. Which of these are valid socket types? (Select all that apply)</h3>
+            <label><input type="checkbox" name="q5" value="SOCK_STREAM"> `SOCK_STREAM`</label><br>
+            <label><input type="checkbox" name="q5" value="SOCK_DGRAM"> `SOCK_DGRAM`</label><br>
+            <label><input type="checkbox" name="q5" value="SOCK_RAW"> `SOCK_RAW`</label><br>
+            <label><input type="checkbox" name="q5" value="SOCK_HTTP"> `SOCK_HTTP`</label><br>
+
+            <h3>6. What is a "port number" used for in networking?</h3>
+            <label><input type="radio" name="q6" value="Identify_device"> To uniquely identify a device on a network</label><br>
+            <label><input type="radio" name="q6" value="Identify_process"> To identify a specific process or application on a host</label><br>
+            <label><input type="radio" name="q6" value="Route_packets"> To route packets between networks</label><br>
+            <label><input type="radio" name="q6" value="Encryption"> For network data encryption</label><br>
+
+            <br><input type="submit" value="Submit Quiz">
+        </form>
+    </main>
+	<footer>
+		<p>&copy; 2025 Webserv Project</p>
+	</footer>
