@@ -114,7 +114,7 @@ void Request::checkCookie(std::string &value, bool &cookie_found)
 	{
 		size_t start = pos_sid + 4;
 		std::string id = value.substr(start, pos - start);
-		std::cout << "STRING ID: " << id << std::endl;
+		//std::cout << "STRING ID: " << id << std::endl;
 		if (!_cluster->hasSessionID(id))
 			makeNewCookie();
 		else
