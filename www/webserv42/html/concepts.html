@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webserv Project - 42 School</title>
-    <link rel="stylesheet" href="/html/style-intro.css">
+    <link rel="stylesheet" href="/html/style.css">
 </head>
 <body>
 	<nav>
@@ -144,57 +144,6 @@
 
 	<img src="../files/config-file-joke.jpeg" alt="Config file joke" width="500" height="600">
         </section>
-
-		<section class="concepts">
-  <h2>Test Your Knowledge: Key Concepts</h2>
-  <div class="quiz-container">
-
-    <!-- Example Card -->
-    <div class="quiz-card">
-      <h3>What are valid HTTP request methods?</h3>
-      <form>
-        <label><input type="checkbox" name="q1" value="GET"> GET</label><br>
-        <label><input type="checkbox" name="q1" value="POST"> POST</label><br>
-        <label><input type="checkbox" name="q1" value="SEND"> SEND</label><br>
-        <label><input type="checkbox" name="q1" value="DELETE"> DELETE</label><br>
-        <button type="button" onclick="checkAnswer(this, ['GET', 'POST', 'DELETE'])">Check Answer</button>
-        <p class="result"></p>
-      </form>
-    </div>
-
-    <div class="quiz-card">
-      <h3>What are key steps in socket programming?</h3>
-      <form>
-        <label><input type="checkbox" name="q2" value="create"> Create socket</label><br>
-        <label><input type="checkbox" name="q2" value="fly"> Fly socket</label><br>
-        <label><input type="checkbox" name="q2" value="bind"> Bind socket</label><br>
-        <label><input type="checkbox" name="q2" value="listen"> Listen on socket</label><br>
-        <button type="button" onclick="checkAnswer(this, ['create', 'bind', 'listen'])">Check Answer</button>
-        <p class="result"></p>
-      </form>
-    </div>
-
-    <!-- Add more cards following the same structure -->
-
-  </div>
-</section>
-
-<script>
-function checkAnswer(button, correctAnswers) {
-  const form = button.parentElement;
-  const checkboxes = form.querySelectorAll('input[type="checkbox"]');
-  const result = form.querySelector('.result');
-  const selected = Array.from(checkboxes)
-                        .filter(cb => cb.checked)
-                        .map(cb => cb.value);
-
-  const isCorrect = selected.length === correctAnswers.length &&
-                    selected.every(val => correctAnswers.includes(val));
-
-  result.textContent = isCorrect ? '✅ Correct!' : '❌ Try again.';
-  result.style.color = isCorrect ? 'green' : 'red';
-}
-</script>
 
     </main>
 
