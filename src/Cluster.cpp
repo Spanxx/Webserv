@@ -20,7 +20,12 @@ void	Cluster::setCookie(std::string &session_id, bool status)
 	//populate other future elements of struct here
 }
 
-std::string	Cluster::makeSessionID() { return intToString(++_session_counter); }
+std::string	Cluster::makeSessionID()
+{ 
+	if (_session_counter == UINT_MAX - 1)
+		_session_counter = 0;
+	return intToString(++_session_counter);
+}
 bool Cluster::hasSessionID(const std::string& id)
 {
 	return _sessionData.find(id) != _sessionData.end();

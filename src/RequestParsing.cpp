@@ -88,8 +88,15 @@ int Request::split_headers(std::istringstream &rstream)
 			_chunked = true;
 		else if (key == "Cookie")
 			checkCookie(value, cookie_found);
+		
 	}
-
+	if (_query == "login=true")
+	{
+		_cluster->setCookie(_sessionID, true);
+		_code = 303;
+		_path = "/index.html";
+		return (1);
+	}
 	if (!blank)
 	{
 		this->_code = 400;
@@ -99,6 +106,7 @@ int Request::split_headers(std::istringstream &rstream)
 		_content_length = 0;
 	if (cookie_found == false)
 		makeNewCookie();
+		
 	return 0;
 }
 
@@ -114,7 +122,7 @@ void Request::checkCookie(std::string &value, bool &cookie_found)
 	{
 		size_t start = pos_sid + 4;
 		std::string id = value.substr(start, pos - start);
-		std::cout << "STRING ID: " << id << std::endl;
+		//std::cout << "STRING ID: " << id << std::endl;
 		if (!_cluster->hasSessionID(id))
 			makeNewCookie();
 		else

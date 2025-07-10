@@ -234,6 +234,7 @@ void Server::prepare_response(int fd, std::map<int, std::string> &response_colle
 
 	delete request;
 	delete response;
+
 	_requestCollector.erase(fd);
 }
 
