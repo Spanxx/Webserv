@@ -87,5 +87,6 @@ std::string Server::getErrorPage() { return _errorPage; };
 std::map<std::string, std::map<std::string, std::string> >*	Server::getLocationBlocks() { return &_locationBlocks;}
 
 std::map<std::string, std::string>	Server::getCGIDir() { return _cgiDir; }
+
 std::vector<std::string>	Server::getAllowedScripts() { return _allowedScripts; }
 Cluster*	Server::getCluster() { return _cluster; }

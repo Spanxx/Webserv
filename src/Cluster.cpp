@@ -14,9 +14,11 @@ Cluster::ClusterException::ClusterException(const std::string &error) : std::run
 
 t_cookie Cluster::getCookie(std::string &id) { return _sessionData[id]; }
 
-void	Cluster::setCookie(std::string &session_id, bool status)
+void	Cluster::setCookie(std::string &session_id, bool status, std::string username)
 {
 	_sessionData[session_id].logged_in = status;
+	if (!username.empty())
+		_sessionData[session_id].username = username;
 	//populate other future elements of struct here
 }
 

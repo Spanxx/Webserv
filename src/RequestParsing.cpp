@@ -90,9 +90,9 @@ int Request::split_headers(std::istringstream &rstream)
 			checkCookie(value, cookie_found);
 		
 	}
-	if (_query == "login=true")
+	if (_query == "login=false")
 	{
-		_cluster->setCookie(_sessionID, true);
+		_cluster->setCookie(_sessionID, false, "");
 		_code = 303;
 		_path = "/index.html";
 		return (1);
@@ -126,7 +126,11 @@ void Request::checkCookie(std::string &value, bool &cookie_found)
 		if (!_cluster->hasSessionID(id))
 			makeNewCookie();
 		else
+		{
 			_sessionID = id;
+			if (value.find("logged_in=") == std::string::npos)
+				setCookie(_sessionID, false, "");
+		}
 	}
 	cookie_found = true;
 }
@@ -134,6 +138,6 @@ void Request::checkCookie(std::string &value, bool &cookie_found)
 void	Request::makeNewCookie()
 {
 	std::string session_id = _cluster->makeSessionID();
-	_cluster->setCookie(session_id, false);
+	_cluster->setCookie(session_id, false, "");
 	_sessionID = session_id;
 }

@@ -7,6 +7,7 @@
 typedef struct s_cookie
 {
 	bool logged_in;
+	std::string username;
 }	t_cookie;
 
 class Cluster {
@@ -32,7 +33,7 @@ public:
 	void removeConnection(int fd); // Removes fd from _pollfds, _responseCollector, _keepAlive, _lastActive and _fdToServerMap
 	void removePollFd(int fd); // Removes fd from _pollfds and _fdToServerMap
 	t_cookie							getCookie(std::string &id);
-	void								setCookie(std::string &session_id, bool status);
+	void								setCookie(std::string &session_id, bool status, std::string username);
 	std::string	makeSessionID();
 	bool hasSessionID(const std::string& id);
 

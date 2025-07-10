@@ -17,6 +17,7 @@ RM = rm -rf
 SRCS = main.cpp \
 		src/DuplicateSocketCheck.cpp \
 		src/ConfigFile.cpp src/ConfigFileChecks.cpp src/ConfigFileVariables.cpp \
+		src/UserAuthentication.cpp \
 		src/Router.cpp \
 		src/ServerDirStruct.cpp \
 		src/Server.cpp src/ServerSocket.cpp \
