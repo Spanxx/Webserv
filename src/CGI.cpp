@@ -169,7 +169,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 				std::string status;
 				lstream >> username >> status;
 				std::string sess_id = _request->getSessionID();
-				std::cout << "CGI body: " << output << std::endl;
+				//std::cout << "CGI body: " << output << std::endl;
 				if (status == "login=true")
 					_request->setCookie(sess_id, true, username);
 				else
@@ -210,7 +210,7 @@ void Response::parseCGIOutput(const std::string &output)
 	}
 	std::string body((std::istreambuf_iterator<char>(stream)),
 						std::istreambuf_iterator<char>());  //using fancy iterator to read the rest of the body
-	std::cout << "CGI body: " << body << std::endl;
+	//std::cout << "CGI body: " << body << std::endl;
 	_body = body;
 	int bodyLen = _body.size();
 	this->_headers["Content-Length"] = intToString(bodyLen);

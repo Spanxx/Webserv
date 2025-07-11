@@ -10,8 +10,6 @@ class Router
 {
 public:
 	Router(Server *server, Request *request);
-	Router(Router &other);
-	Router& operator=(Router &other);
 	~Router();
 
 	void	extractPath();
@@ -44,6 +42,9 @@ private:
 	std::string													_location;
 	std::map<std::string, std::string>							_dirConfig;
 	std::map<std::string, std::map<std::string, std::string> >	*_locationBlocks;
+
+	Router(Router &other);
+	Router& operator=(Router &other);
 };
 
 #endif	//ROUTER_HPP

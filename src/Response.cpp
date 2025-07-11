@@ -6,50 +6,21 @@
 
 Response::Response(Request *request, Server *server, std::string &hostName): _request(request), _server(server), _code(request->getCode())
 {
-	std::cout << "Response constructed\n";
+	//std::cout << "Response constructed\n";
 	this->_headers["hostname"] = hostName;
-}
-
-Response::Response(Response &other)
-{
-	this->_headers = other._headers;
-	this->_body = other._body;
-	this->_code = other._code;
-	this->_request = other._request;
-	this->_status["phrase"] = other._status["phrase"];
-	this->_status["code"] = other._status["code"];
-
-	std::cout << "Response copied\n";
 }
 
 Response::~Response()
 {
-	std::cout << "Response deconstructed\n";
-}
-
-Response& Response::operator=(Response &other)
-{
-	if (this == &other)
-		return (*this);
-	this->_headers = other._headers;
-	this->_body = other._body;
-	this->_code = other._code;
-	this->_request = other._request;
-	this->_status["phrase"] = other._status["phrase"];
-	this->_status["code"] = other._status["code"];
-
-	std::cout << "Response assigned\n";
-
-	return (*this);
+	//std::cout << "Response deconstructed\n";
 }
 
 void Response::setCode(int code) { _code = code; }
+
 int Response::getCode() { return _code; }
 
-std::string	Response::process_request(int client_fd) // Every handler shoudl update _body, _code and the headers are built in the end
+std::string	Response::process_request() // Every handler shoudl update _body, _code and the headers are built in the end
 {
-	(void)client_fd;
-	this->assign_status_phrase();
 	if (_code != 200)
 		handleERROR(this->_code);
 	else if (_request->getMethod() == "GET")
@@ -59,7 +30,6 @@ std::string	Response::process_request(int client_fd) // Every handler shoudl upd
 	else if (_request->getMethod() == "DELETE")
 		handleDELETE();
 	std::cout << *this->_request << std::endl;
-	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	return responseBuilder();
 }
 
@@ -117,7 +87,7 @@ void	Response::handleGET()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "Response File type: " << fileType << std::endl;
+	//std::cout << "Response File type: " << fileType << std::endl;
 	if (isScript(uri))
 		handleCGI(uri);
 	else if (isAutoindex(uri))
@@ -155,7 +125,7 @@ void	Response::handlePOST()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "Response File type: " << fileType << std::endl;
+	//std::cout << "Response File type: " << fileType << std::endl;
 	if (isScript(uri))
 		handleCGI(uri);
 	else
@@ -182,7 +152,9 @@ void	Response::handleDELETE()
 std::string Response::responseBuilder()
 {
 	std::string response;
-
+	assign_status_phrase();
+	std::cout << "Status: " << this->_code << " " << this->_status["phrase"] << std::endl 
+		<< std::endl << "----------------------------------------------------------------" << std::endl;
 	// handle body at first, to get content size and type
 	response.append(this->headersBuilder());
 	response.append(this->_body);
@@ -194,6 +166,7 @@ std::string	Response::headersBuilder()
 {
 	std::ostringstream header;
 	std::string sess_id = _request->getSessionID();
+
 
 	if (_headers.find("Content-Type") == _headers.end())
 		_headers["Content-Type"] = "text/html";
@@ -212,6 +185,7 @@ std::string	Response::headersBuilder()
 			header << "\r\n";	//empty newline to seperate header and body
 
 	// std::cout << "Location for redir: " << this->_request->getPath() << '\n';
+	//std::cout << "Response Header\n" << header.str()  << std::endl;
 
 	return (header.str());
 }
@@ -278,7 +252,7 @@ bool Response::isCGIdir(const std::string &path)
 	{
 		std::vector<std::string> buff = _server->getAllowedScripts();
 		std::string ext = findExt(path.c_str());
-		std::cout << "PATH INSIDE CGI CHECK: " << path << std::endl;
+		//std::cout << "PATH INSIDE CGI CHECK: " << path << std::endl;
 		for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
 		{
 			if (ext == *it)

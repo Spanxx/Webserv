@@ -17,13 +17,11 @@
 class Response {
 	public:
 		Response(Request *request, Server *server, std::string &hostName);
-		Response(Response &other);
 		~Response();
-		Response& operator=(Response &other);
 
 		void 		setCode(int code);
 		int 		getCode();
-		std::string process_request(int client_fd);
+		std::string process_request();
 		std::string responseBuilder();
 		std::string	headersBuilder();
 		void		bodyBuilder();
@@ -55,6 +53,9 @@ class Response {
 		std::map<std::string, std::string> _status;
 		std::map<std::string, std::string> _headers;
 		std::string _body;
+
+		Response(Response &other);
+		Response& operator=(Response &other);
 };
 
 #endif //RESPONSE_HPP
