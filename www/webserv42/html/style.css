@@ -2,7 +2,7 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    padding: 50px;
+    padding: 0px 50px 50px 50px;
     background-color: #d8f8c2;
     color: #333;
     line-height: 1.6;
@@ -47,13 +47,21 @@ header h1 {
     font-size: 2.5em;
 }
 
+.mainHeader {
+    font-size: 4em;
+}
 /* ======= Navigation ======= */
 nav {
     overflow: hidden;
     display: inline-block;
+    padding-top: 15px;
 }
 
 nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -63,7 +71,17 @@ nav ul {
 nav li {
     float: left;
 }
+nav li {
+    float: left;
+}
 
+nav li a {
+    display: block;
+    color: rgb(69, 70, 83);
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
 nav li a {
     display: block;
     color: rgb(69, 70, 83);
@@ -265,6 +283,15 @@ th {
     display: inline-block;
 }
 
+.top-bar-container {
+    display: flex; /* Makes it a flex container */
+    justify-content: flex-end; /* Aligns items to the start (left) of the container */
+    align-items: center; /* Vertically centers the content */
+    width: 100%; /* Ensures the bar takes full width of its parent */
+    border-bottom: 1px solid #ccc; /* Optional: separator line */
+    box-sizing: border-box; /* Include padding in the width calculation */
+}
+
 /* ======= Gallery ======= */
 #gallery {
     display: flex;
@@ -322,6 +349,11 @@ footer {
 footer p {
     margin: 0;
     font-size: 0.9em;
+}
+
+.responsive-img {
+    max-width: 100%; /* Ensures the image doesn't overflow its container */
+    height: auto;    /* Maintains the aspect ratio */
 }
 
 /* ======= Responsive Design ======= */

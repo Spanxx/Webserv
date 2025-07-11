@@ -9,10 +9,12 @@
 </head>
 
 <body>
+	<div class="top-bar-container">
 	<div id="loginStatus" style="display: flex; align-items: center; font-size: 12px; gap: 10px; justify-content: flex-end; padding: 10px;">
 	 <span id="status"></span>  
-  <a href="/html/login.html" style="display: none;" id="loginBtn" class="button-link">Login</a>
-  <a href="/html/index.html" style="display: none;" id="logoutBtn" class="button-link">Logout</a>
+	<a href="/html/login.html" style="display: none;" id="loginBtn" class="button-link">Login</a>
+	<a href="/html/index.html" style="display: none;" id="logoutBtn" class="button-link">Logout</a>
+	</div>
 	</div>
 
 
@@ -49,7 +51,7 @@
 
 	<nav>
 		<ul>
-			<li><a href="/index.html">Index</a></li>
+			<li><a href="/index.html">Home</a></li>
 			<li><a href="/concepts.html">Concepts</a></li>
 			<li><a href="/quizzes/">Quizzes</a></li>
 		</ul>
@@ -57,13 +59,14 @@
 
 
 
-  	<br><br><br><br>
+  	<br><br>
 
-	<h1>Hello from C++ Server!</h1>
+	<h1 class="mainHeader">Hello from C++ Server!</h1>
 	<p>"I used to be addicted to soap, but I'm clean now."</p>
 	<br><br>
 
 	<h2>Please enter your name</h2>
+	<form action="/{{CGI_BIN}}hello.php" method="GET" class="formCenter">
 	<form action="/{{CGI_BIN}}hello.php" method="GET" class="formCenter">
 		<input type="text" name="name" id="name">
 		<input type="submit" value="Say Hi">
@@ -117,14 +120,14 @@
 
 	<h2>Upload a File</h2>
 
-	<form action="/{{CGI_BIN}}upload.py" method="POST" enctype="multipart/form-data" class="formCenter">
-		<input type="file" name="file">
-		<button type="submit">Upload with CGI</button>
+	<form action="/{{CGI_BIN}}upload.py" class="formCenter" method="POST" enctype="multipart/form-data">
+		<input type="file" name="file" id="cgiFileInput">
+		<button type="submit" id="cgiUploadButton" disabled>Upload with CGI</button>
 	</form>
 
-	<form method="POST" action="{{UPLOAD_BLOCK}}" enctype="multipart/form-data" class="formCenter">
-		<input type="file" name="file" />
-		<button type="submit">Upload</button>
+	<form method="POST" action="{{UPLOAD_BLOCK}}" class="formCenter" enctype="multipart/form-data">
+		<input type="file" name="file" id="blockFileInput"/>
+		<button type="submit" id="blockUploadButton" disabled>Upload</button>
 	</form>
 
 	<br><br>
@@ -190,4 +193,29 @@
 		});
 	</script>
 </body>
+
+<script> // Script to Enable and disable upload buttons
+    const cgiFileInput = document.getElementById('cgiFileInput');
+    const cgiUploadButton = document.getElementById('cgiUploadButton');
+
+    const blockFileInput = document.getElementById('blockFileInput');
+    const blockUploadButton = document.getElementById('blockUploadButton');
+    function toggleUploadButton(fileInput, uploadButton) {
+        if (fileInput.files.length > 0) {
+            uploadButton.removeAttribute('disabled');
+        } else {
+            uploadButton.setAttribute('disabled', 'true');
+        }
+    }
+    cgiFileInput.addEventListener('change', function() {
+        toggleUploadButton(cgiFileInput, cgiUploadButton);
+    });
+
+    blockFileInput.addEventListener('change', function() {
+        toggleUploadButton(blockFileInput, blockUploadButton);
+    });
+
+    toggleUploadButton(cgiFileInput, cgiUploadButton);
+    toggleUploadButton(blockFileInput, blockUploadButton);
+</script>
 </html>
