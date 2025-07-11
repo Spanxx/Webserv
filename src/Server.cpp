@@ -31,7 +31,6 @@ Server::Server(std::string &serverConfig, Cluster *cluster) : _cluster(cluster)
 		std::cout << "Server socket fd: " << sock << " created and bound\n";
 		++it;
 	}
-	_maxBodySize = 0;
 }
 
 Server::~Server()

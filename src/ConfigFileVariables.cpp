@@ -7,6 +7,7 @@ void	Server::extractVariables()
 
 	if (!config)
 		throw ConfigException("Extracting serverConfig map failed!");
+	_maxBodySize = 0;
 
 	std::map<std::string, std::string>::iterator it = config->begin();
 	while (it != config->end())
