@@ -161,7 +161,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			if (exitStatus == 2)
 				handleERROR(400);
 			else if (exitStatus == 5)
-				redirect("/index.html");
+				redirect(this->_server->getIndex());
 			else if (exitStatus == 7)
 			{
 				std::istringstream lstream(output);
@@ -174,7 +174,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 					_request->setCookie(sess_id, true, username);
 				else
 					_request->setCookie(sess_id, false, username);
-				redirect("/index.html");
+				redirect(this->_server->getIndex());
 			}
 			else
 				handleERROR(500);

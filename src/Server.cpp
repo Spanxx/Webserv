@@ -73,6 +73,7 @@ Server::ServerException::ServerException(const std::string &error) : std::runtim
 Server::ConfigException::ConfigException(const std::string &error) : std::runtime_error(error) {}
 
 size_t	Server::getMaxBodySize() { return _maxBodySize; }
+std::string Server::getIndex() {return _index;}
 
 std::map<std::string, std::string> Server::getUploadDir() { return _uploadDir; }
 
