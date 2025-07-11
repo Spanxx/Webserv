@@ -17,8 +17,8 @@ void	Server::extractVariables()
 			extractHost(it->second);
 		else if (it->first.find("name") != std::string::npos)
 			extractName(it->second);
-		// else if (it->first.find("root") != std::string::npos)
-		// 	extractRoot(it->second);
+		else if (it->first.find("root") != std::string::npos)
+			extractRoot(it->second);
 		else if (it->first.find("maxbodysize") != std::string::npos)
 			extractMaxBody(it->second);
 		else if (it->first.find("errorPage") != std::string::npos)
@@ -83,15 +83,15 @@ void	Server::extractName(const std::string &name)
 	std::cout << "Server Name: " << this->_name << '\n';
 }
 
-// void	Server::extractRoot(const std::string &root)
-// {
-// 	if (root.find("www/") == std::string::npos)
-// 		throw ServerException("Root path usage: www/<ServerName>\n");
-// 	if (root.find(this->_name) == std::string::npos)
-// 		throw ServerException("Root path usage: www/<ServerName>\n");
+void	Server::extractRoot(const std::string &root)
+{
+	if (root.find("www/") == std::string::npos)
+		throw ServerException("Root path usage: www/<ServerName>\n");
+	if (root.find(this->_name) == std::string::npos)
+		throw ServerException("Root path usage: www/<ServerName>\n");
 	
-// 	this->_serverRoot = root;
-// }
+	this->_serverRoot = root;
+}
 
 void	Server::checkCompletes()
 {
@@ -109,8 +109,8 @@ void	Server::checkCompletes()
 	}
 	if (_ports.empty())
 		throw ConfigException("Config file needs to specify port per server");
-	// if (_serverRoot.empty())
-	// 	throw ConfigException("Config file needs to specify root per server");
+	if (_serverRoot.empty())
+		throw ConfigException("Config file needs to specify root per server");
 	if (_maxBodySize == 0)
 		_maxBodySize = 65536;
 }
