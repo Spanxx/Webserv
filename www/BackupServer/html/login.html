@@ -54,8 +54,16 @@
 			window.location.href = response.url;
 		} else {
 			// optional: handle login error or show message
-			console.log('Login failed or no redirect.');
+			//console.log('Login failed or no redirect.');
+			return response.json();
 		}
+		})
+		.then(data => {
+  			if (!data) return; // redirected, nothing to do here
+
+  			if (data.status === "fail") {
+    				alert(data.message || "Operation failed");
+			}
 		})
 		.catch(error => {
 			console.error("Send error: ", error);
