@@ -145,11 +145,8 @@ void	Response::handleCGI(std::string &uri)
 		handleERROR(403);
 		return;
 	}
-		// std::string exec_path = "./" + uri;
 		std::string exec_path = uri;
-		//std::cout << "EXEC PATH: " << exec_path << std::endl;
 		std::string query_string = this->_request->getQuery();
-		//std::cout << "QUERY STRING: " << query_string << std::endl;
 		cgiExecuter(exec_path, query_string);
 }
 
@@ -190,9 +187,6 @@ std::string Response::responseBuilder()
 	response.append(this->headersBuilder());
 	response.append(this->_body);
 
-	// if (this->_request->getPath() != "www/files/favicon.ico")
-	// 	std::cout << " --> Response:\n" << response << std::endl;
-	//std::cout << "Response"<< std::endl << response << "-- End of response --"<<std::endl;
 	return (response);
 }
 
@@ -202,12 +196,10 @@ std::string	Response::headersBuilder()
 	std::string sess_id = _request->getSessionID();
 
 	if (_headers.find("Content-Type") == _headers.end())
-		_headers["Content-Type"] = "text/html";	// should we change these to text/html for the error pages
-
+		_headers["Content-Type"] = "text/html";
 	header << this->_request->getVersion() << ' '
 			<< this->_code << ' '
-			<< this->_status["phrase"] << "\r\n"
-			// << this->_request->getPath() << "\r\n"							// needed?
+			<< this->_status["phrase"] << "\r\n"						
 			<< "Host: " << this->_headers["hostname"] << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
 			<< "Connection: " << this->_request->getHeader("Connection") << "\r\n"
 			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
@@ -277,8 +269,6 @@ bool Response::isUploadsDir(const std::string &path)
 {
 	if (path.find(_server->getUploadDir()["location"]) != std::string::npos)
 		return true;
-	//if (path == _request->getUploadDir()["root"]) //COMMENT FOR LATER: double check here if this works / or if it has to be compared to location only
-		//return true;
 	return (false);
 }
 
@@ -291,7 +281,6 @@ bool Response::isCGIdir(const std::string &path)
 		std::cout << "PATH INSIDE CGI CHECK: " << path << std::endl;
 		for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
 		{
-			//std::cout << "ALLOWED SCRIPT: " << *it << std::endl;
 			if (ext == *it)
 				return true;
 		}
@@ -299,20 +288,6 @@ bool Response::isCGIdir(const std::string &path)
 	this->_request->setCode(403);
 	return (false);
 }
-// void	Router::checkScriptTypes()
-// {
-
-// 	std::cout << "REQUESTED FILE: " << _requestedFile << std::endl;
-// 	std::string ext = findExt(_requestedFile.c_str());
-// 	for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
-// 	{
-// 		//std::cout << "ALLOWED SCRIPT: " << *it << std::endl;
-// 		if (ext == *it)
-// 			return;
-// 	}
-// 	this->_request->setCode(403);
-// 	throw RouterException("Script type " + ext + " is not allowed!");
-// }
 
 void Response::POSTBodyBuilder()
 {
@@ -485,4 +460,12 @@ void		Response::autoindexBuilder(const std::string &path, const std::vector<File
 	this->_body = html;
 	this->_code = 200;
 	//std::cout << "Autoindex built for path: " << path << std::endl;
+}
+
+void	Response::redirect(std::string path)
+{
+	_code = 303;
+	_request->setPath(path);
+	_request->setHeader("Content-Type", "text/html");
+	_request->setHeader("Location", path);
 }

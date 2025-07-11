@@ -38,6 +38,7 @@ class Response {
 
 		void 		sendResponse(int client_fd);
 		void 		cgiExecuter(std::string path, const std::string &query);
+		void		redirect(std::string path);
 		void 		parseCGIOutput(const std::string &output);
 		std::string getMimeType(const std::string &path);
 		bool 		isCGIdir(const std::string &path);

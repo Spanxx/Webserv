@@ -161,28 +161,20 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			if (exitStatus == 2)
 				handleERROR(400);
 			else if (exitStatus == 5)
-			{
-				_code = 303;
-				_request->setPath("/index.html");
-				_request->setHeader("Content-Type", "text/html");
-				_request->setHeader("Location", "/index.html");
-			}
+				redirect("/index.html");
 			else if (exitStatus == 7)
 			{
 				std::istringstream lstream(output);
 				std::string username;
 				std::string status;
 				lstream >> username >> status;
-				//std::cout << "USERNAME: " << username << " LOGIN: " << status << std::endl;
 				std::string sess_id = _request->getSessionID();
+				std::cout << "CGI body: " << output << std::endl;
 				if (status == "login=true")
 					_request->setCookie(sess_id, true, username);
 				else
 					_request->setCookie(sess_id, false, username);
-				_code = 303;
-				_request->setPath("/index.html");
-				_request->setHeader("Content-Type", "text/html");
-				_request->setHeader("Location", "/index.html");
+				redirect("/index.html");
 			}
 			else
 				handleERROR(500);

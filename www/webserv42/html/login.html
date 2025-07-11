@@ -48,15 +48,28 @@
 			},
 			body: formData.toString()
 		})
-		.then(response => {
-		if (response.redirected) {
-			// manually navigate the browser
-			window.location.href = response.url;
-		} else {
-			// optional: handle login error or show message
-			console.log('Login failed or no redirect.');
-		}
+		.then(response => response.json())
+		.then(data => {
+			if (data.status === "ok") {
+				window.location.href = response.url;
+			} else {
+				alert("Error: " + (data.message || "Login failed."));
+			}
 		})
+
+
+		// .then(data => {
+		// // .then(response => {
+		// if (response.redirected) {
+		// 	// manually navigate the browser
+		// 	window.location.href = response.url;
+		// } else {
+		// 	alert("Login failed: " + data.message);
+		// 	console.log("Server response: ", data)
+		// 	// optional: handle login error or show message
+		// 	// console.log('Login failed or no redirect.');
+		// }
+		// })
 		.catch(error => {
 			console.error("Send error: ", error);
 		});
