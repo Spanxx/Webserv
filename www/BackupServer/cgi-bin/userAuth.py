@@ -9,14 +9,6 @@ import urllib.parse
 import sqlite3
 import uuid
 
-# TestUser: hans@gmail.com,Test123,Hansbert42
-
-# def deleteUser(cursor, email):
-# 	try:
-# 		cursor.execute("DELETE FROM users WHERE email = ?", (email))
-# 	except sqlite3.IntegrityError:
-# 		print("User deletion failed")
-
 def addUser(cursor, email, password_hash, username):
 	try:
 		cursor.execute("INSERT INTO users (email, password, username) VALUES (?, ?, ?)", (email, password_hash, username))
@@ -49,8 +41,13 @@ def login(cursor, email, hashed_password):
 		print(f"{username} login=true")
 		sys.exit(7)
 	else:
-		print (f"unknown login=false")
-		sys.exit(7)
+		print("Content-Type: application/json\n")
+		print(json.dumps({
+			"status": "fail",
+			"message": "Username or password not valid"
+		}))
+		# print (f"unknown login=false")
+		# sys.exit(7)
 
 def main():
 	bodyString = os.environ.get('BODY_STRING', '')
