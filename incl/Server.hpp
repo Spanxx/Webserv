@@ -68,12 +68,13 @@ public:
 	std::string							getRoot();
 	void								checkScriptsExecutable();
 	void	assignCGIDir();
-
+	std::string							getIndex();
 	void	extractVariables();
 	void	extractPorts(const std::string &ports);
 	void	extractHost(const std::string &host);
 	void	extractName(const std::string &name);
 	void	extractRoot(const std::string &root);
+	void	extractIndex(const std::string &index);
 	void	extractMaxBody(const std::string &maxbody);
 	void	extractErrorPage(const std::string &path);
 	void	checkCompletes();
@@ -122,7 +123,7 @@ private:
 	size_t																				_maxBodySize;
 	short																				_limitRequestLine;
 	std::string																			_errorPage;
-	
+	std::string																			_index;
 	std::vector<int>																	_serverSockets; // vector of fd of each socket of the server
 	std::map<int, std::string> 															_socketBuffers;
 	std::map<int, Request*> 															_requestCollector;

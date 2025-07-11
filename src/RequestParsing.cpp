@@ -94,7 +94,7 @@ int Request::split_headers(std::istringstream &rstream)
 	{
 		_cluster->setCookie(_sessionID, false, "");
 		_code = 303;
-		_path = "/index.html";
+		_path = this->_server->getIndex();
 		return (1);
 	}
 	if (!blank)
