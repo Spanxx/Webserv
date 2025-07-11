@@ -2,7 +2,7 @@
 		body {
 		font-family: Arial, sans-serif;
 		text-align: center;
-		padding: 50px;
+		padding: 0px 50px 50px 50px;
 		background-color: #e2d5ff;
 		color: #333;
 		}
@@ -58,6 +58,7 @@
 nav {
     overflow: hidden;
     display: inline-block;
+	padding-top: 15px;
 }
 
 nav ul {
@@ -82,6 +83,15 @@ nav li a {
 nav li a:hover {
     background-color: #6719c0;
     color: rgb(228, 219, 219);
+}
+
+.top-bar-container {
+    display: flex; /* Makes it a flex container */
+    justify-content: flex-end; /* Aligns items to the start (left) of the container */
+    align-items: center; /* Vertically centers the content */
+    width: 100%; /* Ensures the bar takes full width of its parent */
+    border-bottom: 1px solid #ccc; /* Optional: separator line */
+    box-sizing: border-box; /* Include padding in the width calculation */
 }
 		#gallery {
 		display: flex;

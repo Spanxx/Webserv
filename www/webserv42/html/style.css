@@ -2,7 +2,7 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    padding: 50px;
+    padding: 0px 50px 50px 50px;
     background-color: #d8f8c2;
     color: #333;
     line-height: 1.6;
@@ -54,6 +54,7 @@ header h1 {
 nav {
     overflow: hidden;
     display: inline-block;
+    padding-top: 15px;
 }
 
 nav ul {
@@ -266,6 +267,15 @@ th {
     width: auto;
     padding: 10px;
     display: inline-block;
+}
+
+.top-bar-container {
+    display: flex; /* Makes it a flex container */
+    justify-content: flex-end; /* Aligns items to the start (left) of the container */
+    align-items: center; /* Vertically centers the content */
+    width: 100%; /* Ensures the bar takes full width of its parent */
+    border-bottom: 1px solid #ccc; /* Optional: separator line */
+    box-sizing: border-box; /* Include padding in the width calculation */
 }
 
 /* ======= Gallery ======= */
