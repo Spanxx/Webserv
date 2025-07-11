@@ -109,4 +109,9 @@ void	Server::checkCompletes()
 	}
 	if (_ports.empty())
 		throw ConfigException("Config file needs to specify port per server");
+	if (_maxBodySize == -1)
+	{
+		std::cout << "Max body size was not specified in config file - will be set to 50Mb\n";
+		this->_maxBodySize = 52428800; // set to 50MB
+	}	
 }
