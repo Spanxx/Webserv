@@ -89,44 +89,33 @@ std::string Server::findRoot(std::map<std::string, std::string> configblock)
 
 void	Server::checkScriptsExecutable()
 {
-	std::string dir;
+	std::string dir = _cgiDir["root"] + _cgiDir["location"] ;
 
-	for (std::map<std::string, std::map<std::string, std::string> >::iterator it = _locationBlocks.begin(); it != _locationBlocks.end(); ++it)
+	DIR* directory = opendir(dir.c_str());
+	if (!directory)
+		throw ServerException("Can not open directory " + dir);
+	struct dirent* entry;
+	/*
+			struct dirent {
+		ino_t          d_ino;       // inode number (file ID)
+		off_t          d_off;       // offset to next dirent
+		unsigned short d_reclen;    // length of this record
+		unsigned char  d_type;      // type of file (not always available)
+		char           d_name[256]; // filename (null-terminated string)
+		};
+	*/
+	while ((entry = readdir(directory)) != NULL)
 	{
-		if (it->first == "/cgi-bin/")
+		std::string filename = entry->d_name;
+		if (filename == "." || filename == "..") //skip current and parent directory
+			continue;
+		std::string fullPath = dir + "/" + filename;
+		if (access(fullPath.c_str(), X_OK) != 0)
 		{
-			dir = findRoot(it->second);
-			break;
+			closedir(directory);
+			throw ServerException("Script " + filename + " inside of " + dir + " has to be executable");
 		}
+
 	}
-	if (!dir.empty())
-	{
-		DIR* directory = opendir(dir.c_str());
-		if (!directory)
-			throw ServerException("Can not open directory " + dir);
-		struct dirent* entry;
-		/*
-				struct dirent {
-			ino_t          d_ino;       // inode number (file ID)
-			off_t          d_off;       // offset to next dirent
-			unsigned short d_reclen;    // length of this record
-			unsigned char  d_type;      // type of file (not always available)
-			char           d_name[256]; // filename (null-terminated string)
-			};
-		*/
-		while ((entry = readdir(directory)) != NULL)
-		{
-			std::string filename = entry->d_name;
-			if (filename == "." || filename == "..") //skip current and parent directory
-				continue;
-			std::string fullPath = dir + "/" + filename;
-			if (access(fullPath.c_str(), X_OK) != 0)
-			{
-				closedir(directory);
-				throw ServerException("Script " + filename + " inside of " + dir + " has to be executable");
-			}
-
-		}
-		closedir(directory);
-	}		
+	closedir(directory);
 }
