@@ -102,13 +102,13 @@
 	<h2>Upload a File</h2>
 
 	<form action="/{{CGI_BIN}}upload.py" class="formCenter" method="POST" enctype="multipart/form-data">
-		<input type="file" name="file">
-		<button type="submit">Upload</button>
+		<input type="file" name="file" id="cgiFileInput">
+		<button type="submit" id="cgiUploadButton" disabled>Upload with CGI</button>
 	</form>
 
 	<form method="POST" action="{{UPLOAD_BLOCK}}" class="formCenter" enctype="multipart/form-data">
-		<input type="file" name="file" />
-		<button type="submit">Upload to disc without CGI</button>
+		<input type="file" name="file" id="blockFileInput"/>
+		<button type="submit" id="blockUploadButton" disabled>Upload</button>
 	</form>
 
 	<br><br>
@@ -174,5 +174,29 @@
 		});
 	</script>
 </body>
+<script> // Script to Enable and disable upload buttons
+    const cgiFileInput = document.getElementById('cgiFileInput');
+    const cgiUploadButton = document.getElementById('cgiUploadButton');
+
+    const blockFileInput = document.getElementById('blockFileInput');
+    const blockUploadButton = document.getElementById('blockUploadButton');
+    function toggleUploadButton(fileInput, uploadButton) {
+        if (fileInput.files.length > 0) {
+            uploadButton.removeAttribute('disabled');
+        } else {
+            uploadButton.setAttribute('disabled', 'true');
+        }
+    }
+    cgiFileInput.addEventListener('change', function() {
+        toggleUploadButton(cgiFileInput, cgiUploadButton);
+    });
+
+    blockFileInput.addEventListener('change', function() {
+        toggleUploadButton(blockFileInput, blockUploadButton);
+    });
+
+    toggleUploadButton(cgiFileInput, cgiUploadButton);
+    toggleUploadButton(blockFileInput, blockUploadButton);
+</script>
 </html>
 
