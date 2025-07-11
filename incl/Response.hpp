@@ -17,13 +17,11 @@
 class Response {
 	public:
 		Response(Request *request, Server *server, std::string &hostName);
-		Response(Response &other);
 		~Response();
-		Response& operator=(Response &other);
 
 		void 		setCode(int code);
 		int 		getCode();
-		std::string process_request(int client_fd);
+		std::string process_request();
 		std::string responseBuilder();
 		std::string	headersBuilder();
 		void		bodyBuilder();
@@ -38,6 +36,7 @@ class Response {
 
 		void 		sendResponse(int client_fd);
 		void 		cgiExecuter(std::string path, const std::string &query);
+		void		redirect(std::string path);
 		void 		parseCGIOutput(const std::string &output);
 		std::string getMimeType(const std::string &path);
 		bool 		isCGIdir(const std::string &path);
@@ -54,6 +53,9 @@ class Response {
 		std::map<std::string, std::string> _status;
 		std::map<std::string, std::string> _headers;
 		std::string _body;
+
+		Response(Response &other);
+		Response& operator=(Response &other);
 };
 
 #endif //RESPONSE_HPP

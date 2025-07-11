@@ -6,7 +6,7 @@
 
 Server::Server(std::string &serverConfig, Cluster *cluster) : _cluster(cluster)
 {
-	std::cout << "Server created\n";
+	//std::cout << "Server created\n";
 	this->createConfig(serverConfig);
 	this->extractVariables();
 	this->storeServerConfig();
@@ -46,17 +46,10 @@ void	Server::startListen(int socket)
 {
 	//start listening for incoming connections
 	if (listen(socket, 20) < 0)	// was 1, 10 is to test / amount of connections
-	{
 		throw ServerException("Listen failed!");
-	}
 
 	//std::cout << "Server starts listening for incomming connections on FD " << socket <<  "\n";
 
-	/* Now this is done by cluster class
-	struct pollfd serverFd;
-	serverFd.fd = socket;
-	serverFd.events = POLLIN;	// wait for input
-	this->_pollFdArray.push_back(serverFd);*/
 }
 
 void Server::closeServer()
@@ -76,6 +69,7 @@ std::string	Server::getName() { return _name; }
 std::string Server::getRoot() { return _serverRoot;}
 
 Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
+
 Server::ConfigException::ConfigException(const std::string &error) : std::runtime_error(error) {}
 
 size_t	Server::getMaxBodySize() { return _maxBodySize; }

@@ -40,11 +40,22 @@ def login(cursor, email, hashed_password):
 	if row:
 		username = row[0]
 
+	# Cookie generieren (z. B. UUID)
+		cookie = str(uuid.uuid4())
+
+		# Cookie setzen in der DB
+		cursor.execute("UPDATE users SET cookie = ? WHERE email = ?", (cookie, email))
+
 		print(f"{username} login=true")
 		sys.exit(7)
 	else:
-		print (f"{username} login=false")
-		sys.exit(7)
+		print("Content-Type: application/json\n")
+		print(json.dumps({
+			"status": "fail",
+			"message": "Username or password not valid"
+		}))
+		# print (f"unknown login=false")
+		# sys.exit(7)
 
 def main():
 	bodyString = os.environ.get('BODY_STRING', '')
@@ -70,6 +81,7 @@ def main():
 		email TEXT PRIMARY KEY,
 		password TEXT,
 		username TEXT,
+		cookie TEXT
 		)
 	''')
 

@@ -6,50 +6,21 @@
 
 Response::Response(Request *request, Server *server, std::string &hostName): _request(request), _server(server), _code(request->getCode())
 {
-	std::cout << "Response constructed\n";
+	//std::cout << "Response constructed\n";
 	this->_headers["hostname"] = hostName;
-}
-
-Response::Response(Response &other)
-{
-	this->_headers = other._headers;
-	this->_body = other._body;
-	this->_code = other._code;
-	this->_request = other._request;
-	this->_status["phrase"] = other._status["phrase"];
-	this->_status["code"] = other._status["code"];
-
-	std::cout << "Response copied\n";
 }
 
 Response::~Response()
 {
-	std::cout << "Response deconstructed\n";
-}
-
-Response& Response::operator=(Response &other)
-{
-	if (this == &other)
-		return (*this);
-	this->_headers = other._headers;
-	this->_body = other._body;
-	this->_code = other._code;
-	this->_request = other._request;
-	this->_status["phrase"] = other._status["phrase"];
-	this->_status["code"] = other._status["code"];
-
-	std::cout << "Response assigned\n";
-
-	return (*this);
+	//std::cout << "Response deconstructed\n";
 }
 
 void Response::setCode(int code) { _code = code; }
+
 int Response::getCode() { return _code; }
 
-std::string	Response::process_request(int client_fd) // Every handler shoudl update _body, _code and the headers are built in the end
+std::string	Response::process_request() // Every handler shoudl update _body, _code and the headers are built in the end
 {
-	(void)client_fd;
-	this->assign_status_phrase();
 	if (_code != 200)
 		handleERROR(this->_code);
 	else if (_request->getMethod() == "GET")
@@ -59,7 +30,6 @@ std::string	Response::process_request(int client_fd) // Every handler shoudl upd
 	else if (_request->getMethod() == "DELETE")
 		handleDELETE();
 	std::cout << *this->_request << std::endl;
-	std::cout << this->_code << " " << this->_status["phrase"] << std::endl;
 	return responseBuilder();
 }
 
@@ -117,7 +87,7 @@ void	Response::handleGET()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "Response File type: " << fileType << std::endl;
+	//std::cout << "Response File type: " << fileType << std::endl;
 	if (isScript(uri))
 		handleCGI(uri);
 	else if (isAutoindex(uri))
@@ -145,11 +115,8 @@ void	Response::handleCGI(std::string &uri)
 		handleERROR(403);
 		return;
 	}
-		// std::string exec_path = "./" + uri;
 		std::string exec_path = uri;
-		//std::cout << "EXEC PATH: " << exec_path << std::endl;
 		std::string query_string = this->_request->getQuery();
-		//std::cout << "QUERY STRING: " << query_string << std::endl;
 		cgiExecuter(exec_path, query_string);
 }
 
@@ -158,7 +125,7 @@ void	Response::handlePOST()
 	std::string uri = this->_request->getPath();
 	std::string fileType = getMimeType(uri);
 	this->_headers["Content-Type"] = fileType;
-	std::cout << "Response File type: " << fileType << std::endl;
+	//std::cout << "Response File type: " << fileType << std::endl;
 	if (isScript(uri))
 		handleCGI(uri);
 	else
@@ -185,14 +152,13 @@ void	Response::handleDELETE()
 std::string Response::responseBuilder()
 {
 	std::string response;
-
+	assign_status_phrase();
+	std::cout << "Status: " << this->_code << " " << this->_status["phrase"] << std::endl 
+		<< std::endl << "----------------------------------------------------------------" << std::endl;
 	// handle body at first, to get content size and type
 	response.append(this->headersBuilder());
 	response.append(this->_body);
 
-	// if (this->_request->getPath() != "www/files/favicon.ico")
-	// 	std::cout << " --> Response:\n" << response << std::endl;
-	//std::cout << "Response"<< std::endl << response << "-- End of response --"<<std::endl;
 	return (response);
 }
 
@@ -201,13 +167,12 @@ std::string	Response::headersBuilder()
 	std::ostringstream header;
 	std::string sess_id = _request->getSessionID();
 
-	if (_headers.find("Content-Type") == _headers.end())
-		_headers["Content-Type"] = "text/html";	// should we change these to text/html for the error pages
 
+	if (_headers.find("Content-Type") == _headers.end())
+		_headers["Content-Type"] = "text/html";
 	header << this->_request->getVersion() << ' '
 			<< this->_code << ' '
-			<< this->_status["phrase"] << "\r\n"
-			// << this->_request->getPath() << "\r\n"							// needed?
+			<< this->_status["phrase"] << "\r\n"						
 			<< "Host: " << this->_headers["hostname"] << "\r\n"										// shall we keep it, nessessary for webhosting (multiple clients share one server to host there page)
 			<< "Connection: " << this->_request->getHeader("Connection") << "\r\n"
 			<< "Content-Type: " << this->_headers["Content-Type"] <<"\r\n"
@@ -220,6 +185,7 @@ std::string	Response::headersBuilder()
 			header << "\r\n";	//empty newline to seperate header and body
 
 	// std::cout << "Location for redir: " << this->_request->getPath() << '\n';
+	//std::cout << "Response Header\n" << header.str()  << std::endl;
 
 	return (header.str());
 }
@@ -277,8 +243,6 @@ bool Response::isUploadsDir(const std::string &path)
 {
 	if (path.find(_server->getUploadDir()["location"]) != std::string::npos)
 		return true;
-	//if (path == _request->getUploadDir()["root"]) //COMMENT FOR LATER: double check here if this works / or if it has to be compared to location only
-		//return true;
 	return (false);
 }
 
@@ -288,10 +252,9 @@ bool Response::isCGIdir(const std::string &path)
 	{
 		std::vector<std::string> buff = _server->getAllowedScripts();
 		std::string ext = findExt(path.c_str());
-		std::cout << "PATH INSIDE CGI CHECK: " << path << std::endl;
+		//std::cout << "PATH INSIDE CGI CHECK: " << path << std::endl;
 		for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
 		{
-			//std::cout << "ALLOWED SCRIPT: " << *it << std::endl;
 			if (ext == *it)
 				return true;
 		}
@@ -299,20 +262,6 @@ bool Response::isCGIdir(const std::string &path)
 	this->_request->setCode(403);
 	return (false);
 }
-// void	Router::checkScriptTypes()
-// {
-
-// 	std::cout << "REQUESTED FILE: " << _requestedFile << std::endl;
-// 	std::string ext = findExt(_requestedFile.c_str());
-// 	for (std::vector<std::string>::iterator it = buff.begin(); it != buff.end(); ++it)
-// 	{
-// 		//std::cout << "ALLOWED SCRIPT: " << *it << std::endl;
-// 		if (ext == *it)
-// 			return;
-// 	}
-// 	this->_request->setCode(403);
-// 	throw RouterException("Script type " + ext + " is not allowed!");
-// }
 
 void Response::POSTBodyBuilder()
 {
@@ -485,4 +434,12 @@ void		Response::autoindexBuilder(const std::string &path, const std::vector<File
 	this->_body = html;
 	this->_code = 200;
 	//std::cout << "Autoindex built for path: " << path << std::endl;
+}
+
+void	Response::redirect(std::string path)
+{
+	_code = 303;
+	_request->setPath(path);
+	_request->setHeader("Content-Type", "text/html");
+	_request->setHeader("Location", path);
 }

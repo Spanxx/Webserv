@@ -80,8 +80,7 @@ void Cluster::run()
 		{
 			int fd = _pollfds[i].fd;
 			short revents = _pollfds[i].revents;
-			if (revents == 0)
-				continue;
+			
 			Server* server = _fdToServerMap[fd];
 			if (!server)
 			{
@@ -95,6 +94,8 @@ void Cluster::run()
 				removeConnection(fd);
 				continue;
 			}
+			if (revents == 0)
+			 	continue;
 			//Handle new connections
 			if (server->isServerSocket(fd) && (revents & POLLIN))
 				handleNewConnection(fd, server);
