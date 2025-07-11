@@ -6,7 +6,7 @@
 
 Router::Router(Server *server, Request *request) : _server(server), _request(request)
 {
-	std::cout << "Router created\n";
+	//std::cout << "Router created\n";
 
 	this->_requestedPath = this->_request->getPath();
 	this->_serverName = this->_server->getName();
@@ -21,8 +21,8 @@ Router::Router(Server *server, Request *request) : _server(server), _request(req
 		checkForDirRequest();
 		resolvePath();
 		handleFavicon();
-		std::cout << "FULL PATH from routing ==> " << this->_request->getPath() << std::endl;
-		std::cout << "CODE from routing ==> " << this->_request->getCode() << std::endl;
+		//std::cout << "FULL PATH from routing ==> " << this->_request->getPath() << std::endl;
+		//std::cout << "CODE from routing ==> " << this->_request->getCode() << std::endl;
 	}
 	catch (std::exception &e)
 	{
@@ -65,14 +65,14 @@ Router& Router::operator=(Router &other)
 
 Router::~Router()
 {
-	std::cout << "Router deconstructed\n";
+	//std::cout << "Router deconstructed\n";
 }
 
 Router::RouterException::RouterException(const std::string &error) : std::runtime_error(error) {}
 
 void	Router::extractPath()
 {
-	std::cout << "Requested Path: " << this->_requestedPath << '\n';
+	//std::cout << "Requested Path: " << this->_requestedPath << '\n';
 
 	int 		lastSlashPos = -1;
 
@@ -103,7 +103,7 @@ void	Router::extractFile()
 	}
 
 	this->_requestedFile = this->_requestedPath.substr(lastSlashPos + 1);
-	std::cout << "Requested file found = " << this->_requestedFile << std::endl;
+	//std::cout << "Requested file found = " << this->_requestedFile << std::endl;
 }
 
 void Router::findDirConfig()
@@ -152,7 +152,7 @@ void Router::findDirConfig()
 	if (this->_locationBlockRoot.empty())
 		this->_locationBlockRoot = this->_server->getRoot();
 
-	std::cout << "Location Block ===> " << _location << std::endl;
+	//std::cout << "Location Block ===> " << _location << std::endl;
 	if (this->_requestedFile == "none")
 	{
 		if (this->_requestedPath.find_last_of("/") != this->_requestedPath.size() - 1)
@@ -209,13 +209,10 @@ void	Router::resolvePath()
 		return;
 	}
 
-	std::cout << "Location block Root = " << this->_locationBlockRoot << std::endl;
-	std::cout << "Requested Path = " << this->_requestedPath << std::endl;
-	// if (this->_request->getCode() != 301)
-	// {
-		this->_request->setPath(this->_locationBlockRoot + this->_requestedPath);
-		std::cout << "FROM setDirForType Setting Path to: " << this->_request->getPath() << std::endl;
-	// }
+	//std::cout << "Location block Root = " << this->_locationBlockRoot << std::endl;
+	//std::cout << "Requested Path = " << this->_requestedPath << std::endl;
+	this->_request->setPath(this->_locationBlockRoot + this->_requestedPath);
+	//std::cout << "FROM setDirForType Setting Path to: " << this->_request->getPath() << std::endl;
 }
 
 void	Router::handleFavicon()
@@ -241,7 +238,7 @@ void	Router::checkMethods()
 		{
 			if (it->second.find(method) != std::string::npos)
 			{
-				std::cout << "Request Method is allowed: "<< method << '\n';
+				//std::cout << "Request Method is allowed: "<< method << '\n';
 				return ;
 			}
 		}

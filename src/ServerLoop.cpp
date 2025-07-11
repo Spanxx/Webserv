@@ -230,7 +230,7 @@ void Server::prepare_response(int fd, std::map<int, std::string> &response_colle
 	Request *request = _requestCollector[fd];
 	Response *response = new Response(request, this, this->_name);
 
-	response_collector[fd] = response->process_request(fd);
+	response_collector[fd] = response->process_request();
 
 	delete request;
 	delete response;

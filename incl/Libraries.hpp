@@ -27,12 +27,13 @@
 #include <fcntl.h>      // For file control options (e.g., fcntl, O_NONBLOCK)
 #include <arpa/inet.h>  // For IP address manipulation (e.g., inet_aton, inet_ntoa)
 #include <dirent.h>       // For opendir, eaddir and closedir.
+#include <ctime>
 
 // Custom Header
 #include "Utils.hpp"    // Your custom utility header file
 
 #define POLL_TIME_OUT 100		// milliseconds
-#define CLIENT_TIMEOUT 1000
+#define CLIENT_TIMEOUT 90
 #define BUFFER_SIZE 1024
 
 enum RequestState {

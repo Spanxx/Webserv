@@ -6,49 +6,15 @@
 Request::Request(Server *server) : _content_length(-1), _code(200), _chunked(false), _parse_pos(0), 
 	_errorPage(server->getErrorPage()), _server(server)
 {
-	std::cout << "Request constructed\n";
+	//std::cout << "Request constructed\n";
 	_cluster = _server->getCluster();
-}
-
-Request::Request(Request &other)
-{
-	this->_method = other._method;
-	this->_path = other._path;
-	this->_version = other._version;
-	this->_headers = other._headers;
-	this->_body = other._body;
-	this->_code = other._code;
-	this->_content_length = other._content_length;
-	this->_chunked = other._chunked;
-	this->_parse_pos = other._parse_pos;
-
-	std::cout << "Request copied\n";
 }
 
 Request::~Request()
 {
-	std::cout << "Request deconstructed\n";
+	//std::cout << "Request deconstructed\n";
 }
 
-Request& Request::operator=(Request &other)
-{
-	if (this == &other)
-		return (*this);
-
-	this->_method = other._method;
-	this->_path = other._path;
-	this->_version = other._version;
-	this->_headers = other._headers;
-	this->_body = other._body;
-	this->_code = other._code;
-	this->_content_length = other._content_length;
-	this->_chunked = other._chunked;
-	this->_parse_pos = other._parse_pos;
-
-	std::cout << "Request assigned\n";
-
-	return (*this);
-}
 
 std::ostream &operator<<(std::ostream &os, Request &request)
 {
@@ -90,7 +56,7 @@ std::string Request::getHeader(const std::string &key)
 	std::map<std::string, std::string>::const_iterator it = _headers.find(key);
 	if (it != _headers.end())
         	return it->second;
-	std::cout << "Header " << key << " does not exist\n";
+	//std::cout << "Header " << key << " does not exist\n";
 	return "";
 }
 void	Request::setHeader(const std::string &key, const std::string &value)

@@ -47,7 +47,7 @@ void	Server::extractPorts(const std::string &ports)
 	std::vector<int>::iterator iPorts = this->_ports.begin();
 	while (iPorts != this->_ports.end())
 	{
-		std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
+		//std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
 		++iPorts;
 	}
 }
@@ -109,4 +109,8 @@ void	Server::checkCompletes()
 	}
 	if (_ports.empty())
 		throw ConfigException("Config file needs to specify port per server");
+	if (_serverRoot.empty())
+		throw ConfigException("Config file needs to specify root per server");
+	if (_maxBodySize == 0)
+		_maxBodySize = 65536;
 }

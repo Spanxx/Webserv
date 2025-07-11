@@ -62,12 +62,26 @@ nav ul {
     margin: 0;
     padding: 0;
     overflow: hidden;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 nav li {
     float: left;
 }
+nav li {
+    float: left;
+}
 
+nav li a {
+    display: block;
+    color: rgb(69, 70, 83);
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
 nav li a {
     display: block;
     color: rgb(69, 70, 83);
