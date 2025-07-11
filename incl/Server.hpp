@@ -78,6 +78,7 @@ public:
 	void	extractErrorPage(const std::string &path);
 	void	checkCompletes();
 	void	doesRootExist(std::map<std::string, std::string> &targetMap);
+	void	doesMethodsExist(std::map<std::string, std::string> &targetMap);
 
 	int		createServerSocket(int port);
 
