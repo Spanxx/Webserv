@@ -118,4 +118,4 @@ void	Server::checkScriptsExecutable()
 
 	}
 	closedir(directory);
-}		
+}

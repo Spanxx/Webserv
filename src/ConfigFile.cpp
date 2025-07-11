@@ -108,6 +108,7 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 	std::string trimmed;
 	std::string locationPath;
 	bool		inBlock = false;
+	bool	 methods_set = false;
 
 	std::istringstream iss(configFile);
 	if (!iss)
@@ -144,7 +145,10 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 					}
 				}
 				if (trimmed.find("methods") != std::string::npos)
+				{
+					methods_set = true;
 					allowedMethods(trimmed);
+				}
 				if (handleLocationBlocks(&inBlock, trimmed) == 1)
 					continue;
 
@@ -153,6 +157,8 @@ void	Server::extractConfigMap(std::string &configFile, std::map<std::string, std
 
 		}
 	}
+	if (methods_set == false)
+		throw ConfigException("Config File needs to specify methods for each location block");
 }
 
 void	Server::doesRootExist(std::map<std::string, std::string> &targetMap)
