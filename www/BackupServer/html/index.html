@@ -40,14 +40,15 @@
     showStatus(); // check cookie and update status on page load
   </script>
 
-	<br><br><br><br>
+	<br>
 
-	<h1>Hello from C++ Server!</h1>
-	<p>"I used to be addicted to soap, but I'm clean now."</p>
+	<h1 class="mainHeader">Hello from Back Up Server!</h1>
+		<img src="../files/no-backup-no-pity.png" alt="No back up no pity" width="500" height="600" class="responsive-img">
+
 	<br><br>
 
 	<h2>Please enter your name</h2>
-	<form action="/{{CGI_BIN}}hello.php" method="GET">
+	<form action="/{{CGI_BIN}}hello.php" method="GET" class="formCenter">
 		<input type="text" name="name" id="name">
 		<input type="submit" value="Say Hi">
 	</form>
@@ -100,12 +101,12 @@
 
 	<h2>Upload a File</h2>
 
-	<form action="/{{CGI_BIN}}upload.py" method="POST" enctype="multipart/form-data">
+	<form action="/{{CGI_BIN}}upload.py" class="formCenter" method="POST" enctype="multipart/form-data">
 		<input type="file" name="file">
 		<button type="submit">Upload</button>
 	</form>
 
-	<form method="POST" action="{{UPLOAD_BLOCK}}" enctype="multipart/form-data">
+	<form method="POST" action="{{UPLOAD_BLOCK}}" class="formCenter" enctype="multipart/form-data">
 		<input type="file" name="file" />
 		<button type="submit">Upload to disc without CGI</button>
 	</form>

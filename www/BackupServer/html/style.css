@@ -31,9 +31,12 @@
 		font-family: Georgia, 'Times New Roman', Times, serif;
 		font-size: 24px;
 		margin-top: 30px;
-		text-align: center;
+		text-align: left;
 		color: #666;
 			}
+		.formCenter {
+		text-align: center;
+		}
 		.container {
 		background-color: rgb(163, 244, 255);
 		padding: 40px;
@@ -76,3 +79,8 @@
 		border-radius: 10px;
 		box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 		}
+
+		.responsive-img {
+    max-width: 100%; /* Ensures the image doesn't overflow its container */
+    height: auto;    /* Maintains the aspect ratio */ /* Removes extra space below the image if it's inline */
+}
