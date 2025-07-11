@@ -34,7 +34,6 @@ def addUser(cursor, email, password_hash, username):
 
 
 def login(cursor, email, hashed_password):
-		
 	cursor.execute("SELECT username FROM users WHERE email = ? AND password = ?", (email, hashed_password))
 	row = cursor.fetchone()
 
@@ -47,18 +46,13 @@ def login(cursor, email, hashed_password):
 		# Cookie setzen in der DB
 		cursor.execute("UPDATE users SET cookie = ? WHERE email = ?", (cookie, email))
 
-		print("Content-Type: application/json\n")
-		print(json.dumps({
-			"status": "ok"
-			"{username} login=true")
-		}))
-		
+		print(f"{username} login=true")
 		sys.exit(7)
 	else:
 		print("Content-Type: application/json\n")
 		print(json.dumps({
 			"status": "fail",
-			"message": "Username or password is wrong"
+			"message": "Username or password not valid"
 		}))
 		# print (f"unknown login=false")
 		# sys.exit(7)
