@@ -47,7 +47,7 @@ void	Server::extractPorts(const std::string &ports)
 	std::vector<int>::iterator iPorts = this->_ports.begin();
 	while (iPorts != this->_ports.end())
 	{
-		std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
+		//std::cout << "Port: " << *iPorts << '\n';	// add  check for port duplicates
 		++iPorts;
 	}
 }

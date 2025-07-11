@@ -14,9 +14,7 @@ class Request
 {
 	public:
 		Request(Server *server);
-		Request(Request &other);
 		~Request();
-		Request& operator=(Request &other);
 
 		// int	parse_request(const std::string &request_raw);
 		void								check_headers(const std::string &headers_raw);
@@ -78,6 +76,9 @@ class Request
 		std::string	_sessionID;
 		Server 								*_server;
 		Cluster	*_cluster;
+
+		Request(Request &other);
+		Request& operator=(Request &other);
 };
 
 #endif

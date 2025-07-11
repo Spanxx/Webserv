@@ -37,8 +37,6 @@ class Request;
 class Server
 {
 public:
-
-	// Server(char *av);
 	Server(std::string &serverConfig, Cluster *cluster);
 	~Server();
 
