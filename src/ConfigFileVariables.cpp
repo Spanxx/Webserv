@@ -111,4 +111,6 @@ void	Server::checkCompletes()
 		throw ConfigException("Config file needs to specify port per server");
 	if (_maxBodySize == 0)
 		throw ConfigException("Max body size needs to be specified in config file and must be bigger than 0");	
+	if (_serverRoot.empty())
+		throw ConfigException("Config file needs to specify root per server");
 }
