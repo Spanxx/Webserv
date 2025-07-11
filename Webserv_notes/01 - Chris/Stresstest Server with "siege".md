@@ -41,7 +41,7 @@ For more details: https://commandmasters.com/commands/siege-common/
 
 # Complete command for stresstest
 
-`siege --benchmark --internet --concurrent=255 --time=300s --file url_list.txt`
+`siege --benchmark --internet --concurrent=50 --time=300s --file url_list.txt`
 
 - 255 concurrent connections
 - 5 minutes (300sec)

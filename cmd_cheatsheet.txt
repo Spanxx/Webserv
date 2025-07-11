@@ -1,0 +1,14 @@
+Curl Commands:
+
+Testing GET
+curl http://localhost:8080/
+
+Testing POST
+Uploading file to uploads
+curl -X POST -F "file=@<filename>" http://localhost:8080/uploads/
+
+Testing DELETE
+curl -X DELETE http://127.0.0.1:8080/uploads/<filename>
+
+Testing PUT (would update the online with the local version)
+curl -T <filename> http://localhost:8080/uploads/
