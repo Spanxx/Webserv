@@ -23,9 +23,17 @@ void	Server::extractVariables()
 			extractMaxBody(it->second);
 		else if (it->first.find("errorPage") != std::string::npos)
 			extractErrorPage(it->second);
+		else if (it->first.find("index") != std::string::npos)
+			extractIndex(it->second);
 		++it;
 	}
 	checkCompletes();
+}
+
+
+void	Server::extractIndex(const std::string &index)
+{
+	_index = index;
 }
 
 void	Server::extractPorts(const std::string &ports)
@@ -113,4 +121,10 @@ void	Server::checkCompletes()
 		throw ConfigException("Config file needs to specify root per server");
 	if (_maxBodySize == 0)
 		_maxBodySize = 65536;
-}
+	if (_index.empty())
+			throw ConfigException("Config file needs to specify an index file per server");
+	std::ifstream file((this->_serverRoot + _index).c_str());
+	if (!file.is_open())
+		throw ConfigException("Index page file does not exist or is not readable");
+	file.close();
+	}

@@ -64,14 +64,12 @@ class Request
 		std::string 						_path;
 		std::string 						_query;
 		std::string 						_version;
-		// bool 									_autoindex;
 		std::map<std::string, std::string>	_headers;
 		int 								_content_length;
 		std::string 						_body;
 		int 								_code;
 		bool 								_chunked;
 		size_t 								_parse_pos;
-		//std::map<std::string, std::string>	_uploadDir;
 		std::string	_errorPage;
 		std::string	_sessionID;
 		Server 								*_server;

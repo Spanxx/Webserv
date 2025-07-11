@@ -66,6 +66,7 @@ public:
 	std::vector<std::string>	getAllowedScripts();
 	std::string 						getErrorPage();
 	std::string							getRoot();
+	std::string							getIndex();
 	void								checkScriptsExecutable();
 	void	assignCGIDir();
 
@@ -74,6 +75,7 @@ public:
 	void	extractHost(const std::string &host);
 	void	extractName(const std::string &name);
 	void	extractRoot(const std::string &root);
+	void	extractIndex(const std::string &index);
 	void	extractMaxBody(const std::string &maxbody);
 	void	extractErrorPage(const std::string &path);
 	void	checkCompletes();
@@ -118,6 +120,7 @@ private:
 	std::string 																		_name;
 	std::string																			_IPHost;
 	std::string																			_serverRoot;
+	std::string																			_index;
 	size_t																				_maxBodySize;
 	short																				_limitRequestLine;
 	std::string																			_errorPage;

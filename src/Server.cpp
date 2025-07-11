@@ -68,6 +68,8 @@ std::string	Server::getName() { return _name; }
 
 std::string Server::getRoot() { return _serverRoot;}
 
+std::string Server::getIndex() {return _index;}
+
 Server::ServerException::ServerException(const std::string &error) : std::runtime_error(error) {}
 
 Server::ConfigException::ConfigException(const std::string &error) : std::runtime_error(error) {}

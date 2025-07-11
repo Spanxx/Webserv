@@ -320,11 +320,7 @@ void Response::POSTBodyBuilder()
 
 		this->_headers["Content-Type"] = "text/html";
 		_code = 303;
-		_request->setPath("/index.html");
-		// std::stringstream ss;
-		// ss << "<html><body><h1>File uploaded successfully!</h1><p>Saved as: " << filename << "</p></body></html>";
-		// this->_body = ss.str();
-		// this->_headers["Content-Length"] = intToString(this->_body.size());
+		_request->setPath(this->_server->getIndex());
 	}
 	else
 		handleERROR(415);
