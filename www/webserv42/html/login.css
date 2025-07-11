@@ -1,3 +1,10 @@
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 body {
 	font-family: Arial, sans-serif;
 	background-color: #f0f2f5;
@@ -6,6 +13,14 @@ body {
 	align-items: center;
 	height: 100vh;
 }
+
+input {
+  width: 100%; /* Now 100% will include padding and border */
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  /* Other styles */
+}
+
 .login-container {
 	background-color: white;
 	padding: 30px;
