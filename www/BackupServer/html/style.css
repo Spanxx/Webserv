@@ -53,6 +53,36 @@
 		padding: 10px;
 		display: inline-block;
 		}
+
+        /* ======= Navigation ======= */
+nav {
+    overflow: hidden;
+    display: inline-block;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+nav li {
+    float: left;
+}
+
+nav li a {
+    display: block;
+    color: rgb(69, 70, 83);
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+nav li a:hover {
+    background-color: #6719c0;
+    color: rgb(228, 219, 219);
+}
 		#gallery {
 		display: flex;
 		flex-wrap: wrap;
@@ -83,4 +113,17 @@
 		.responsive-img {
     max-width: 100%; /* Ensures the image doesn't overflow its container */
     height: auto;    /* Maintains the aspect ratio */ /* Removes extra space below the image if it's inline */
+}
+#loginBtn,  #logoutBtn {
+    top: 15px;            /* distance from top */
+    right: 15px;          /* distance from right */
+    padding: 10px 20px;
+    background-color: #6719c0;
+    color: white;
+    border: none;
+	text-decoration: none; /* Remove underline */
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 1000;        /* stays on top */
 }
