@@ -35,18 +35,35 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 	if (pid == 0)	//child
 	{
 
+		std::string upl = _server->getUploadDir()["root"] + _server->getUploadDir()["location"];
+		std::cerr << "UPLOAD PATH " << upl << std::endl;
+		char absolute_upl[PATH_MAX];
+		if (realpath(upl.c_str(), absolute_upl) == NULL)
+		{
+			std::cerr << "ERROR: upload realpath failed!\n";
+			exit(EXIT_FAILURE);
+		}
+
 		if (chdir((_server->getCGIDir()["root"] + _server->getCGIDir()["location"]).c_str()) == -1)
 		{
     		std::cerr << "ERROR: chdir failed: " << strerror(errno) << std::endl;
     		exit(EXIT_FAILURE);
 		}
-		std::string cwd = getcwd();
+
+		
+		std::cerr << "UPLOAD ABDOLUTE PATH " << absolute_upl << std::endl;
 		std::string methodSTR		= "REQUEST_METHOD=" + method;
 		std::string querySTR		= "QUERY_STRING=" + query;
 		std::string contentTypeSTR	= "CONTENT_TYPE=" + _request->getHeader("Content-Type");
 		std::string contentLenSTR	= "CONTENT_LENGTH=" + _request->getHeader("Content-Length");
 		std::string uploadDirSTR	= "UPLOAD_DIR=" + _server->getUploadDir()["root"];
+		//std::string uploadDirSTR	= "UPLOAD_DIR=" + _server->getRoot() + _server->getUploadDir()["root"];
+		// std::cout << "UPLOAD_DIR inside cgi exec=" << uploadDirSTR << std::endl;
+		// std::string block = _server->getUploadDir()["location"];
+		// block = block.substr(1, block.size() - 2);
+		// std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + block;
 		std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + _server->getUploadDir()["location"];
+		std::string absoluteUploadSTR	= std::string("ABSOLUTE_UPLOAD=") + absolute_upl;
 		std::string redirectStatus	= "REDIRECT_STATUS=200";
 		std::string gatewayInterface	= "GATEWAY_INTERFACE=CGI/1.1";
 		std::string serverProtocol	= "SERVER_PROTOCOL=HTTP/1.1";
@@ -57,6 +74,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		std::string bodySTR			= "BODY_STRING=" + this->_request->getBody();
 		std::string rootPath		= "ROOT_PATH=" + (this->_server->getRoot());
 
+
 		char *env[] = {
 			const_cast<char *>(methodSTR.c_str()),
 			const_cast<char *>(querySTR.c_str()),
@@ -64,6 +82,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			const_cast<char *>(contentLenSTR.c_str()),
 			const_cast<char *>(uploadDirSTR.c_str()),
 			const_cast<char *>(uploadBlockSTR.c_str()),
+			const_cast<char *>(absoluteUploadSTR.c_str()),
 			const_cast<char *>(redirectStatus.c_str()),
 			const_cast<char *>(gatewayInterface.c_str()),
 			const_cast<char *>(serverProtocol.c_str()),
@@ -73,8 +92,8 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			NULL
 		};
 
-		std::cout << "UPLOAD DIR" << uploadDirSTR << std::endl;
-		std::cout << "UPLOAD BLOCK" << uploadBlockSTR << std::endl;
+		// std::cout << "UPLOAD DIR" << uploadDirSTR << std::endl;
+		// std::cout << "UPLOAD BLOCK" << uploadBlockSTR << std::endl;
 
 		dup2(inPipe[0], STDIN_FILENO);
 		dup2(outPipe[1], STDOUT_FILENO);

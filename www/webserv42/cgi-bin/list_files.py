@@ -5,12 +5,28 @@ import sys
 
 # UPLOAD_DIR = "www/webserv42/files/uploads/"
 upload_dir = os.environ.get('UPLOAD_DIR', '')
-upload_block = os.environ.get('UPLOAD_BLOCK', '').strip('/')
-upload_block = upload_block.lstrip('/')
-
+upload_block = os.environ.get('UPLOAD_BLOCK', '')
+upload_block = upload_block.strip('/')
+absolute_upload = os.environ.get('ABSOLUTE_UPLOAD', '')
 upload_path = os.path.join(upload_dir, upload_block)
-print(f"DEBUG upload_path: {upload_path}", file=sys.stderr)  # <-- This prints to stderr
-print(f"DEBUG: Current working directory = {os.getcwd()}", file=sys.stderr)
+upload_path = os.path.normpath(upload_path) 
+print(f"UPLOAD_DIR={upload_dir}", file=sys.stderr)
+print(f"UPLOAD_BLOCK={upload_block}", file=sys.stderr)
+print(f"FINAL upload_path: {upload_path}", file=sys.stderr)
+print(f"FINAL absolute upload: {absolute_upload}", file=sys.stderr)
+
+
+print("Content-Type: application/json\n")
+
+try:
+	files = os.listdir(absolute_upload)
+	files = [f for f in files 
+	  if os.path.isfile(os.path.join(absolute_upload, f)) and not f.startswith('.')]
+	print(json.dumps(files))
+except Exception as e:
+	print(json.dumps({"error": str(e)}))
+
+
 # upload_dir = os.environ.get('UPLOAD_DIR', '')  # e.g. "www/webserv42/files"
 # upload_block = os.environ.get('UPLOAD_BLOCK', '').lstrip('/')  # e.g. "uploads"
 
@@ -29,15 +45,3 @@ print(f"DEBUG: Current working directory = {os.getcwd()}", file=sys.stderr)
 #     upload_dir = os.path.join(base_dir, upload_dir)
 # upload_path = os.path.join(upload_dir, upload_block)
 # upload_path = os.path.abspath(upload_path)
-
-print(f"DEBUG upload_path: {upload_path}", file=sys.stderr)
-
-print("Content-Type: application/json\n")
-
-try:
-	files = os.listdir(upload_path)
-	files = [f for f in files 
-	  if os.path.isfile(os.path.join(upload_path, f)) and not f.startswith('.')]
-	print(json.dumps(files))
-except Exception as e:
-	print(json.dumps({"error": str(e)}))
