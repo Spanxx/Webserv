@@ -93,7 +93,10 @@ int Request::split_headers(std::istringstream &rstream)
 	if (_query == "login=false")
 	{
 		_cluster->setCookie(_sessionID, false, "");
-		_code = 303;
+		if (_method == "POST" || _method == "DELETE")
+			_code = 307;
+		else
+			_code = 303;
 		_path = this->_server->getIndex();
 		return (1);
 	}

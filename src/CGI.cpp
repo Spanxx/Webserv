@@ -34,6 +34,13 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 
 	if (pid == 0)	//child
 	{
+
+		if (chdir((_server->getCGIDir()["root"] + _server->getCGIDir()["location"]).c_str()) == -1)
+		{
+    		std::cerr << "ERROR: chdir failed: " << strerror(errno) << std::endl;
+    		exit(EXIT_FAILURE);
+		}
+		std::string cwd = getcwd();
 		std::string methodSTR		= "REQUEST_METHOD=" + method;
 		std::string querySTR		= "QUERY_STRING=" + query;
 		std::string contentTypeSTR	= "CONTENT_TYPE=" + _request->getHeader("Content-Type");
@@ -43,7 +50,10 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		std::string redirectStatus	= "REDIRECT_STATUS=200";
 		std::string gatewayInterface	= "GATEWAY_INTERFACE=CGI/1.1";
 		std::string serverProtocol	= "SERVER_PROTOCOL=HTTP/1.1";
-		std::string scriptFilename	= "SCRIPT_FILENAME=" + path;
+		size_t pos = path.find_last_of('/');
+		std::string tmp = path.substr(pos + 1);
+		std::cout << "TMP = " << tmp << std::endl;
+		std::string scriptFilename	= "SCRIPT_FILENAME=" + tmp;
 		std::string bodySTR			= "BODY_STRING=" + this->_request->getBody();
 		std::string rootPath		= "ROOT_PATH=" + (this->_server->getRoot());
 
@@ -63,6 +73,9 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			NULL
 		};
 
+		std::cout << "UPLOAD DIR" << uploadDirSTR << std::endl;
+		std::cout << "UPLOAD BLOCK" << uploadBlockSTR << std::endl;
+
 		dup2(inPipe[0], STDIN_FILENO);
 		dup2(outPipe[1], STDOUT_FILENO);
 
@@ -72,13 +85,16 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		close(outPipe[1]);
 
 		char resolved_path[PATH_MAX];
-		if (realpath(path.c_str(), resolved_path) == NULL)
+		if (realpath(tmp.c_str(), resolved_path) == NULL)
 		{
 			std::cerr << "ERROR: realpath failed!\n";
 			exit(EXIT_FAILURE);
 		}
 
 		char *argv[] = {resolved_path, NULL};
+	
+		std::cerr << "Resolved path in cgiExecuter = " << resolved_path << std::endl;
+		std::cerr << " root + cgi location = " << (_server->getCGIDir()["root"] + _server->getCGIDir()["location"]) << std::endl;
 		execve(resolved_path, argv, env);
 
 		// execve failed

@@ -151,8 +151,14 @@ void Router::findDirConfig()
 	this->_locationBlockRoot = this->_dirConfig["root"];
 	if (this->_locationBlockRoot.empty())
 		this->_locationBlockRoot = this->_server->getRoot();
-
-	//std::cout << "Location Block ===> " << _location << std::endl;
+	DIR* dir = opendir((_locationBlockRoot + _location).c_str());
+	if (dir == NULL)
+	{
+		this->_request->setCode(404);
+		throw RouterException("Router exception: Directory " + _location + " doesn't exist!");
+	}
+	closedir(dir);
+		//std::cout << "Location Block ===> " << _location << std::endl;
 	if (this->_requestedFile == "none")
 	{
 		if (this->_requestedPath.find_last_of("/") != this->_requestedPath.size() - 1)
@@ -160,7 +166,10 @@ void Router::findDirConfig()
 			std::cout << "Setting path to _location from findDirConfig" << std::endl;
 			this->_requestedPath += '/';
 			this->_request->setPath(_requestedPath);
-			this->_request->setCode(301);
+			if (this->_request->getMethod() == "POST" || this->_request->getMethod() == "DELETE")
+				this->_request->setCode(307);
+			else
+				this->_request->setCode(301);
 			throw RouterException("Redirect");
 		}
 	}
