@@ -43,6 +43,14 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			std::cerr << "ERROR: upload realpath failed!\n";
 			exit(EXIT_FAILURE);
 		}
+		//char absolute_idx[PATH_MAX];
+		std::string idx = "/" + _server->getIndex();
+		std::cerr << "INDEX " << _server-> _server->getIndex() << std::endl;
+		// if (realpath(idx.c_str(), absolute_idx) == NULL)
+		// {
+		// 	std::cerr << "ERROR: index realpath failed!\n";
+		// 	exit(EXIT_FAILURE);
+		// }
 
 		if (chdir((_server->getCGIDir()["root"] + _server->getCGIDir()["location"]).c_str()) == -1)
 		{
@@ -64,6 +72,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 		// std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + block;
 		std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + _server->getUploadDir()["location"];
 		std::string absoluteUploadSTR	= std::string("ABSOLUTE_UPLOAD=") + absolute_upl;
+		std::string absoluteIndexSTR	= std::string("ABSOLUTE_INDEX=") + idx;
 		std::string redirectStatus	= "REDIRECT_STATUS=200";
 		std::string gatewayInterface	= "GATEWAY_INTERFACE=CGI/1.1";
 		std::string serverProtocol	= "SERVER_PROTOCOL=HTTP/1.1";
@@ -83,6 +92,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			const_cast<char *>(uploadDirSTR.c_str()),
 			const_cast<char *>(uploadBlockSTR.c_str()),
 			const_cast<char *>(absoluteUploadSTR.c_str()),
+			const_cast<char *>(absoluteIndexSTR.c_str()),
 			const_cast<char *>(redirectStatus.c_str()),
 			const_cast<char *>(gatewayInterface.c_str()),
 			const_cast<char *>(serverProtocol.c_str()),
@@ -109,6 +119,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			std::cerr << "ERROR: realpath failed!\n";
 			exit(EXIT_FAILURE);
 		}
+		
 
 		char *argv[] = {resolved_path, NULL};
 	
