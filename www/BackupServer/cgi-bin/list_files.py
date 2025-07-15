@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 import os
 import json
+import sys
 
-# UPLOAD_DIR = "www/BackupServer/files/uploads/"
-upload_dir = os.environ.get('UPLOAD_DIR', '')
-upload_block = os.environ.get('UPLOAD_BLOCK', '')
-upload_block = upload_block.lstrip('/')
-upload_path = os.path.join(upload_dir, upload_block)
+absolute_upload = os.environ.get('ABSOLUTE_UPLOAD', '')
+
+
 
 print("Content-Type: application/json\n")
 
 try:
-	files = os.listdir(upload_path)
+	files = os.listdir(absolute_upload)
 	files = [f for f in files 
-	  if os.path.isfile(os.path.join(upload_path, f)) and not f.startswith('.')]
+	  if os.path.isfile(os.path.join(absolute_upload, f)) and not f.startswith('.')]
 	print(json.dumps(files))
 except Exception as e:
 	print(json.dumps({"error": str(e)}))
-

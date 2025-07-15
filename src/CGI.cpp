@@ -43,56 +43,41 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			std::cerr << "ERROR: upload realpath failed!\n";
 			exit(EXIT_FAILURE);
 		}
-		//char absolute_idx[PATH_MAX];
-		std::string idx = "/" + _server->getIndex();
-		std::cerr << "INDEX " << _server-> _server->getIndex() << std::endl;
-		// if (realpath(idx.c_str(), absolute_idx) == NULL)
-		// {
-		// 	std::cerr << "ERROR: index realpath failed!\n";
-		// 	exit(EXIT_FAILURE);
-		// }
+		std::string root = this->_server->getRoot();
+		char absolute_root[PATH_MAX];
+		if (realpath(root.c_str(), absolute_root) == NULL)
+		{
+			std::cerr << "ERROR: root realpath failed!\n";
+			exit(EXIT_FAILURE);
+		}
 
 		if (chdir((_server->getCGIDir()["root"] + _server->getCGIDir()["location"]).c_str()) == -1)
 		{
     		std::cerr << "ERROR: chdir failed: " << strerror(errno) << std::endl;
     		exit(EXIT_FAILURE);
 		}
-
 		
-		std::cerr << "UPLOAD ABDOLUTE PATH " << absolute_upl << std::endl;
+		size_t pos = path.find_last_of('/');
+		std::string tmp = path.substr(pos + 1);
+		
 		std::string methodSTR		= "REQUEST_METHOD=" + method;
 		std::string querySTR		= "QUERY_STRING=" + query;
 		std::string contentTypeSTR	= "CONTENT_TYPE=" + _request->getHeader("Content-Type");
 		std::string contentLenSTR	= "CONTENT_LENGTH=" + _request->getHeader("Content-Length");
-		std::string uploadDirSTR	= "UPLOAD_DIR=" + _server->getUploadDir()["root"];
-		//std::string uploadDirSTR	= "UPLOAD_DIR=" + _server->getRoot() + _server->getUploadDir()["root"];
-		// std::cout << "UPLOAD_DIR inside cgi exec=" << uploadDirSTR << std::endl;
-		// std::string block = _server->getUploadDir()["location"];
-		// block = block.substr(1, block.size() - 2);
-		// std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + block;
-		std::string uploadBlockSTR	= "UPLOAD_BLOCK=" + _server->getUploadDir()["location"];
 		std::string absoluteUploadSTR	= std::string("ABSOLUTE_UPLOAD=") + absolute_upl;
-		std::string absoluteIndexSTR	= std::string("ABSOLUTE_INDEX=") + idx;
 		std::string redirectStatus	= "REDIRECT_STATUS=200";
 		std::string gatewayInterface	= "GATEWAY_INTERFACE=CGI/1.1";
 		std::string serverProtocol	= "SERVER_PROTOCOL=HTTP/1.1";
-		size_t pos = path.find_last_of('/');
-		std::string tmp = path.substr(pos + 1);
-		std::cout << "TMP = " << tmp << std::endl;
 		std::string scriptFilename	= "SCRIPT_FILENAME=" + tmp;
 		std::string bodySTR			= "BODY_STRING=" + this->_request->getBody();
-		std::string rootPath		= "ROOT_PATH=" + (this->_server->getRoot());
-
+		std::string rootPath		= std::string("ROOT_PATH=") + absolute_root;
 
 		char *env[] = {
 			const_cast<char *>(methodSTR.c_str()),
 			const_cast<char *>(querySTR.c_str()),
 			const_cast<char *>(contentTypeSTR.c_str()),
 			const_cast<char *>(contentLenSTR.c_str()),
-			const_cast<char *>(uploadDirSTR.c_str()),
-			const_cast<char *>(uploadBlockSTR.c_str()),
 			const_cast<char *>(absoluteUploadSTR.c_str()),
-			const_cast<char *>(absoluteIndexSTR.c_str()),
 			const_cast<char *>(redirectStatus.c_str()),
 			const_cast<char *>(gatewayInterface.c_str()),
 			const_cast<char *>(serverProtocol.c_str()),
@@ -101,9 +86,6 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			const_cast<char *>(rootPath.c_str()),
 			NULL
 		};
-
-		// std::cout << "UPLOAD DIR" << uploadDirSTR << std::endl;
-		// std::cout << "UPLOAD BLOCK" << uploadBlockSTR << std::endl;
 
 		dup2(inPipe[0], STDIN_FILENO);
 		dup2(outPipe[1], STDOUT_FILENO);
