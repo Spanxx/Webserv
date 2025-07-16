@@ -434,7 +434,10 @@ void		Response::autoindexBuilder(const std::string &path, const std::vector<File
 
 void	Response::redirect(std::string path)
 {
-	_code = 303;
+	// if (this->_request->getMethod() == "POST" || this->_request->getMethod() == "DELETE")
+	// 	_code = 307;
+	// else
+		_code = 303;
 	_request->setPath(path);
 	_request->setHeader("Content-Type", "text/html");
 	_request->setHeader("Location", path);

@@ -37,8 +37,8 @@ def main():
     try:
         content_length = int(os.environ.get('CONTENT_LENGTH', 0))
         content_type = os.environ.get('CONTENT_TYPE', '')
-        upload_dir = os.environ.get('UPLOAD_DIR', '')
-        upload_block = os.environ.get('UPLOAD_BLOCK', '')
+        absolute_upload = os.environ.get('ABSOLUTE_UPLOAD', '')
+	
         match = re.search(r'boundary=(.*)', content_type)
         if not match:
             sys.exit(2)
@@ -48,26 +48,16 @@ def main():
         filename, file_data = parse_multipart(raw_data, boundary)
 
         if file_data:
-            upload_block = upload_block.lstrip('/')
-            upload_path = os.path.join(upload_dir, upload_block)
-            os.makedirs(upload_path, exist_ok=True)
+            os.makedirs(absolute_upload, exist_ok=True)
             filename = sanitize_filename(filename)
-            unique_filename = get_unique_filename(upload_path, filename)
-            full_path = os.path.join(upload_path, unique_filename)
+            unique_filename = get_unique_filename(absolute_upload, filename)
+            full_path = os.path.join(absolute_upload, unique_filename)
 
             with open(full_path, "wb") as f:
                 f.write(file_data)
 
             sys.exit(5)
-            # index_path = "www/webserv42/html/index.html"
-            # with open(index_path, "r", encoding="utf-8") as f:
-            #     html_content = f.read()
 
-            # insertion = f'\n<img src="/{upload_block}{unique_filename}" alt="Uploaded Image" style="max-width:100%; margin-top:20px;">\n'
-            # html_content = html_content.replace("</form>", "</form>" + insertion, 1)
-
-            # print("Content-Type: text/html\r\n")
-            # print(html_content)
         else:
             sys.exit(2)
 

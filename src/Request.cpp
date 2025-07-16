@@ -87,8 +87,6 @@ void	Request::splitURI()
 	pos = 0;
 	if (_path.compare(0, 7, "http://") == 0)
 		pos = 7;
-	else if (_path.compare(0, 8, "https://") == 0)
-		pos = 8;
 	pos = _path.find("//", pos);
 	if (pos != std::string::npos)
 	{
@@ -97,7 +95,10 @@ void	Request::splitURI()
 			_path.replace(pos, 2, "/");
 		}
 		//std::cout << "PATH NEW AFTER SLASHES: " << _path << std::endl;
-		_code = 303;
+		if (_method == "POST" || _method == "DELETE")
+			_code = 307;
+		else
+			_code = 303;
 	}
 }
 
