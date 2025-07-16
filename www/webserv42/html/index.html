@@ -11,45 +11,14 @@
 <body>
 	<div class="top-bar-container">
 	<div id="loginStatus" style="display: flex; align-items: center; font-size: 12px; gap: 10px; justify-content: flex-end; padding: 10px;">
-	 <span id="status"></span>  
-	<a href="/html/login.html" style="display: none;" id="loginBtn" class="button-link">Login</a>
+	 <span id="status"></span>
+	 	<a href="/html/login.html" style="display: none;" id="loginBtn" class="button-link">Login</a>
 	<a href="/html/index.html" style="display: none;" id="logoutBtn" class="button-link">Logout</a>
 	</div>
 	</div>
 
 
-	<script>
-		
-		function getCookie(name) {
-			const value = `; ${document.cookie}`;
-			const parts = value.split(`; ${name}=`);
-			if (parts.length === 2) return parts.pop().split(';').shift();
-			return null;
-		}
-
-		function showStatus() {
-			const loggedIn = getCookie('logged_in');
-			const statusDiv = document.getElementById('status');
-			const loginBtn = document.getElementById('loginBtn');
-			
-			if (loggedIn === 'true') {
-				statusDiv.textContent = "Logged in as {{USER}}";
-				logoutBtn.style.display = 'inline-block';
-			} else {
-				// statusDiv.textContent = "Not logged in";
-				loginBtn.style.display = 'inline-block';
-			}
-		}
-		
-		document.getElementById('logoutBtn').addEventListener('click', function() {
-			window.location.href = window.location.pathname + '?login=false';
-		});
-		
-		showStatus(); 
-	</script>
-
-
-	<nav>
+	 <nav>
 		<ul>
 			<li><a href="/index.html">Home</a></li>
 			<li><a href="/concepts.html">Concepts</a></li>
@@ -194,6 +163,40 @@
 	</script>
 </body>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	const logoutBtn = document.getElementById('logoutBtn');
+	const loginBtn = document.getElementById('loginBtn');
+
+	function getCookie(name) {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop().split(';').shift();
+		return null;
+	}
+
+	function showStatus() {
+		const loggedIn = getCookie('logged_in');
+		const statusDiv = document.getElementById('status');
+
+		if (loggedIn === 'true') {
+			statusDiv.textContent = "Logged in as {{USER}}";
+			logoutBtn.style.display = 'inline-block';
+		} else {
+			loginBtn.style.display = 'inline-block';
+		}
+	}
+
+	if (logoutBtn) {
+		logoutBtn.addEventListener('click', function (event) {
+			event.preventDefault(); // Prevent <a> from instantly redirecting
+			window.location.href = window.location.pathname + '?login=false';
+		});
+	}
+
+	showStatus();
+});
+</script>
 <script> // Script to Enable and disable upload buttons
     const cgiFileInput = document.getElementById('cgiFileInput');
     const cgiUploadButton = document.getElementById('cgiUploadButton');
