@@ -1,14 +1,31 @@
 Curl Commands:
 
-Testing GET
+Testing GET (curl -s -D - -o /dev/null ---> to see only the header)
 curl http://localhost:8080/
+curl -s -D - -o /dev/null http://localhost:8080/
 
 Testing POST
 Uploading file to uploads
 curl -X POST -F "file=@<filename>" http://localhost:8080/uploads/
+curl -s -D - -o /dev/null -X POST -F "file=@<filename>" http://localhost:8080/uploads/
 
 Testing DELETE
 curl -X DELETE http://127.0.0.1:8080/uploads/<filename>
+curl -s -D - -o /dev/null -X DELETE http://127.0.0.1:8080/uploads/<filename>
 
-Testing PUT (would update the online with the local version)
+Testing PUT (would update the online with the local version) (Method not allowed)
 curl -T <filename> http://localhost:8080/uploads/
+
+Testing CGI (GET & POST)
+curl http://localhost:8080/cgi-bin/script.py
+curl -X POST -F "file=@<filename>" http://localhost:8080/uploads/
+
+Curl to test errors for CGI (curl -s -D - -o /dev/null ---> to see only the header)
+curl -s -D - -o /dev/null http://localhost:8080/cgi-bin/error.py
+curl -s -D - -o /dev/null http://localhost:8080/cgi-bin/infinite.py
+curl -s -D - -o /dev/null http://localhost:8080/cgi-bin/not_found.py
+
+
+Siege
+siege -c 20 -r 100 http://localhost:8080/empty.html
+

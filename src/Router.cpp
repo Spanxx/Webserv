@@ -97,7 +97,7 @@ void	Router::extractFile()
 	//check if directory was set to requested file
 	if (dotPos == -1)
 	{
-		std::cout << "No dot in the requested path" << std::endl;
+		//std::cout << "No dot in the requested path" << std::endl;
 		this->_requestedFile = "none";
 		return;
 	}

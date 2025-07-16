@@ -56,10 +56,10 @@ void Response::cgiExecuter(std::string path, const std::string &query)
     		std::cerr << "ERROR: chdir failed: " << strerror(errno) << std::endl;
     		exit(EXIT_FAILURE);
 		}
-		
+
 		size_t pos = path.find_last_of('/');
 		std::string tmp = path.substr(pos + 1);
-		
+
 		std::string methodSTR		= "REQUEST_METHOD=" + method;
 		std::string querySTR		= "QUERY_STRING=" + query;
 		std::string contentTypeSTR	= "CONTENT_TYPE=" + _request->getHeader("Content-Type");
@@ -101,10 +101,10 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 			std::cerr << "ERROR: realpath failed!\n";
 			exit(EXIT_FAILURE);
 		}
-		
+
 
 		char *argv[] = {resolved_path, NULL};
-	
+
 		std::cerr << "Resolved path in cgiExecuter = " << resolved_path << std::endl;
 		std::cerr << " root + cgi location = " << (_server->getCGIDir()["root"] + _server->getCGIDir()["location"]) << std::endl;
 		execve(resolved_path, argv, env);
@@ -146,7 +146,7 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 				std::cerr << "CGI Timeout. Killing child...\n";
 				kill(pid, SIGKILL);
 				waitpid(pid, &status, 0); // reap
-				handleERROR(408);
+				handleERROR(504);
 				close(outPipe[0]);
 				return;
 			}

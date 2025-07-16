@@ -1,5 +1,4 @@
-127.0.0.1:8080/index.html
-127.0.0.1:8888/test.html
-127.0.0.1:8080/hello.py
-127.0.0.1:8080/status_page.html
+127.0.0.1:8080/empty.html
+127.0.0.1:8080/cgi-bin/script.py
+127.0.0.1:8080/concepts.html
 127.0.0.1:8080/indux.html
