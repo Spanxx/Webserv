@@ -27,5 +27,7 @@ curl -s -D - -o /dev/null http://localhost:8080/cgi-bin/not_found.py
 
 
 Siege
+siege -c 10 -r 100 http://localhost:8080/index.html
 siege -c 20 -r 100 http://localhost:8080/empty.html
+siege --benchmark -c 50 -r 100 http://localhost:8080/index.html
 
