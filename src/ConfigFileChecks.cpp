@@ -109,13 +109,16 @@ void	Server::checkScriptsExecutable()
 		std::string filename = entry->d_name;
 		if (filename == "." || filename == "..") //skip current and parent directory
 			continue;
-		std::string fullPath = dir + "/" + filename;
-		if (access(fullPath.c_str(), X_OK) != 0)
+		std::string ext = findExt(filename);
+		if (ext == ".py" || ext == ".js" || ext == ".php" || ext == ".cgi")
 		{
-			closedir(directory);
-			throw ServerException("Script " + filename + " inside of " + dir + " has to be executable");
+			std::string fullPath = dir + "/" + filename;
+			if (access(fullPath.c_str(), X_OK) != 0)
+			{
+				closedir(directory);
+				throw ServerException("Script " + filename + " inside of " + dir + " has to be executable");
+			}
 		}
-
 	}
 	closedir(directory);
 }
