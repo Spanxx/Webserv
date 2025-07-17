@@ -47,7 +47,7 @@ def main():
         raw_data = sys.stdin.buffer.read(content_length)
         filename, file_data = parse_multipart(raw_data, boundary)
 
-        if file_data:
+        if filename is not None and file_data is not None:
             os.makedirs(absolute_upload, exist_ok=True)
             filename = sanitize_filename(filename)
             unique_filename = get_unique_filename(absolute_upload, filename)
