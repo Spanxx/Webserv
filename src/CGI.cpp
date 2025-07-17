@@ -36,7 +36,6 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 	{
 
 		std::string upl = _server->getUploadDir()["root"] + _server->getUploadDir()["location"];
-		std::cerr << "UPLOAD PATH " << upl << std::endl;
 		char absolute_upl[PATH_MAX];
 		if (realpath(upl.c_str(), absolute_upl) == NULL)
 		{
@@ -105,8 +104,6 @@ void Response::cgiExecuter(std::string path, const std::string &query)
 
 		char *argv[] = {resolved_path, NULL};
 
-		std::cerr << "Resolved path in cgiExecuter = " << resolved_path << std::endl;
-		std::cerr << " root + cgi location = " << (_server->getCGIDir()["root"] + _server->getCGIDir()["location"]) << std::endl;
 		execve(resolved_path, argv, env);
 
 		// execve failed

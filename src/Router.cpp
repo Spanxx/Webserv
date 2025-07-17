@@ -113,6 +113,12 @@ void Router::findDirConfig()
 	size_t longestMatch = 0;
 	std::string bestMatch;
 	size_t length = 0;
+	std::string usePath;
+
+	if (_requestedFile == "none")
+		usePath = _requestedPath;
+	else
+		usePath = _extractedPath;
 
 	while (it != this->_locationBlocks->end())
 	{
@@ -122,7 +128,7 @@ void Router::findDirConfig()
 			loc_path = loc_path.substr(0, loc_path.length() - 1);
 		length = loc_path.length();
 
-		if (this->_requestedPath.compare(0, length, loc_path) == 0)
+		if (usePath.compare(0, length, loc_path) == 0)
 		{
 			if (loc_path.length() > longestMatch)
 			{
