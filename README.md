@@ -17,7 +17,6 @@ We handle the following aspects:
 - routing per specificied location blocks
 - directory listing for directory listing (when no index page is specified in config file and autoindex is on)
 <br>
-
 ## Usage
 To run our program, first download the code, open a terminal, go inside the project directory and type: 'make'
 Then type './webserv server.conf' in the terminal to launch the server with our default configuration. You can change the configuration by adding a different file as program argument or change the server.conf file directly.
