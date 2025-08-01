@@ -17,7 +17,6 @@ We handle the following aspects:
 - routing per specificied location blocks
 - directory listing for directory listing (when no index page is specified in config file and autoindex is on)
 <br>
-<br>
 
 ## Usage
 To run our program, first download the code, open a terminal, go inside the project directory and type: 'make'
@@ -26,6 +25,7 @@ You can access our default websites in the browser, by either requesting 'localh
 <br>
 
 **! Plase note that the 'SAY HI' button on our websites is a php script configured for linux !**
+<br>
 <br>
 If you want to use this script on mac, you have to change the php shebang of the hello.php script inside the cgi-bin folder to the location your php-cgi is at (to find out where this is, type 'which php-cgi' in the terminal) 
 
