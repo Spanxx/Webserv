@@ -34,7 +34,3 @@ webserv
 
 # vsCode
 .vscode/*.json
-
-# Obsidian
-Webserv_notes/.obsidian/workspace.json
-Webserv_notes/.obsidian/workspace-mobile.json
