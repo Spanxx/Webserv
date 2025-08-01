@@ -25,7 +25,7 @@ Then type './webserv server.conf' in the terminal to launch the server with our 
 You can access our default websites in the browser, by either requesting 'localhost:8080' or 'localhost:9090' (or the alternate host:port combination you would put in your own configuration) and then discover all features.
 <br>
 
-## ! Plase note that the 'SAY HI' button on our websites is a php script configured for linux !
+**! Plase note that the 'SAY HI' button on our websites is a php script configured for linux !** 
 If you want to use this script on mac, you have to change the php shebang of the hello.php script inside the cgi-bin folder to the location your php-cgi is at (to find out where this is, type 'which php-cgi' in the terminal) 
 
 
