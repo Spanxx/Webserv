@@ -1,4 +1,4 @@
-#!/usr/local/bin/php-cgi
+#!/usr/bin/env php-cgi
 <?php
 
 header("Content-Type: text/html");
