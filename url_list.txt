@@ -1,4 +1,0 @@
-127.0.0.1:8080/empty.html
-127.0.0.1:8080/cgi-bin/script.py
-127.0.0.1:8080/indux.html
-127.0.0.1:8080/test.html
