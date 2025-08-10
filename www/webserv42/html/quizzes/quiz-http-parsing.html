@@ -61,40 +61,40 @@
         </section>
         <form action="/cgi-bin/quiz.py" method="post">
             <h3>1. What separates the HTTP headers from the message body in both requests and responses?</h3>
-            <label><input type="radio" name="q1" value="CRLFCRLF"> An empty line (CRLFCRLF)</label><br>
-            <label><input type="radio" name="q1" value="Single_CRLF"> A single CRLF</label><br>
-            <label><input type="radio" name="q1" value="Semicolon"> A semicolon (;)</label><br>
-            <label><input type="radio" name="q1" value="Space"> A space</label><br>
+            <label><input type="radio" name="q1_parsing" value="CRLFCRLF"> An empty line (CRLFCRLF)</label><br>
+            <label><input type="radio" name="q1_parsing" value="Single_CRLF"> A single CRLF</label><br>
+            <label><input type="radio" name="q1_parsing" value="Semicolon"> A semicolon (;)</label><br>
+            <label><input type="radio" name="q1_parsing" value="Space"> A space</label><br>
 
             <h3>2. Which HTTP header indicates the size of the message body in bytes?</h3>
-            <label><input type="radio" name="q2" value="Content-Length"> `Content-Length`</label><br>
-            <label><input type="radio" name="q2" value="Transfer-Encoding"> `Transfer-Encoding`</label><br>
-            <label><input type="radio" name="q2" value="Content-Type"> `Content-Type`</label><br>
-            <label><input type="radio" name="q2" value="Accept"> `Accept`</label><br>
+            <label><input type="radio" name="q2_parsing" value="Content-Length"> `Content-Length`</label><br>
+            <label><input type="radio" name="q2_parsing" value="Transfer-Encoding"> `Transfer-Encoding`</label><br>
+            <label><input type="radio" name="q2_parsing" value="Content-Type"> `Content-Type`</label><br>
+            <label><input type="radio" name="q2_parsing" value="Accept"> `Accept`</label><br>
 
             <h3>3. What is the first line of an HTTP request called?</h3>
-            <label><input type="radio" name="q3" value="Request_Line"> Request Line</label><br>
-            <label><input type="radio" name="q3" value="Status_Line"> Status Line</label><br>
-            <label><input type="radio" name="q3" value="Header_Line"> Header Line</label><br>
-            <label><input type="radio" name="q3" value="Body_Line"> Body Line</label><br>
+            <label><input type="radio" name="q3_parsing" value="Request_Line"> Request Line</label><br>
+            <label><input type="radio" name="q3_parsing" value="Status_Line"> Status Line</label><br>
+            <label><input type="radio" name="q3_parsing" value="Header_Line"> Header Line</label><br>
+            <label><input type="radio" name="q3_parsing" value="Body_Line"> Body Line</label><br>
 
             <h3>4. In an HTTP response, what information does the Status Line typically contain? (Select all that apply)</h3>
-            <label><input type="checkbox" name="q4" value="HTTP_Version"> HTTP Version</label><br>
-            <label><input type="checkbox" name="q4" value="Status_Code"> Status Code</label><br>
-            <label><input type="checkbox" name="q4" value="Reason_Phrase"> Reason Phrase</label><br>
-            <label><input type="checkbox" name="q4" value="Request_Method"> Request Method</label><br>
+            <label><input type="checkbox" name="q4_parsing" value="HTTP_Version"> HTTP Version</label><br>
+            <label><input type="checkbox" name="q4_parsing" value="Status_Code"> Status Code</label><br>
+            <label><input type="checkbox" name="q4_parsing" value="Reason_Phrase"> Reason Phrase</label><br>
+            <label><input type="checkbox" name="q4_parsing" value="Request_Method"> Request Method</label><br>
 
             <h3>5. When parsing an HTTP request, if the `Transfer-Encoding` header is set to `chunked`, what does it imply about the message body?</h3>
-            <label><input type="radio" name="q5" value="Length_unknown"> The body's length is not known in advance and is sent in a series of chunks.</label><br>
-            <label><input type="radio" name="q5" value="Compressed"> The body is compressed and needs decompression.</label><br>
-            <label><input type="radio" name="q5" value="Encrypted"> The body is encrypted.</label><br>
-            <label><input type="radio" name="q5" value="Fixed_length"> The body has a fixed length defined by `Content-Length`.</label><br>
+            <label><input type="radio" name="q5_parsing" value="Length_unknown"> The body's length is not known in advance and is sent in a series of chunks.</label><br>
+            <label><input type="radio" name="q5_parsing" value="Compressed"> The body is compressed and needs decompression.</label><br>
+            <label><input type="radio" name="q5_parsing" value="Encrypted"> The body is encrypted.</label><br>
+            <label><input type="radio" name="q5_parsing" value="Fixed_length"> The body has a fixed length defined by `Content-Length`.</label><br>
 
             <h3>6. Which character is used as a delimiter between a header field name and its value?</h3>
-            <label><input type="radio" name="q6" value="Colon"> Colon (:)</label><br>
-            <label><input type="radio" name="q6" value="Semicolon"> Semicolon (;)</label><br>
-            <label><input type="radio" name="q6" value="Equals"> Equals (=)</label><br>
-            <label><input type="radio" name="q6" value="Space"> Space</label><br>
+            <label><input type="radio" name="q6_parsing" value="Colon"> Colon (:)</label><br>
+            <label><input type="radio" name="q6_parsing" value="Semicolon"> Semicolon (;)</label><br>
+            <label><input type="radio" name="q6_parsing" value="Equals"> Equals (=)</label><br>
+            <label><input type="radio" name="q6_parsing" value="Space"> Space</label><br>
 
             <br><input type="submit" value="Submit Quiz">
         </form>

@@ -114,12 +114,12 @@ def main():
         quiz_prefix = "_config"
     elif "q1_cgi" in form:
         quiz_prefix = "_cgi"
-    elif "q1_errors" in form:
-        quiz_prefix = "_errors"
-    elif "q1_arch" in form:
-        quiz_prefix = "_arch"
-    elif "q1_vhosts" in form:
-        quiz_prefix = "_vhosts"
+    # elif "q1_errors" in form:
+    #     quiz_prefix = "_errors"
+    # elif "q1_arch" in form:
+    #     quiz_prefix = "_arch"
+    # elif "q1_vhosts" in form:
+    #     quiz_prefix = "_vhosts"
     elif "q1_files" in form:
         quiz_prefix = "_files"
 
